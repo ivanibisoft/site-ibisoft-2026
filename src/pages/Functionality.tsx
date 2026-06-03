@@ -171,8 +171,10 @@ export default function Functionality() {
                 {moduleData.name}
               </h1>
               <p className="text-lg md:text-xl text-primary-foreground/80 mb-8 leading-relaxed max-w-2xl">
-                O sistema de ERP 'ibisoft Empresas' foi desenvolvido com o objetivo de fornecer uma
-                solução completa e integrada para a gestão empresarial.
+                Para a gestão mais eficiente de clientes, fornecedores, transportadoras e
+                colaboradores o sistema de ERP 'ibisoft Empresas' oferece um cadastro de pessoas
+                robusto e completo, projetado para atender às necessidades dos diversos
+                departamentos dentro da sua empresa.
               </p>
               <Link to="/quero-conhecer">
                 <Button
