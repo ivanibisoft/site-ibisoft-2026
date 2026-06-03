@@ -185,9 +185,190 @@ export default function Functionality() {
             </div>
           </section>
 
+          {/* ERP Overview Sections */}
+          <section className="py-16 bg-white border-b border-border">
+            <div className="container max-w-4xl mx-auto px-6 space-y-16">
+              {/* Gestão Integrada e Eficiente */}
+              <div>
+                <h2 className="text-3xl font-bold mb-8 text-primary">
+                  Gestão Integrada e Eficiente
+                </h2>
+                <div className="grid md:grid-cols-2 gap-8">
+                  <Card className="shadow-none bg-slate-50 border-none">
+                    <CardContent className="p-6">
+                      <div className="mb-4 inline-flex p-3 rounded-lg bg-primary/10 text-primary">
+                        <Icons.Network className="h-6 w-6" />
+                      </div>
+                      <h3 className="text-xl font-bold mb-3 text-foreground">
+                        Informações Relevantes
+                      </h3>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Todas as informações relevantes ao negócio são geradas, disponibilizadas e
+                        avaliadas pelos colaboradores de maneira rápida e eficiente. Isso
+                        proporciona uma visão simples e completa das informações, essenciais para a
+                        tomada de decisões pelos gestores.
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card className="shadow-none bg-slate-50 border-none">
+                    <CardContent className="p-6">
+                      <div className="mb-4 inline-flex p-3 rounded-lg bg-primary/10 text-primary">
+                        <Icons.BarChart3 className="h-6 w-6" />
+                      </div>
+                      <h3 className="text-xl font-bold mb-3 text-foreground">Tomada de Decisões</h3>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Com dados precisos e atualizados, os gestores podem tomar decisões
+                        informadas e estratégicas, resultando em melhores resultados para todos os
+                        departamentos da empresa, tanto nas atividades operacionais quanto nas
+                        gerenciais e estratégicas.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Modelo Multi-Empresa */}
+              <div>
+                <h2 className="text-3xl font-bold mb-8 text-primary">Modelo Multi-Empresa</h2>
+                <div className="grid md:grid-cols-2 gap-8">
+                  <Card className="shadow-none bg-slate-50 border-none">
+                    <CardContent className="p-6">
+                      <div className="mb-4 inline-flex p-3 rounded-lg bg-primary/10 text-primary">
+                        <Icons.Building2 className="h-6 w-6" />
+                      </div>
+                      <h3 className="text-xl font-bold mb-3 text-foreground">
+                        Visão Individual e Geral
+                      </h3>
+                      <p className="text-muted-foreground leading-relaxed">
+                        O sistema permite uma visão individual de cada empresa do grupo, bem como
+                        uma visão geral de todas as empresas administradas. Isso facilita o controle
+                        e a análise de desempenho de cada unidade de negócio.
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card className="shadow-none bg-slate-50 border-none">
+                    <CardContent className="p-6">
+                      <div className="mb-4 inline-flex p-3 rounded-lg bg-primary/10 text-primary">
+                        <Icons.ShieldCheck className="h-6 w-6" />
+                      </div>
+                      <h3 className="text-xl font-bold mb-3 text-foreground">
+                        Controle Simplificado
+                      </h3>
+                      <p className="text-muted-foreground leading-relaxed">
+                        O modelo funcional do 'ibisoft Empresas' permite controlar de maneira
+                        simples as informações comerciais, financeiras e de estoques de cada empresa
+                        individualmente e do grupo como um todo.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Benefícios para Todos os Departamentos */}
+              <div>
+                <h2 className="text-3xl font-bold mb-8 text-primary">
+                  Benefícios para Todos os Departamentos
+                </h2>
+                <div className="grid md:grid-cols-3 gap-6">
+                  <Card className="shadow-none border-border">
+                    <CardContent className="p-6">
+                      <div className="mb-4 inline-flex p-3 rounded-lg bg-secondary/10 text-secondary">
+                        <Icons.Cog className="h-6 w-6" />
+                      </div>
+                      <h3 className="text-lg font-bold mb-2 text-foreground">Operacional</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Melhoria na eficiência das operações diárias, com processos automatizados e
+                        integrados.
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card className="shadow-none border-border">
+                    <CardContent className="p-6">
+                      <div className="mb-4 inline-flex p-3 rounded-lg bg-secondary/10 text-secondary">
+                        <Icons.PieChart className="h-6 w-6" />
+                      </div>
+                      <h3 className="text-lg font-bold mb-2 text-foreground">Gerencial</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Ferramentas de análise e relatórios detalhados que auxiliam na gestão e no
+                        planejamento estratégico.
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card className="shadow-none border-border">
+                    <CardContent className="p-6">
+                      <div className="mb-4 inline-flex p-3 rounded-lg bg-secondary/10 text-secondary">
+                        <Icons.Target className="h-6 w-6" />
+                      </div>
+                      <h3 className="text-lg font-bold mb-2 text-foreground">Estratégico</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Visão holística do negócio, permitindo a identificação de oportunidades e a
+                        mitigação de riscos.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Recursos Adicionais */}
+              <div>
+                <h2 className="text-3xl font-bold mb-8 text-primary">Recursos Adicionais</h2>
+                <div className="grid md:grid-cols-3 gap-6">
+                  <Card className="shadow-none border-border">
+                    <CardContent className="p-6">
+                      <div className="mb-4 inline-flex p-3 rounded-lg bg-accent/10 text-accent-foreground">
+                        <Icons.LayoutDashboard className="h-6 w-6" />
+                      </div>
+                      <h3 className="text-lg font-bold mb-2 text-foreground">
+                        Interface Intuitiva
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Interface amigável e intuitiva, facilitando a adoção e o uso do sistema por
+                        todos os colaboradores.
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card className="shadow-none border-border">
+                    <CardContent className="p-6">
+                      <div className="mb-4 inline-flex p-3 rounded-lg bg-accent/10 text-accent-foreground">
+                        <Icons.Sliders className="h-6 w-6" />
+                      </div>
+                      <h3 className="text-lg font-bold mb-2 text-foreground">Customização</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Possibilidade de customização para atender às necessidades específicas de
+                        cada empresa.
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card className="shadow-none border-border">
+                    <CardContent className="p-6">
+                      <div className="mb-4 inline-flex p-3 rounded-lg bg-accent/10 text-accent-foreground">
+                        <Icons.Headset className="h-6 w-6" />
+                      </div>
+                      <h3 className="text-lg font-bold mb-2 text-foreground">
+                        Suporte e Atualizações
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Suporte técnico especializado e atualizações constantes para garantir que o
+                        sistema esteja sempre alinhado com as melhores práticas do mercado.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* Resources Section */}
           <section className="py-16">
             <div className="container max-w-4xl mx-auto px-6 space-y-12">
+              {groups.length > 0 && (
+                <div className="mb-2">
+                  <h2 className="text-3xl font-bold text-primary mb-2">Recursos Específicos</h2>
+                  <p className="text-muted-foreground">
+                    Funcionalidades do módulo {moduleData.name}
+                  </p>
+                </div>
+              )}
               {groups.map((group) => {
                 const groupResources = resources.filter((r) => r.group === group.id)
                 return (
