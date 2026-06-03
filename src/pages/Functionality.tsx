@@ -74,6 +74,16 @@ export default function Functionality() {
         return prev
       })
       loadAllModules()
+    } else if (e.action === 'delete') {
+      setData((prev) => {
+        if (prev && e.record.id === prev.moduleData.id) {
+          return null
+        }
+        return prev
+      })
+      loadAllModules()
+    } else if (e.action === 'create') {
+      loadAllModules()
     }
   })
 
