@@ -87,6 +87,14 @@ export default function Functionality() {
     }
   })
 
+  useRealtime('resource_groups', () => {
+    loadData()
+  })
+
+  useRealtime('resources', () => {
+    loadData()
+  })
+
   const NavItems = () => (
     <nav className="space-y-1">
       {allModules.map((mod) => {
