@@ -359,63 +359,7 @@ export default function Functionality() {
           </section>
 
           {/* Resources Section */}
-          <section className="py-16">
-            <div className="container max-w-4xl mx-auto px-6 space-y-12">
-              {groups.length > 0 && (
-                <div className="mb-2">
-                  <h2 className="text-3xl font-bold text-primary mb-2">Recursos Específicos</h2>
-                  <p className="text-muted-foreground">
-                    Funcionalidades do módulo {moduleData.name}
-                  </p>
-                </div>
-              )}
-              {groups.map((group) => {
-                const groupResources = resources.filter((r) => r.group === group.id)
-                return (
-                  <div
-                    key={group.id}
-                    className="bg-white rounded-2xl p-8 border border-border shadow-sm hover:shadow-md transition-shadow"
-                  >
-                    <h3 className="text-xl font-bold mb-6 flex items-center gap-3 text-primary">
-                      <Settings2 className="h-5 w-5 text-secondary" />
-                      {group.name}
-                    </h3>
-                    <div className="grid sm:grid-cols-2 gap-6">
-                      {groupResources.map((resource) => (
-                        <Card
-                          key={resource.id}
-                          className="shadow-none border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
-                        >
-                          <CardContent className="p-5">
-                            <h4 className="font-bold text-base mb-2 text-foreground">
-                              {resource.name}
-                            </h4>
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                              {resource.description}
-                            </p>
-                          </CardContent>
-                        </Card>
-                      ))}
-                      {groupResources.length === 0 && (
-                        <p className="text-sm text-muted-foreground italic col-span-2">
-                          Nenhum recurso cadastrado neste grupo.
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-
-              {groups.length === 0 && (
-                <div className="text-center p-12 bg-white rounded-2xl border border-dashed border-border">
-                  <Settings2 className="h-8 w-8 text-muted-foreground mx-auto mb-4 opacity-50" />
-                  <p className="text-muted-foreground font-medium">
-                    Recursos em desenvolvimento para este módulo.
-                  </p>
-                </div>
-              )}
-            </div>
-          </section>
+          <section className="py-16"></section>
         </main>
       </div>
     </div>
