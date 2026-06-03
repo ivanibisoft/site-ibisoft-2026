@@ -190,7 +190,8 @@ export default function Functionality() {
                 {moduleData.name}
               </h1>
               <div className="text-lg md:text-xl text-primary-foreground/80 mb-8 leading-relaxed max-w-2xl whitespace-pre-line">
-                {moduleData.description}
+                {moduleData.description ||
+                  "O sistema de ERP 'ibisoft Empresas' foi desenvolvido com o objetivo de fornecer uma solução completa e integrada para a gestão empresarial."}
               </div>
               <Link to="/quero-conhecer">
                 <Button
