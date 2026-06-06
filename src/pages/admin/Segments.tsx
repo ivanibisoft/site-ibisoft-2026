@@ -95,14 +95,12 @@ function SegmentDialog({ segment, onUpdate }: { segment: any; onUpdate: () => vo
   const [newDesc, setNewDesc] = useState('')
   const addChallenge = async () => {
     if (!newTitle) return
-    const ch = await pb
-      .collection('segment_challenges')
-      .create({
-        segment: segment.id,
-        title: newTitle,
-        description: newDesc,
-        order: challenges.length + 1,
-      })
+    const ch = await pb.collection('segment_challenges').create({
+      segment: segment.id,
+      title: newTitle,
+      description: newDesc,
+      order: challenges.length + 1,
+    })
     setChallenges([...challenges, ch])
     setNewTitle('')
     setNewDesc('')
