@@ -18,6 +18,15 @@ export const createLead = async (data: {
   }
 }
 
+export const updateLeadStatus = async (id: string, status: string) => {
+  try {
+    return await pb.collection('leads').update(id, { status })
+  } catch (error) {
+    console.error('Error updating lead:', error)
+    throw error
+  }
+}
+
 export const getLeads = async () => {
   try {
     // Only attempt to fetch if authenticated

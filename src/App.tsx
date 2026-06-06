@@ -11,6 +11,15 @@ import SobreErp from './pages/SobreErp'
 import About from './pages/About'
 import Cases from './pages/Cases'
 import NotFound from './pages/NotFound'
+import AdminLayout from './components/AdminLayout'
+import AdminLogin from './pages/admin/Login'
+import AdminDashboard from './pages/admin/Dashboard'
+import AdminLeads from './pages/admin/Leads'
+import AdminModules from './pages/admin/Modules'
+import AdminModuleDetails from './pages/admin/ModuleDetails'
+import AdminSegments from './pages/admin/Segments'
+import AdminCases from './pages/admin/Cases'
+import AdminTeam from './pages/admin/Team'
 import { ScrollToTop } from './components/ScrollToTop'
 import { AuthProvider } from '@/hooks/use-auth'
 import { ErrorBoundary } from './components/ErrorBoundary'
@@ -36,6 +45,18 @@ const App = () => (
                 <Route path="/cases" element={<Cases />} />
                 <Route path="/contato" element={<QueroConhecer />} />
               </Route>
+
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="leads" element={<AdminLeads />} />
+                <Route path="modules" element={<AdminModules />} />
+                <Route path="modules/:id" element={<AdminModuleDetails />} />
+                <Route path="segments" element={<AdminSegments />} />
+                <Route path="cases" element={<AdminCases />} />
+                <Route path="team" element={<AdminTeam />} />
+              </Route>
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>
