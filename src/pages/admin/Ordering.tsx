@@ -11,9 +11,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import pb from '@/lib/pocketbase/client'
-import { ArrowDown, ArrowUp, GripVertical, Loader2 } from 'lucide-react'
+import { GripVertical, Loader2 } from 'lucide-react'
 import type { Module, ResourceGroup, Resource } from '@/services/modules'
 import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 
 export default function AdminOrdering() {
   const { toast } = useToast()
@@ -110,8 +111,8 @@ export default function AdminOrdering() {
             <CardHeader>
               <CardTitle>Módulos Principais</CardTitle>
               <CardDescription>
-                Arraste ou use as setas para alterar a ordem dos módulos na navegação e na tela
-                inicial.
+                Arraste e solte para alterar a ordem dos módulos na navegação e na tela inicial. O
+                salvamento é automático.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -129,7 +130,8 @@ export default function AdminOrdering() {
             <CardHeader>
               <CardTitle>Grupos de Recursos</CardTitle>
               <CardDescription>
-                Selecione um módulo para ordenar seus grupos de recursos.
+                Selecione um módulo e arraste os grupos para reordená-los. O salvamento é
+                automático.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -162,7 +164,8 @@ export default function AdminOrdering() {
             <CardHeader>
               <CardTitle>Recursos</CardTitle>
               <CardDescription>
-                Selecione um módulo e um grupo para ordenar os recursos individuais.
+                Selecione um módulo e um grupo e arraste os recursos para reordená-los. O salvamento
+                é automático.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -229,27 +232,58 @@ function SortableList({
   isSaving: boolean
 }) {
   const [items, setItems] = useState(initialItems)
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   useEffect(() => {
     setItems(initialItems)
   }, [initialItems])
 
-  const moveUp = (index: number) => {
-    if (index === 0) return
-    const newItems = [...items]
-    const temp = newItems[index]
-    newItems[index] = newItems[index - 1]
-    newItems[index - 1] = temp
-    setItems(newItems)
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    if (isSaving) {
+      e.preventDefault()
+      return
+    }
+    setDraggedIndex(index)
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', index.toString())
   }
 
-  const moveDown = (index: number) => {
-    if (index === items.length - 1) return
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index)
+    }
+  }
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null)
+  }
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault()
+    if (draggedIndex === null || draggedIndex === index) {
+      setDraggedIndex(null)
+      setDragOverIndex(null)
+      return
+    }
+
     const newItems = [...items]
-    const temp = newItems[index]
-    newItems[index] = newItems[index + 1]
-    newItems[index + 1] = temp
+    const draggedItem = newItems[draggedIndex]
+    newItems.splice(draggedIndex, 1)
+    newItems.splice(index, 0, draggedItem)
+
     setItems(newItems)
+    setDraggedIndex(null)
+    setDragOverIndex(null)
+
+    onSave(newItems.map((i) => i.id))
+  }
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null)
+    setDragOverIndex(null)
   }
 
   if (items.length === 0) {
@@ -261,46 +295,44 @@ function SortableList({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        {items.map((item, index) => (
+    <div className="relative space-y-2 pb-4">
+      {isSaving && (
+        <div className="absolute inset-0 bg-white/50 z-10 flex items-center justify-center rounded-md backdrop-blur-[1px]">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      )}
+      {items.map((item, index) => {
+        const isDraggingThis = draggedIndex === index
+        const isDragOver =
+          dragOverIndex === index && draggedIndex !== null && draggedIndex !== index
+
+        return (
           <div
             key={item.id}
-            className="flex items-center justify-between p-3 bg-white border rounded-md shadow-sm transition-colors hover:border-primary/30"
+            draggable={!isSaving}
+            onDragStart={(e) => handleDragStart(e, index)}
+            onDragOver={(e) => handleDragOver(e, index)}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, index)}
+            onDragEnd={handleDragEnd}
+            className={cn(
+              'flex items-center justify-between p-3 bg-white border rounded-md shadow-sm transition-all duration-200 ease-in-out cursor-grab active:cursor-grabbing hover:border-primary/30',
+              isDraggingThis && 'opacity-50 scale-[0.98] shadow-md border-primary',
+              isDragOver &&
+                (dragOverIndex > draggedIndex
+                  ? 'border-b-2 border-b-primary bg-primary/5'
+                  : 'border-t-2 border-t-primary bg-primary/5'),
+            )}
           >
-            <div className="flex items-center gap-3">
-              <GripVertical className="text-slate-300 w-5 h-5" />
-              <span className="font-medium text-slate-700">{item.name}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => moveUp(index)}
-                disabled={index === 0 || isSaving}
-                className="text-slate-500 hover:text-slate-900"
-              >
-                <ArrowUp className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => moveDown(index)}
-                disabled={index === items.length - 1 || isSaving}
-                className="text-slate-500 hover:text-slate-900"
-              >
-                <ArrowDown className="w-4 h-4" />
-              </Button>
+            <div className="flex items-center gap-3 w-full">
+              <GripVertical className="text-slate-400 w-5 h-5 pointer-events-none" />
+              <span className="font-medium text-slate-700 pointer-events-none select-none">
+                {item.name}
+              </span>
             </div>
           </div>
-        ))}
-      </div>
-      <div className="flex justify-end pt-4 border-t mt-4">
-        <Button onClick={() => onSave(items.map((i) => i.id))} disabled={isSaving}>
-          {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-          Salvar Ordem
-        </Button>
-      </div>
+        )
+      })}
     </div>
   )
 }
