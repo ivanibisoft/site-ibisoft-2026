@@ -25,6 +25,7 @@ export interface Resource {
   group: string
   name: string
   description: string
+  order?: number
   created: string
   updated: string
 }
@@ -56,7 +57,7 @@ export const getModuleHierarchy = async (slug: string) => {
       const filter = groupIds.map((id) => `group = "${id}"`).join(' || ')
       resources = await pb.collection('resources').getFullList<Resource>({
         filter,
-        sort: 'name',
+        sort: 'order,name',
       })
     }
 
