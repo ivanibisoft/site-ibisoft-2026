@@ -143,13 +143,7 @@ export default function QueroConhecer() {
                       Horário de Atendimento
                     </h4>
                     <p className="text-slate-600">
-                      Segunda a Sexta
-                      <br />
-                      08:00 às 18:00
-                      <br />
-                      Sábado
-                      <br />
-                      08:00 às 12:00
+                      Segunda a Sexta 08:30 às 12:00 e 13:30 às 18:00
                     </p>
                   </div>
                 </div>
