@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-29T02:41:13.510Z",
+  "generatedAt": "2026-06-29T02:50:00.384Z",
   "collections": [
     {
       "name": "users",
@@ -526,6 +526,52 @@
         "CREATE INDEX idx_resources_group ON resources (`group`)",
         "CREATE INDEX `idx_resources_order` ON `resources` (`order`)"
       ]
+    },
+    {
+      "name": "home_config",
+      "type": "base",
+      "apiRules": {
+        "list": "",
+        "view": "",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "hero_image",
+          "type": "file",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "hero_title",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "hero_subtitle",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
     }
   ]
 }

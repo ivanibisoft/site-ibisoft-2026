@@ -22,6 +22,7 @@ import AdminSegments from './pages/admin/Segments'
 import AdminCases from './pages/admin/Cases'
 import AdminTeam from './pages/admin/Team'
 import AdminProfile from './pages/admin/Profile'
+import AdminHomeConfig from './pages/admin/HomeConfig'
 import { ScrollToTop } from './components/ScrollToTop'
 import { AuthProvider } from '@/hooks/use-auth'
 import { ErrorBoundary } from './components/ErrorBoundary'
@@ -59,6 +60,7 @@ const App = () => (
                 <Route path="cases" element={<AdminCases />} />
                 <Route path="team" element={<AdminTeam />} />
                 <Route path="profile" element={<AdminProfile />} />
+                <Route path="home-config" element={<AdminHomeConfig />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />

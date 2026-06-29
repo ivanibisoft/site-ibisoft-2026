@@ -1,7 +1,17 @@
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 
-export function Hero() {
+interface HeroProps {
+  heroTitle: string
+  heroSubtitle: string
+  heroImageUrl: string | null
+}
+
+const DEFAULT_HERO_IMAGE = 'https://img.usecurling.com/p/800/600?q=dashboard%20analytics&color=blue'
+
+export function Hero({ heroTitle, heroSubtitle, heroImageUrl }: HeroProps) {
+  const imageUrl = heroImageUrl || DEFAULT_HERO_IMAGE
+
   return (
     <section className="relative overflow-hidden bg-primary pt-20 pb-32 text-primary-foreground">
       <div className="absolute inset-0 bg-[url('https://img.usecurling.com/p/1920/1080?q=abstract%20blue%20waves&color=blue')] opacity-10 bg-cover bg-center mix-blend-overlay"></div>
@@ -9,12 +19,11 @@ export function Hero() {
       <div className="container relative z-10 grid lg:grid-cols-2 gap-12 items-center">
         <div className="space-y-8 animate-fade-in-up">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-display leading-[1.1]">
-            Gestão completa da sua empresa com um ERP{' '}
-            <span className="text-accent">simples, integrado e escalável</span>
+            {heroTitle}
           </h1>
 
           <p className="text-xl md:text-2xl text-primary-foreground/90 font-medium leading-relaxed">
-            Controle financeiro, estoque, vendas, fiscal e muito mais em um único sistema
+            {heroSubtitle}
           </p>
 
           <p className="text-lg text-primary-foreground/70 leading-relaxed max-w-xl">
@@ -41,7 +50,7 @@ export function Hero() {
         <div className="relative animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
           <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/50 border border-white/10 bg-white/5 backdrop-blur-sm p-2">
             <img
-              src="https://img.usecurling.com/p/800/600?q=dashboard%20analytics&color=blue"
+              src={imageUrl}
               alt="Dashboard ERP ibisoft"
               className="rounded-xl w-full h-auto object-cover opacity-90 hover:opacity-100 transition-opacity duration-500"
             />

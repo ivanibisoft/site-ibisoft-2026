@@ -9,8 +9,10 @@ import { SocialProof } from './home/SocialProof'
 import { Segments } from './home/Segments'
 import { FinalCTA } from './home/FinalCTA'
 import { useAuth } from '@/hooks/use-auth'
+import { useRealtime } from '@/hooks/use-realtime'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useEffect, useState } from 'react'
+import { getHomeConfig, getHeroImageUrl, type HomeConfig } from '@/services/home-config'
 
 const IndexLoader = () => (
   <div className="flex flex-col w-full min-h-screen p-8 space-y-8 animate-pulse bg-background">
@@ -26,26 +28,43 @@ const IndexLoader = () => (
 const Index = () => {
   const { loading, isAuthenticated } = useAuth()
   const [isReady, setIsReady] = useState(false)
+  const [homeConfig, setHomeConfig] = useState<HomeConfig | null>(null)
 
-  // Resilient data-fetching strategy:
-  // We ensure the auth token state is fully resolved before mounting
-  // the homepage components to prevent concurrent 403 errors during token refresh
+  const loadHomeConfig = async () => {
+    const config = await getHomeConfig()
+    setHomeConfig(config)
+  }
+
   useEffect(() => {
     if (!loading) {
-      // Add a tiny delay to ensure PocketBase auth store is fully propagated
-      // to the child components' micro-tasks.
       const timer = setTimeout(() => setIsReady(true), 50)
       return () => clearTimeout(timer)
     }
   }, [loading, isAuthenticated])
 
+  useEffect(() => {
+    loadHomeConfig()
+  }, [])
+
+  useRealtime('home_config', () => {
+    loadHomeConfig()
+  })
+
   if (!isReady) {
     return <IndexLoader />
   }
 
+  const heroImageUrl = homeConfig ? getHeroImageUrl(homeConfig, '800x600') : null
+  const heroTitle =
+    homeConfig?.hero_title ||
+    'Gestão completa da sua empresa com um ERP simples, integrado e escalável'
+  const heroSubtitle =
+    homeConfig?.hero_subtitle ||
+    'Controle financeiro, estoque, vendas, fiscal e muito mais em um único sistema'
+
   return (
     <div className="flex flex-col w-full">
-      <Hero />
+      <Hero heroTitle={heroTitle} heroSubtitle={heroSubtitle} heroImageUrl={heroImageUrl} />
       <Problems />
       <Benefits />
       <HowItWorks />
