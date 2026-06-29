@@ -86,35 +86,31 @@ export default function About() {
         </div>
       </section>
 
-      {/* Nossa Logomarca */}
+      {/* Onde a Terra Encontra a Tecnologia */}
       <section id="logomarca" className="py-24 bg-muted/30 scroll-mt-20 border-y border-border">
         <div className="container max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary font-medium text-sm mb-6">
             <Lightbulb className="h-4 w-4" /> Identidade Visual
           </div>
-          <h2 className="text-3xl font-bold mb-12">Nossa Logomarca</h2>
+          <h2 className="text-3xl font-bold mb-12">Onde a Terra Encontra a Tecnologia</h2>
 
           <div className="bg-background p-8 md:p-12 rounded-3xl shadow-xl border border-border flex flex-col items-center transition-all hover:shadow-2xl">
             <div className="bg-primary text-white p-4 md:p-6 rounded-xl font-display font-bold text-4xl md:text-6xl tracking-tighter mb-10 shadow-lg">
               ibi<span className="text-accent">soft</span>
             </div>
-            <div className="grid sm:grid-cols-2 gap-8 text-left max-w-2xl">
-              <div>
-                <h3 className="font-bold text-xl mb-3 text-primary">Solidez e Confiança</h3>
-                <p className="text-muted-foreground">
-                  O tom azul escuro primário reflete a estabilidade corporativa, a segurança dos
-                  dados e a base sólida que nosso ERP fornece às operações diárias de nossos
-                  parceiros.
-                </p>
-              </div>
-              <div>
-                <h3 className="font-bold text-xl mb-3 text-accent">Inovação e Agilidade</h3>
-                <p className="text-muted-foreground">
-                  O destaque em tom ciano representa a modernidade, a interface intuitiva e a
-                  inovação tecnológica contínua que impulsiona os resultados de quem utiliza nossa
-                  plataforma.
-                </p>
-              </div>
+            <div className="max-w-2xl text-left space-y-6">
+              <p className="text-muted-foreground text-lg leading-relaxed">
+                O nome ibisoft nasce de um encontro simbólico entre as raízes do Brasil e o futuro
+                da inovação. 'Ibi', em tupi-guarani, significa terra ou chão — a base sólida de onde
+                tudo cresce e se sustenta.
+              </p>
+              <p className="text-muted-foreground text-lg leading-relaxed">
+                Ao unir essa essência à tecnologia do software, criamos a 'Terra do Software'. Nossa
+                marca representa o compromisso de construir soluções robustas e confiáveis,
+                respeitando nossas origens enquanto impulsionamos a modernidade. Para nós, a
+                tecnologia só faz sentido quando está conectada ao que é essencial: a base do seu
+                negócio.
+              </p>
             </div>
           </div>
         </div>
