@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Facebook, Instagram, Linkedin, MapPin, Phone } from 'lucide-react'
 import ibisoftLogo from '@/assets/botao_ibisoft_2_sem_fundo-74482.png'
+import dunsPdf from '@/assets/ibisoft-tecnologia-duns-number-905539672-3e6be.pdf'
 import { SEGMENTS } from '@/lib/constants'
 
 export function Footer() {
@@ -140,7 +141,16 @@ export function Footer() {
               reservados.
             </p>
             <p className="text-xs text-slate-400 text-center md:text-left">
-              CNPJ: 78.761.285/0001-70 | DUNS: 905539672
+              CNPJ: 78.761.285/0001-70 | DUNS:{' '}
+              <a
+                href={dunsPdf}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors underline decoration-transparent hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+                aria-label="Ver Certificado DUNS"
+              >
+                905539672
+              </a>
             </p>
           </div>
           <div className="flex items-center space-x-4 text-sm text-slate-500">
