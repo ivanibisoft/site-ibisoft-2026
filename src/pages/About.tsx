@@ -4,6 +4,7 @@ import { Building2, Lightbulb, UserCircle2 } from 'lucide-react'
 import { getTeamMembers } from '@/services/team_members'
 import pb from '@/lib/pocketbase/client'
 import ivanPhoto from '@/assets/ivan-2-7b6a6.jpg'
+import ibisoftLogo from '@/assets/logo-ibisoft-r-e60ad.png'
 
 export default function About() {
   const location = useLocation()
@@ -95,8 +96,12 @@ export default function About() {
           <h2 className="text-3xl font-bold mb-12">Onde a Terra Encontra a Tecnologia</h2>
 
           <div className="bg-background p-8 md:p-12 rounded-3xl shadow-xl border border-border flex flex-col items-center transition-all hover:shadow-2xl">
-            <div className="bg-primary text-white p-4 md:p-6 rounded-xl font-display font-bold text-4xl md:text-6xl tracking-tighter mb-10 shadow-lg">
-              ibi<span className="text-accent">soft</span>
+            <div className="mb-10">
+              <img
+                src={ibisoftLogo}
+                alt="Logomarca ibisoft"
+                className="w-full max-w-xs md:max-w-sm h-auto object-contain mx-auto"
+              />
             </div>
             <div className="max-w-2xl text-left space-y-6">
               <p className="text-muted-foreground text-lg leading-relaxed">
