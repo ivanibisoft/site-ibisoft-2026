@@ -52,16 +52,28 @@ export default function About() {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary font-medium text-sm mb-6">
               <Building2 className="h-4 w-4" /> Nossa História
             </div>
-            <h2 className="text-3xl font-bold mb-6">Uma década de inovação contínua</h2>
+            <h2 className="text-3xl font-bold mb-6">
+              Quatro Décadas Transformando a Gestão no Brasil
+            </h2>
             <p className="text-muted-foreground text-lg leading-relaxed mb-6">
-              Fundada com o propósito de democratizar o acesso a sistemas de gestão empresarial
-              (ERP) de alto nível, a ibisoft rapidamente se destacou no mercado por sua abordagem
-              consultiva e tecnologia robusta.
+              Nascida em Curitiba — cidade referência em inovação e sustentabilidade — a ibisoft
+              Tecnologia da Informação iniciou sua trajetória em 1985. Surgimos em um momento
+              decisivo de abertura do mercado de informática, com o propósito de suprir a crescente
+              demanda por processamento de dados e desenvolvimento de softwares de alta performance.
+            </p>
+            <p className="text-muted-foreground text-lg leading-relaxed mb-6">
+              Desde então, nossa evolução tem sido constante. O que começou como um suporte técnico
+              especializado transformou-se em um ecossistema completo de soluções de gestão. Hoje,
+              desenvolvemos softwares que vão desde Sistemas de Gestão de Negócios (ERP) robustos
+              até ferramentas específicas, desenhadas para atender às particularidades de cada
+              modelo de negócio.
             </p>
             <p className="text-muted-foreground text-lg leading-relaxed">
-              Hoje, atendemos centenas de empresas nos setores atacadista, comércio exterior,
-              industrial e de serviços, garantindo que nossos clientes tenham a visibilidade e o
-              controle necessários para crescer com segurança.
+              Nossa missão é clara: democratizar o acesso à tecnologia de ponta. Acreditamos que
+              pequenas e médias empresas dos setores de comércio, indústria e serviços merecem
+              decidir com base em dados precisos e em tempo real. Na ibisoft, não entregamos apenas
+              software; entregamos o diferencial competitivo necessário para impulsionar a
+              eficiência e o crescimento sustentável dos nossos clientes.
             </p>
           </div>
           <div className="rounded-2xl overflow-hidden shadow-2xl">
