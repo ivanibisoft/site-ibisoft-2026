@@ -101,7 +101,7 @@ export default function About() {
             <div className="max-w-2xl text-left space-y-6">
               <p className="text-muted-foreground text-lg leading-relaxed">
                 O nome ibisoft nasce de um encontro simbólico entre as raízes do Brasil e o futuro
-                da inovação. 'Ibi', em tupi-guarani, significa terra ou chão — a base sólida de onde
+                da inovação. 'ibi', em tupi-guarani, significa terra ou chão — a base sólida de onde
                 tudo cresce e se sustenta.
               </p>
               <p className="text-muted-foreground text-lg leading-relaxed">
