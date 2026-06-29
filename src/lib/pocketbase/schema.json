@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-29T01:24:19.709Z",
+  "generatedAt": "2026-06-29T01:41:06.971Z",
   "collections": [
     {
       "name": "users",
@@ -294,6 +294,12 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "image",
+          "type": "file",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": ["CREATE UNIQUE INDEX idx_segments_slug ON segments (slug)"]

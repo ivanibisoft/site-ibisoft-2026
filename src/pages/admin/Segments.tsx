@@ -69,6 +69,8 @@ function SegmentDialog({ segment, onUpdate }: { segment: any; onUpdate: () => vo
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [challenges, setChallenges] = useState<any[]>([])
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
 
   useEffect(() => {
     if (open) {
@@ -77,12 +79,25 @@ function SegmentDialog({ segment, onUpdate }: { segment: any; onUpdate: () => vo
         .then(setChallenges)
       setData({ title: segment.title, description: segment.description, icon: segment.icon })
       setErrors({})
+      setImageFile(null)
+      setImagePreviewUrl(
+        segment.image ? `${pb.baseURL}/api/files/segments/${segment.id}/${segment.image}` : null,
+      )
     }
   }, [open, segment])
 
   const save = async () => {
     try {
-      await pb.collection('segments').update(segment.id, data)
+      if (imageFile) {
+        const formData = new FormData()
+        formData.append('title', data.title)
+        formData.append('description', data.description)
+        formData.append('icon', data.icon)
+        formData.append('image', imageFile)
+        await pb.collection('segments').update(segment.id, formData)
+      } else {
+        await pb.collection('segments').update(segment.id, data)
+      }
       toast({ title: 'Segmento salvo com sucesso' })
       onUpdate()
       setErrors({})
@@ -139,6 +154,33 @@ function SegmentDialog({ segment, onUpdate }: { segment: any; onUpdate: () => vo
                 rows={4}
                 className="resize-none"
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Imagem do Segmento</Label>
+              {imagePreviewUrl && (
+                <div className="relative w-full max-w-xs rounded-lg overflow-hidden border border-gray-200">
+                  <img
+                    src={imagePreviewUrl}
+                    alt="Pré-visualização"
+                    className="w-full h-40 object-cover"
+                  />
+                </div>
+              )}
+              <Input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="bg-white"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null
+                  setImageFile(file)
+                  if (file) {
+                    setImagePreviewUrl(URL.createObjectURL(file))
+                  }
+                }}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Recomendado: 800x600px. JPG, PNG ou WebP.
+              </p>
             </div>
             <Button onClick={save}>Atualizar Dados Principais</Button>
           </div>

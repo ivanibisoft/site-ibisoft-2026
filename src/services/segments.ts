@@ -6,8 +6,15 @@ export interface Segment {
   slug: string
   description: string
   icon: string
+  image: string
   created: string
   updated: string
+}
+
+export const getSegmentImageUrl = (segment: Segment, thumb?: string): string | null => {
+  if (!segment.image) return null
+  const thumbParam = thumb ? `?thumb=${thumb}` : ''
+  return `${pb.baseURL}/api/files/segments/${segment.id}/${segment.image}${thumbParam}`
 }
 
 export interface SegmentChallenge {

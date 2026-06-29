@@ -6,6 +6,7 @@ import * as Icons from 'lucide-react'
 import {
   getSegmentBySlug,
   getSegmentChallenges,
+  getSegmentImageUrl,
   type Segment as SegmentType,
   type SegmentChallenge,
 } from '@/services/segments'
@@ -92,9 +93,12 @@ export default function Segment() {
               </Button>
             </Link>
           </div>
-          <div className="rounded-2xl overflow-hidden shadow-2xl">
+          <div className="rounded-2xl overflow-hidden shadow-2xl aspect-[4/3]">
             <img
-              src={`https://img.usecurling.com/p/800/600?q=${segment.title.split(' ')[0]}&color=blue`}
+              src={
+                getSegmentImageUrl(segment) ||
+                `https://img.usecurling.com/p/800/600?q=${encodeURIComponent(segment.title.split(' ')[0])}&color=blue`
+              }
               alt={segment.title}
               className="w-full h-full object-cover"
             />
