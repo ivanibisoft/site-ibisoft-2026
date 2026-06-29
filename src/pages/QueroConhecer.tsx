@@ -146,6 +146,10 @@ export default function QueroConhecer() {
                       Segunda a Sexta
                       <br />
                       08:00 às 18:00
+                      <br />
+                      Sábado
+                      <br />
+                      08:00 às 12:00
                     </p>
                   </div>
                 </div>
