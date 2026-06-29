@@ -134,10 +134,15 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-slate-500 text-center md:text-left">
-            © {new Date().getFullYear()} ibisoft Tecnologia da Informação. Todos os direitos
-            reservados.
-          </p>
+          <div className="flex flex-col items-center md:items-start gap-1">
+            <p className="text-sm text-slate-500 text-center md:text-left">
+              © {new Date().getFullYear()} ibisoft Tecnologia da Informação. Todos os direitos
+              reservados.
+            </p>
+            <p className="text-xs text-slate-400 text-center md:text-left">
+              CNPJ: 78.761.285/0001-70 | DUNS: 905539672
+            </p>
+          </div>
           <div className="flex items-center space-x-4 text-sm text-slate-500">
             <Link to="/privacidade" className="hover:text-primary transition-colors">
               Política de Privacidade
