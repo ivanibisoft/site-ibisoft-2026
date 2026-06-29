@@ -4,7 +4,7 @@ import { Building2, Lightbulb, UserCircle2 } from 'lucide-react'
 import { getTeamMembers } from '@/services/team_members'
 import pb from '@/lib/pocketbase/client'
 import ivanPhoto from '@/assets/ivan-2-7b6a6.jpg'
-import ibisoftLogo from '@/assets/logo-ibisoft-r-e60ad.png'
+import ibisoftLogo from '@/assets/logo-ibisoft-r-4b810.jpg'
 
 export default function About() {
   const location = useLocation()
