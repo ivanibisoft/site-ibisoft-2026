@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { FUNNEL_STAGES, BLOG_POSTS } from '@/lib/erp-content'
+import { ModulesSection } from '@/components/ModulesSection'
 
 export default function SobreErp() {
   return (
@@ -98,6 +99,8 @@ export default function SobreErp() {
           </div>
         </div>
       </section>
+
+      <ModulesSection />
 
       <section className="py-24">
         <div className="container max-w-6xl mx-auto">
