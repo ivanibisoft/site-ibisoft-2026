@@ -11,6 +11,7 @@ import {
   FileText,
   UserCircle,
   ImageIcon,
+  Image,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -29,6 +30,7 @@ export default function AdminLayout() {
     { name: 'Cases', href: '/admin/cases', icon: FileText },
     { name: 'Equipe', href: '/admin/team', icon: Users },
     { name: 'Configurações da Home', href: '/admin/home-config', icon: ImageIcon },
+    { name: 'Logos de Parceiros', href: '/admin/partner-logos', icon: Image },
     { name: 'Meu Perfil', href: '/admin/profile', icon: UserCircle },
   ]
 

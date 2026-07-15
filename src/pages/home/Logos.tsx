@@ -1,9 +1,10 @@
-import { useRef } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import Autoplay from 'embla-carousel-autoplay'
 import { ThumbsUp, CheckCircle2 } from 'lucide-react'
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel'
+import { getActivePartnerLogos, getLogoUrl, type PartnerLogo } from '@/services/partner-logos'
 
-const LOGOS = [
+const FALLBACK_LOGOS = [
   'google',
   'microsoft',
   'apple',
@@ -27,6 +28,20 @@ const LOGOS = [
 
 export function Logos() {
   const plugin = useRef(Autoplay({ delay: 3000, stopOnInteraction: false }))
+  const [logos, setLogos] = useState<PartnerLogo[]>([])
+
+  useEffect(() => {
+    getActivePartnerLogos().then(setLogos)
+  }, [])
+
+  const useFallback = logos.length === 0
+  const items = useFallback
+    ? FALLBACK_LOGOS.map((name, i) => ({
+        id: `fb-${i}`,
+        name,
+        url: `https://img.usecurling.com/i?q=${name}&color=multicolor&shape=fill`,
+      }))
+    : logos.map((l) => ({ id: l.id, name: l.name, url: getLogoUrl(l) }))
 
   return (
     <section className="py-20 bg-background overflow-hidden border-t border-border/40">
@@ -50,7 +65,6 @@ export function Logos() {
         </div>
 
         <div className="relative max-w-6xl mx-auto">
-          {/* Fading gradients for smooth edge appearance */}
           <div className="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none"></div>
           <div className="absolute right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>
 
@@ -66,15 +80,15 @@ export function Logos() {
             onMouseLeave={plugin.current.reset}
           >
             <CarouselContent className="flex items-center -ml-4 md:-ml-8">
-              {LOGOS.map((logo, index) => (
+              {items.map((item) => (
                 <CarouselItem
-                  key={index}
+                  key={item.id}
                   className="pl-4 md:pl-8 basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6 shrink-0"
                 >
                   <div className="flex items-center justify-center p-2 group">
                     <img
-                      src={`https://img.usecurling.com/i?q=${logo}&color=multicolor&shape=fill`}
-                      alt={`Logo ${logo}`}
+                      src={item.url}
+                      alt={`Logo ${item.name}`}
                       className="h-10 md:h-12 w-auto object-contain max-w-[120px] opacity-50 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
                     />
                   </div>

@@ -11,8 +11,9 @@ import { FinalCTA } from './home/FinalCTA'
 import { useAuth } from '@/hooks/use-auth'
 import { useRealtime } from '@/hooks/use-realtime'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { getHomeConfig, getHeroImageUrl, type HomeConfig } from '@/services/home-config'
+import { getActivePartnerLogos, type PartnerLogo } from '@/services/partner-logos'
 
 const IndexLoader = () => (
   <div className="flex flex-col w-full min-h-screen p-8 space-y-8 animate-pulse bg-background">
@@ -29,11 +30,17 @@ const Index = () => {
   const { loading, isAuthenticated } = useAuth()
   const [isReady, setIsReady] = useState(false)
   const [homeConfig, setHomeConfig] = useState<HomeConfig | null>(null)
+  const [partnerLogos, setPartnerLogos] = useState<PartnerLogo[]>([])
 
-  const loadHomeConfig = async () => {
+  const loadHomeConfig = useCallback(async () => {
     const config = await getHomeConfig()
     setHomeConfig(config)
-  }
+  }, [])
+
+  const loadPartnerLogos = useCallback(async () => {
+    const logos = await getActivePartnerLogos()
+    setPartnerLogos(logos)
+  }, [])
 
   useEffect(() => {
     if (!loading) {
@@ -44,10 +51,15 @@ const Index = () => {
 
   useEffect(() => {
     loadHomeConfig()
-  }, [])
+    loadPartnerLogos()
+  }, [loadHomeConfig, loadPartnerLogos])
 
   useRealtime('home_config', () => {
     loadHomeConfig()
+  })
+
+  useRealtime('partner_logos', () => {
+    loadPartnerLogos()
   })
 
   if (!isReady) {
@@ -70,7 +82,7 @@ const Index = () => {
       <HowItWorks />
       <Features />
       <Segments />
-      <Logos />
+      <Logos key={partnerLogos.length} />
       <SuccessCases />
       <SocialProof />
       <FinalCTA />

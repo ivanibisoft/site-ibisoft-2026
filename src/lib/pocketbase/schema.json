@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-29T03:44:01.417Z",
+  "generatedAt": "2026-07-15T00:08:06.407Z",
   "collections": [
     {
       "name": "users",
@@ -572,6 +572,58 @@
         }
       ],
       "indexes": []
+    },
+    {
+      "name": "partner_logos",
+      "type": "base",
+      "apiRules": {
+        "list": "",
+        "view": "",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "logo",
+          "type": "file",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "order_number",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "is_active",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_partner_logos_order ON partner_logos (order_number)"]
     }
   ]
 }

@@ -1,0 +1,221 @@
+import { useState, useEffect } from 'react'
+import pb from '@/lib/pocketbase/client'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { extractFieldErrors } from '@/lib/pocketbase/errors'
+import { toast } from '@/hooks/use-toast'
+import { Edit2, Plus, Trash2 } from 'lucide-react'
+
+export default function AdminPartnerLogos() {
+  const [logos, setLogos] = useState<any[]>([])
+
+  const load = async () => {
+    const list = await pb.collection('partner_logos').getFullList({ sort: 'order_number' })
+    setLogos(list)
+  }
+
+  useEffect(() => {
+    load()
+  }, [])
+
+  const deleteLogo = async (id: string) => {
+    if (confirm('Tem certeza que deseja excluir este logo?')) {
+      await pb.collection('partner_logos').delete(id)
+      toast({ title: 'Logo excluído com sucesso' })
+      load()
+    }
+  }
+
+  const toggleActive = async (logo: any) => {
+    await pb.collection('partner_logos').update(logo.id, { is_active: !logo.is_active })
+    load()
+  }
+
+  return (
+    <div className="space-y-6 animate-fade-in-up">
+      <div className="flex justify-between items-center">
+        <h2 className="text-3xl font-bold tracking-tight">Logos de Parceiros</h2>
+        <PartnerLogoDialog onSaved={load} />
+      </div>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+        <Table>
+          <TableHeader className="bg-gray-50/50">
+            <TableRow>
+              <TableHead className="font-semibold w-24 text-center">Ordem</TableHead>
+              <TableHead className="font-semibold">Logo</TableHead>
+              <TableHead className="font-semibold">Nome</TableHead>
+              <TableHead className="font-semibold text-center">Ativo</TableHead>
+              <TableHead className="text-right font-semibold">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {logos.map((l) => (
+              <TableRow key={l.id}>
+                <TableCell className="text-center font-medium text-gray-500">
+                  {l.order_number}
+                </TableCell>
+                <TableCell>
+                  <img
+                    src={`${pb.baseURL}/api/files/partner_logos/${l.id}/${l.logo}`}
+                    alt={l.name}
+                    className="h-10 w-auto object-contain max-w-[120px]"
+                  />
+                </TableCell>
+                <TableCell className="font-medium">{l.name}</TableCell>
+                <TableCell className="text-center">
+                  <Switch checked={l.is_active} onCheckedChange={() => toggleActive(l)} />
+                </TableCell>
+                <TableCell className="text-right space-x-2">
+                  <PartnerLogoDialog logo={l} onSaved={load} />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => deleteLogo(l.id)}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  )
+}
+
+function PartnerLogoDialog({ logo, onSaved }: { logo?: any; onSaved: () => void }) {
+  const [open, setOpen] = useState(false)
+  const [name, setName] = useState(logo?.name || '')
+  const [orderNumber, setOrderNumber] = useState(logo?.order_number ?? 0)
+  const [isActive, setIsActive] = useState(logo?.is_active ?? true)
+  const [file, setFile] = useState<File | null>(null)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      setName(logo?.name || '')
+      setOrderNumber(logo?.order_number ?? 0)
+      setIsActive(logo?.is_active ?? true)
+      setFile(null)
+      setErrors({})
+    }
+  }, [open, logo])
+
+  const save = async () => {
+    setSaving(true)
+    try {
+      if (logo) {
+        const formData = new FormData()
+        formData.append('name', name)
+        formData.append('order_number', String(orderNumber))
+        formData.append('is_active', String(isActive))
+        if (file) formData.append('logo', file)
+        await pb.collection('partner_logos').update(logo.id, formData)
+      } else {
+        const formData = new FormData()
+        formData.append('name', name)
+        formData.append('order_number', String(orderNumber))
+        formData.append('is_active', String(isActive))
+        if (file) formData.append('logo', file)
+        await pb.collection('partner_logos').create(formData)
+      }
+      toast({ title: 'Logo salvo com sucesso' })
+      setOpen(false)
+      onSaved()
+    } catch (e) {
+      setErrors(extractFieldErrors(e))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          variant={logo ? 'outline' : 'default'}
+          size={logo ? 'sm' : 'default'}
+          className={logo ? 'h-8' : ''}
+        >
+          {logo ? (
+            <>
+              <Edit2 className="w-3 h-3 mr-2" /> Editar
+            </>
+          ) : (
+            <>
+              <Plus className="w-4 h-4 mr-2" /> Adicionar Logo
+            </>
+          )}
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="text-xl">{logo ? 'Editar Logo' : 'Novo Logo'}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 pt-2">
+          <div className="space-y-2">
+            <Label>Nome da Empresa</Label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Ex: Microsoft"
+            />
+            {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label>Ordem de exibição</Label>
+            <Input
+              type="number"
+              value={orderNumber}
+              onChange={(e) => setOrderNumber(Number(e.target.value))}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Logo (PNG, JPG, SVG)</Label>
+            <Input
+              type="file"
+              accept="image/png,image/jpeg,image/svg+xml,image/webp"
+              className="bg-white"
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
+            />
+            {errors.logo && <p className="text-red-500 text-sm">{errors.logo}</p>}
+            {logo && !file && (
+              <img
+                src={`${pb.baseURL}/api/files/partner_logos/${logo.id}/${logo.logo}`}
+                alt={logo.name}
+                className="h-12 w-auto object-contain"
+              />
+            )}
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch checked={isActive} onCheckedChange={setIsActive} />
+            <Label>Ativo (exibir na home)</Label>
+          </div>
+          <Button onClick={save} disabled={saving} className="w-full">
+            {saving ? 'Salvando...' : 'Salvar'}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
