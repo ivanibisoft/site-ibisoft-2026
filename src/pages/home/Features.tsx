@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import * as Icons from 'lucide-react'
@@ -32,28 +32,25 @@ export function Features() {
         </div>
 
         {loading ? (
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-16">
-            {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-48 w-full rounded-xl" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-16">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+              <Skeleton key={i} className="h-32 w-full rounded-xl" />
             ))}
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-16">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-16">
             {modules.map((mod) => {
               const IconComponent =
                 mod.icon && (Icons as any)[mod.icon] ? (Icons as any)[mod.icon] : Icons.Box
               return (
                 <Link key={mod.id} to={`/funcionalidades/${mod.slug}`} className="block h-full">
-                  <Card className="hover:border-accent/50 transition-colors group border-border h-full">
-                    <CardHeader className="pb-3">
-                      <div className="h-12 w-12 rounded-lg bg-primary/5 flex items-center justify-center mb-4 group-hover:bg-accent/10 transition-colors">
-                        <IconComponent className="h-6 w-6 text-primary group-hover:text-accent transition-colors" />
-                      </div>
-                      <CardTitle className="text-lg">{mod.name}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">{mod.description}</p>
-                    </CardContent>
+                  <Card className="flex flex-col items-center justify-center gap-4 p-6 text-center hover:border-accent/50 hover:shadow-md transition-all duration-200 group border-border h-full min-h-[140px]">
+                    <div className="h-14 w-14 rounded-xl bg-primary/5 flex items-center justify-center group-hover:bg-accent/10 transition-colors">
+                      <IconComponent className="h-7 w-7 text-primary group-hover:text-accent transition-colors" />
+                    </div>
+                    <span className="text-sm font-medium text-foreground leading-tight line-clamp-2">
+                      {mod.name}
+                    </span>
                   </Card>
                 </Link>
               )
