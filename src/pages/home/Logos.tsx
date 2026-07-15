@@ -79,13 +79,13 @@ export function Logos() {
             onMouseEnter={plugin.current.stop}
             onMouseLeave={plugin.current.reset}
           >
-            <CarouselContent className="flex items-center -ml-8 md:-ml-14 lg:-ml-16">
+            <CarouselContent className="flex items-center -ml-16 md:-ml-24 lg:-ml-32">
               {items.map((item) => (
                 <CarouselItem
                   key={item.id}
-                  className="pl-8 md:pl-14 lg:pl-16 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 shrink-0"
+                  className="pl-16 md:pl-24 lg:pl-32 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 shrink-0"
                 >
-                  <div className="flex items-center justify-center p-4 md:p-6 lg:p-8 group">
+                  <div className="flex items-center justify-center p-6 md:p-10 lg:p-14 group">
                     <img
                       src={item.url}
                       alt={`Logo ${item.name}`}
