@@ -1,10 +1,11 @@
 import { MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { WHATSAPP_URL } from '@/lib/constants'
 
 export function WhatsAppButton() {
   return (
     <a
-      href="https://wa.me/5541991166264"
+      href={WHATSAPP_URL}
       target="_blank"
       rel="noopener noreferrer"
       className={cn(

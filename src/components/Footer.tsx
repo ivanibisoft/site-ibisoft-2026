@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Facebook, Instagram, Linkedin, MapPin, Phone } from 'lucide-react'
 import ibisoftLogo from '@/assets/botao_ibisoft_2_sem_fundo-74482.png'
 import dunsPdf from '@/assets/ibisoft-tecnologia-duns-number-905539672-3e6be.pdf'
-import { SEGMENTS } from '@/lib/constants'
+import { SEGMENTS, WHATSAPP_URL } from '@/lib/constants'
 
 export function Footer() {
   return (
@@ -124,7 +124,14 @@ export function Footer() {
                 <span>
                   (41) 3027-2003
                   <br />
-                  (41) 99116-6264 WhatsApp
+                  <a
+                    href={WHATSAPP_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary transition-colors"
+                  >
+                    (41) 99116-6264 WhatsApp
+                  </a>
                 </span>
               </li>
               <li className="flex items-center space-x-3 text-sm">

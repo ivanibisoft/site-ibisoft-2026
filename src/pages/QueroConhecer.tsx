@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/form'
 import pb from '@/lib/pocketbase/client'
 import { useToast } from '@/hooks/use-toast'
+import { WHATSAPP_URL } from '@/lib/constants'
 
 const formSchema = z.object({
   name: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
@@ -110,19 +111,26 @@ export default function QueroConhecer() {
                   </div>
                 </a>
 
-                <div className="flex items-start space-x-4">
-                  <div className="bg-primary/10 p-3 rounded-lg shrink-0">
+                <a
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start space-x-4 group cursor-pointer"
+                >
+                  <div className="bg-primary/10 p-3 rounded-lg group-hover:bg-primary/20 transition-colors shrink-0">
                     <Phone className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-lg text-slate-900 mb-2">Telefone</h4>
+                    <h4 className="font-medium text-lg text-slate-900 mb-2 group-hover:text-primary transition-colors">
+                      Telefone
+                    </h4>
                     <p className="text-slate-600">
                       (41) 3027-2003
                       <br />
                       (41) 99116-6264 WhatsApp
                     </p>
                   </div>
-                </div>
+                </a>
 
                 <div className="flex items-start space-x-4">
                   <div className="bg-primary/10 p-3 rounded-lg shrink-0">

@@ -1,6 +1,7 @@
 import { MapPin, Phone, Mail, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { WHATSAPP_URL } from '@/lib/constants'
 
 export function FinalCTA() {
   return (
@@ -55,19 +56,26 @@ export function FinalCTA() {
                 </div>
               </a>
 
-              <div className="flex items-start space-x-4 p-4 rounded-xl">
-                <div className="bg-primary/20 p-3 rounded-lg shrink-0">
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-start space-x-4 p-4 rounded-xl hover:bg-slate-700/50 transition-colors group cursor-pointer"
+              >
+                <div className="bg-primary/20 p-3 rounded-lg group-hover:bg-primary/30 transition-colors shrink-0">
                   <Phone className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h4 className="font-medium text-lg mb-1">Telefone</h4>
+                  <h4 className="font-medium text-lg mb-1 group-hover:text-primary transition-colors">
+                    Telefone
+                  </h4>
                   <p className="text-slate-400 text-sm">
                     (41) 3027-2003
                     <br />
                     (41) 99116-6264 WhatsApp
                   </p>
                 </div>
-              </div>
+              </a>
 
               <div className="flex items-start space-x-4 p-4 rounded-xl">
                 <div className="bg-primary/20 p-3 rounded-lg shrink-0">

@@ -1,3 +1,6 @@
+export const WHATSAPP_URL =
+  'https://wa.me/5541991166264?text=Olá%2C%20gostaria%20de%20saber%20mais%20sobre%20o%20ERP%20da%20ibisoft.'
+
 import {
   Building2,
   Globe2,

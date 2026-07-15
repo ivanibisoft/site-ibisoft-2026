@@ -19,6 +19,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { getSegments, type Segment } from '@/services/segments'
 import { getModules, type Module } from '@/services/modules'
 import useRealtime from '@/hooks/use-realtime'
+import { WHATSAPP_URL } from '@/lib/constants'
 import * as Icons from 'lucide-react'
 
 export function MobileNav() {
@@ -194,7 +195,7 @@ export function MobileNav() {
               </Button>
 
               <a
-                href="https://wa.me/5541991166264"
+                href={WHATSAPP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={handleLinkClick}
