@@ -83,13 +83,13 @@ export function Logos() {
               {items.map((item) => (
                 <CarouselItem
                   key={item.id}
-                  className="pl-4 md:pl-8 basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6 shrink-0"
+                  className="pl-4 md:pl-8 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 shrink-0"
                 >
-                  <div className="flex items-center justify-center p-2 group">
+                  <div className="flex items-center justify-center p-3 md:p-4 group">
                     <img
                       src={item.url}
                       alt={`Logo ${item.name}`}
-                      className="h-10 md:h-12 w-auto object-contain max-w-[120px] opacity-50 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
+                      className="h-16 md:h-20 lg:h-24 w-auto object-contain max-w-[180px] md:max-w-[220px] opacity-60 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
                     />
                   </div>
                 </CarouselItem>
