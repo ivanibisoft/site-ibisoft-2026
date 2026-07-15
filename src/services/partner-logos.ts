@@ -1,4 +1,5 @@
 import pb from '@/lib/pocketbase/client'
+import type { Segment } from '@/services/segments'
 
 export interface PartnerLogo {
   id: string
@@ -6,15 +7,21 @@ export interface PartnerLogo {
   logo: string
   order_number: number
   is_active: boolean
+  segment: string
   created: string
   updated: string
 }
 
-export const getActivePartnerLogos = async (): Promise<PartnerLogo[]> => {
+export interface PartnerLogoWithExpand extends PartnerLogo {
+  expand?: { segment?: Segment }
+}
+
+export const getActivePartnerLogos = async (): Promise<PartnerLogoWithExpand[]> => {
   try {
-    return await pb.collection('partner_logos').getFullList<PartnerLogo>({
+    return await pb.collection('partner_logos').getFullList<PartnerLogoWithExpand>({
       filter: 'is_active = true',
-      sort: 'order_number',
+      sort: 'segment,order_number',
+      expand: 'segment',
     })
   } catch (error) {
     console.error('Error fetching partner logos:', error)
@@ -22,10 +29,11 @@ export const getActivePartnerLogos = async (): Promise<PartnerLogo[]> => {
   }
 }
 
-export const getAllPartnerLogos = async (): Promise<PartnerLogo[]> => {
+export const getAllPartnerLogos = async (): Promise<PartnerLogoWithExpand[]> => {
   try {
-    return await pb.collection('partner_logos').getFullList<PartnerLogo>({
-      sort: 'order_number',
+    return await pb.collection('partner_logos').getFullList<PartnerLogoWithExpand>({
+      sort: 'segment,order_number',
+      expand: 'segment',
     })
   } catch (error) {
     console.error('Error fetching all partner logos:', error)

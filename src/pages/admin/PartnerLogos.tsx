@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import pb from '@/lib/pocketbase/client'
 import {
   Table,
@@ -19,20 +19,37 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { extractFieldErrors } from '@/lib/pocketbase/errors'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { Edit2, GripVertical, Loader2, Plus, Trash2 } from 'lucide-react'
+import { getSegments, type Segment } from '@/services/segments'
 
 export default function AdminPartnerLogos() {
   const [logos, setLogos] = useState<any[]>([])
+  const [segments, setSegments] = useState<Segment[]>([])
+  const [activeTab, setActiveTab] = useState<string>('all')
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [isSaving, setIsSaving] = useState(false)
 
   const load = async () => {
-    const list = await pb.collection('partner_logos').getFullList({ sort: 'order_number' })
-    setLogos(list)
+    const [logoList, segList] = await Promise.all([
+      pb
+        .collection('partner_logos')
+        .getFullList({ sort: 'segment,order_number', expand: 'segment' }),
+      getSegments(),
+    ])
+    setLogos(logoList)
+    setSegments(segList)
   }
 
   useEffect(() => {
@@ -51,6 +68,11 @@ export default function AdminPartnerLogos() {
     await pb.collection('partner_logos').update(logo.id, { is_active: !logo.is_active })
     load()
   }
+
+  const filteredLogos = useMemo(() => {
+    if (activeTab === 'all') return logos
+    return logos.filter((l) => l.segment === activeTab)
+  }, [logos, activeTab])
 
   const handleDragStart = (e: React.DragEvent<HTMLTableRowElement>, index: number) => {
     if (isSaving) {
@@ -82,20 +104,40 @@ export default function AdminPartnerLogos() {
       return
     }
 
-    const newItems = [...logos]
-    const draggedItem = newItems[draggedIndex]
-    newItems.splice(draggedIndex, 1)
-    newItems.splice(index, 0, draggedItem)
+    const visibleItems = [...filteredLogos]
+    const draggedItem = visibleItems[draggedIndex]
+    visibleItems.splice(draggedIndex, 1)
+    visibleItems.splice(index, 0, draggedItem)
 
-    setLogos(newItems)
+    const updatedLogos = [...logos]
+    const visibleIds = new Set(visibleItems.map((l) => l.id))
+
+    const baseOrder =
+      activeTab === 'all'
+        ? 0
+        : Math.min(
+            ...logos
+              .filter((l) => l.segment === activeTab && !visibleIds.has(l.id))
+              .map((l) => l.order_number ?? 0),
+            0,
+          )
+
+    visibleItems.forEach((item, i) => {
+      const globalIdx = updatedLogos.findIndex((l) => l.id === item.id)
+      if (globalIdx !== -1) {
+        updatedLogos[globalIdx] = { ...updatedLogos[globalIdx], order_number: baseOrder + i + 1 }
+      }
+    })
+
+    setLogos(updatedLogos)
     setDraggedIndex(null)
     setDragOverIndex(null)
     setIsSaving(true)
 
     try {
       await Promise.all(
-        newItems.map((l, i) =>
-          pb.collection('partner_logos').update(l.id, { order_number: i + 1 }),
+        visibleItems.map((l, i) =>
+          pb.collection('partner_logos').update(l.id, { order_number: baseOrder + i + 1 }),
         ),
       )
       toast({ title: 'Ordem dos logos atualizada!' })
@@ -116,8 +158,20 @@ export default function AdminPartnerLogos() {
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold tracking-tight">Logos de Parceiros</h2>
-        <PartnerLogoDialog onSaved={load} />
+        <PartnerLogoDialog segments={segments} onSaved={load} />
       </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="flex-wrap h-auto gap-1">
+          <TabsTrigger value="all">Todos</TabsTrigger>
+          {segments.map((seg) => (
+            <TabsTrigger key={seg.id} value={seg.id}>
+              {seg.title}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
         <Table>
           <TableHeader className="bg-gray-50/50">
@@ -126,6 +180,7 @@ export default function AdminPartnerLogos() {
               <TableHead className="font-semibold w-20 text-center">Ordem</TableHead>
               <TableHead className="font-semibold">Logo</TableHead>
               <TableHead className="font-semibold">Nome</TableHead>
+              <TableHead className="font-semibold">Segmento</TableHead>
               <TableHead className="font-semibold text-center">Ativo</TableHead>
               <TableHead className="text-right font-semibold">Ações</TableHead>
             </TableRow>
@@ -136,10 +191,12 @@ export default function AdminPartnerLogos() {
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
             )}
-            {logos.map((l, index) => {
+            {filteredLogos.map((l, index) => {
               const isDraggingThis = draggedIndex === index
               const isDragOver =
                 dragOverIndex === index && draggedIndex !== null && draggedIndex !== index
+              const segName =
+                l.expand?.segment?.title || segments.find((s) => s.id === l.segment)?.title
               return (
                 <TableRow
                   key={l.id}
@@ -174,6 +231,9 @@ export default function AdminPartnerLogos() {
                   <TableCell className="font-medium pointer-events-none select-none">
                     {l.name}
                   </TableCell>
+                  <TableCell className="text-sm text-gray-500 pointer-events-none select-none">
+                    {segName || <span className="text-gray-400 italic">—</span>}
+                  </TableCell>
                   <TableCell className="text-center">
                     <Switch
                       checked={l.is_active}
@@ -182,7 +242,7 @@ export default function AdminPartnerLogos() {
                     />
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    <PartnerLogoDialog logo={l} onSaved={load} />
+                    <PartnerLogoDialog logo={l} segments={segments} onSaved={load} />
                     <Button
                       variant="ghost"
                       size="sm"
@@ -196,6 +256,13 @@ export default function AdminPartnerLogos() {
                 </TableRow>
               )
             })}
+            {filteredLogos.length === 0 && !isSaving && (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-gray-400 py-8">
+                  Nenhum logo encontrado neste segmento.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
@@ -203,11 +270,20 @@ export default function AdminPartnerLogos() {
   )
 }
 
-function PartnerLogoDialog({ logo, onSaved }: { logo?: any; onSaved: () => void }) {
+function PartnerLogoDialog({
+  logo,
+  segments,
+  onSaved,
+}: {
+  logo?: any
+  segments: Segment[]
+  onSaved: () => void
+}) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState(logo?.name || '')
   const [orderNumber, setOrderNumber] = useState(logo?.order_number ?? 0)
   const [isActive, setIsActive] = useState(logo?.is_active ?? true)
+  const [segmentId, setSegmentId] = useState<string>(logo?.segment || '')
   const [file, setFile] = useState<File | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
@@ -217,6 +293,7 @@ function PartnerLogoDialog({ logo, onSaved }: { logo?: any; onSaved: () => void 
       setName(logo?.name || '')
       setOrderNumber(logo?.order_number ?? 0)
       setIsActive(logo?.is_active ?? true)
+      setSegmentId(logo?.segment || '')
       setFile(null)
       setErrors({})
     }
@@ -225,19 +302,16 @@ function PartnerLogoDialog({ logo, onSaved }: { logo?: any; onSaved: () => void 
   const save = async () => {
     setSaving(true)
     try {
+      const formData = new FormData()
+      formData.append('name', name)
+      formData.append('order_number', String(orderNumber))
+      formData.append('is_active', String(isActive))
+      if (segmentId) formData.append('segment', segmentId)
+      if (file) formData.append('logo', file)
+
       if (logo) {
-        const formData = new FormData()
-        formData.append('name', name)
-        formData.append('order_number', String(orderNumber))
-        formData.append('is_active', String(isActive))
-        if (file) formData.append('logo', file)
         await pb.collection('partner_logos').update(logo.id, formData)
       } else {
-        const formData = new FormData()
-        formData.append('name', name)
-        formData.append('order_number', String(orderNumber))
-        formData.append('is_active', String(isActive))
-        if (file) formData.append('logo', file)
         await pb.collection('partner_logos').create(formData)
       }
       toast({ title: 'Logo salvo com sucesso' })
@@ -282,6 +356,22 @@ function PartnerLogoDialog({ logo, onSaved }: { logo?: any; onSaved: () => void 
               placeholder="Ex: Microsoft"
             />
             {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label>Segmento</Label>
+            <Select value={segmentId} onValueChange={setSegmentId}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione um segmento (opcional)" />
+              </SelectTrigger>
+              <SelectContent>
+                {segments.map((seg) => (
+                  <SelectItem key={seg.id} value={seg.id}>
+                    {seg.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.segment && <p className="text-red-500 text-sm">{errors.segment}</p>}
           </div>
           <div className="space-y-2">
             <Label>Ordem de exibição</Label>

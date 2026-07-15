@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-15T03:20:13.401Z",
+  "generatedAt": "2026-07-15T03:55:12.346Z",
   "collections": [
     {
       "name": "users",
@@ -621,6 +621,13 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "segment",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "segments"
         }
       ],
       "indexes": ["CREATE INDEX idx_partner_logos_order ON partner_logos (order_number)"]

@@ -2,7 +2,11 @@ import { useRef, useEffect, useState } from 'react'
 import Autoplay from 'embla-carousel-autoplay'
 import { ThumbsUp, CheckCircle2 } from 'lucide-react'
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel'
-import { getActivePartnerLogos, getLogoUrl, type PartnerLogo } from '@/services/partner-logos'
+import {
+  getActivePartnerLogos,
+  getLogoUrl,
+  type PartnerLogoWithExpand,
+} from '@/services/partner-logos'
 
 const FALLBACK_LOGOS = [
   'google',
@@ -28,7 +32,7 @@ const FALLBACK_LOGOS = [
 
 export function Logos() {
   const plugin = useRef(Autoplay({ delay: 3000, stopOnInteraction: false }))
-  const [logos, setLogos] = useState<PartnerLogo[]>([])
+  const [logos, setLogos] = useState<PartnerLogoWithExpand[]>([])
 
   useEffect(() => {
     getActivePartnerLogos().then(setLogos)
