@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 export function WhatsAppButton() {
   return (
     <a
-      href="https://wa.me/5511999999999"
+      href="https://wa.me/5541991166264"
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
