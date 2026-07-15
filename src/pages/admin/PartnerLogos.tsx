@@ -21,10 +21,14 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { extractFieldErrors } from '@/lib/pocketbase/errors'
 import { toast } from '@/hooks/use-toast'
-import { Edit2, Plus, Trash2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { Edit2, GripVertical, Loader2, Plus, Trash2 } from 'lucide-react'
 
 export default function AdminPartnerLogos() {
   const [logos, setLogos] = useState<any[]>([])
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
 
   const load = async () => {
     const list = await pb.collection('partner_logos').getFullList({ sort: 'order_number' })
@@ -48,6 +52,66 @@ export default function AdminPartnerLogos() {
     load()
   }
 
+  const handleDragStart = (e: React.DragEvent<HTMLTableRowElement>, index: number) => {
+    if (isSaving) {
+      e.preventDefault()
+      return
+    }
+    setDraggedIndex(index)
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', index.toString())
+  }
+
+  const handleDragOver = (e: React.DragEvent<HTMLTableRowElement>, index: number) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index)
+    }
+  }
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null)
+  }
+
+  const handleDrop = async (e: React.DragEvent<HTMLTableRowElement>, index: number) => {
+    e.preventDefault()
+    if (draggedIndex === null || draggedIndex === index) {
+      setDraggedIndex(null)
+      setDragOverIndex(null)
+      return
+    }
+
+    const newItems = [...logos]
+    const draggedItem = newItems[draggedIndex]
+    newItems.splice(draggedIndex, 1)
+    newItems.splice(index, 0, draggedItem)
+
+    setLogos(newItems)
+    setDraggedIndex(null)
+    setDragOverIndex(null)
+    setIsSaving(true)
+
+    try {
+      await Promise.all(
+        newItems.map((l, i) =>
+          pb.collection('partner_logos').update(l.id, { order_number: i + 1 }),
+        ),
+      )
+      toast({ title: 'Ordem dos logos atualizada!' })
+    } catch (err) {
+      toast({ title: 'Erro ao salvar ordem', variant: 'destructive' })
+      load()
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null)
+    setDragOverIndex(null)
+  }
+
   return (
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex justify-between items-center">
@@ -58,43 +122,80 @@ export default function AdminPartnerLogos() {
         <Table>
           <TableHeader className="bg-gray-50/50">
             <TableRow>
-              <TableHead className="font-semibold w-24 text-center">Ordem</TableHead>
+              <TableHead className="w-12 text-center"></TableHead>
+              <TableHead className="font-semibold w-20 text-center">Ordem</TableHead>
               <TableHead className="font-semibold">Logo</TableHead>
               <TableHead className="font-semibold">Nome</TableHead>
               <TableHead className="font-semibold text-center">Ativo</TableHead>
               <TableHead className="text-right font-semibold">Ações</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {logos.map((l) => (
-              <TableRow key={l.id}>
-                <TableCell className="text-center font-medium text-gray-500">
-                  {l.order_number}
-                </TableCell>
-                <TableCell>
-                  <img
-                    src={`${pb.baseURL}/api/files/partner_logos/${l.id}/${l.logo}`}
-                    alt={l.name}
-                    className="h-10 w-auto object-contain max-w-[120px]"
-                  />
-                </TableCell>
-                <TableCell className="font-medium">{l.name}</TableCell>
-                <TableCell className="text-center">
-                  <Switch checked={l.is_active} onCheckedChange={() => toggleActive(l)} />
-                </TableCell>
-                <TableCell className="text-right space-x-2">
-                  <PartnerLogoDialog logo={l} onSaved={load} />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => deleteLogo(l.id)}
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+          <TableBody className="relative">
+            {isSaving && (
+              <div className="absolute inset-0 bg-white/50 z-10 flex items-center justify-center backdrop-blur-[1px]">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            )}
+            {logos.map((l, index) => {
+              const isDraggingThis = draggedIndex === index
+              const isDragOver =
+                dragOverIndex === index && draggedIndex !== null && draggedIndex !== index
+              return (
+                <TableRow
+                  key={l.id}
+                  draggable={!isSaving}
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragOver={(e) => handleDragOver(e, index)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, index)}
+                  onDragEnd={handleDragEnd}
+                  className={cn(
+                    'transition-colors cursor-grab active:cursor-grabbing',
+                    isDraggingThis && 'opacity-50 bg-primary/5 shadow-md',
+                    isDragOver &&
+                      (dragOverIndex > draggedIndex
+                        ? 'border-b-2 border-b-primary'
+                        : 'border-t-2 border-t-primary'),
+                  )}
+                >
+                  <TableCell className="text-center align-middle">
+                    <GripVertical className="w-4 h-4 text-gray-400 mx-auto pointer-events-none" />
+                  </TableCell>
+                  <TableCell className="text-center font-medium text-gray-500 pointer-events-none select-none">
+                    {l.order_number}
+                  </TableCell>
+                  <TableCell className="pointer-events-none">
+                    <img
+                      src={`${pb.baseURL}/api/files/partner_logos/${l.id}/${l.logo}`}
+                      alt={l.name}
+                      className="h-10 w-auto object-contain max-w-[120px]"
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium pointer-events-none select-none">
+                    {l.name}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Switch
+                      checked={l.is_active}
+                      onCheckedChange={() => toggleActive(l)}
+                      disabled={isSaving}
+                    />
+                  </TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <PartnerLogoDialog logo={l} onSaved={load} />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => deleteLogo(l.id)}
+                      disabled={isSaving}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       </div>
