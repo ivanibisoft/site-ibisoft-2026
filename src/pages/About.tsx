@@ -5,10 +5,17 @@ import { getTeamMembers } from '@/services/team_members'
 import pb from '@/lib/pocketbase/client'
 import ivanPhoto from '@/assets/ivan-2-7b6a6.jpg'
 import ibisoftLogo from '@/assets/logo-ibisoft-r-4b810.jpg'
+import { useSiteAssets } from '@/hooks/use-site-assets'
 
 export default function About() {
   const location = useLocation()
   const [ceo, setCeo] = useState<any>(null)
+  const { getAssetUrl } = useSiteAssets()
+  const ceoPhotoUrl = getAssetUrl('foto-ceo')
+  const logoIbisoftRUrl = getAssetUrl('logo-ibisoft-r') || ibisoftLogo
+  const historyImageUrl =
+    getAssetUrl('imagem-sobre-1') ||
+    'https://img.usecurling.com/p/800/600?q=office%20team&color=blue'
 
   useEffect(() => {
     getTeamMembers()
@@ -79,7 +86,7 @@ export default function About() {
           </div>
           <div className="rounded-2xl overflow-hidden shadow-2xl">
             <img
-              src="https://img.usecurling.com/p/800/600?q=office%20team&color=blue"
+              src={historyImageUrl}
               alt="Nossa História"
               className="w-full h-full object-cover"
             />
@@ -98,7 +105,7 @@ export default function About() {
           <div className="bg-background p-8 md:p-12 rounded-3xl shadow-xl border border-border flex flex-col items-center transition-all hover:shadow-2xl">
             <div className="mb-10">
               <img
-                src={ibisoftLogo}
+                src={logoIbisoftRUrl}
                 alt="Logomarca ibisoft"
                 className="w-full max-w-xs md:max-w-sm h-auto object-contain mx-auto"
               />
@@ -133,13 +140,7 @@ export default function About() {
             <div className="grid md:grid-cols-5 gap-8 items-center bg-card rounded-3xl p-8 md:p-12 shadow-elevation border border-border">
               <div className="md:col-span-2">
                 <img
-                  src={
-                    ceo.photo === 'ivan-2-7b6a6.jpg'
-                      ? ivanPhoto
-                      : ceo.photo
-                        ? pb.files.getUrl(ceo, ceo.photo)
-                        : 'https://img.usecurling.com/ppl/large?gender=male&seed=42'
-                  }
+                  src={ceoPhotoUrl || (ceo.photo ? pb.files.getUrl(ceo, ceo.photo) : ivanPhoto)}
                   alt={`Foto de ${ceo.name}`}
                   className="w-full rounded-2xl shadow-lg border-4 border-background"
                 />

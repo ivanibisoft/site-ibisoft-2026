@@ -3,8 +3,12 @@ import { Facebook, Instagram, Linkedin, MapPin, Phone } from 'lucide-react'
 import ibisoftLogo from '@/assets/botao_ibisoft_2_sem_fundo-74482.png'
 import dunsPdf from '@/assets/ibisoft-tecnologia-duns-number-905539672-3e6be.pdf'
 import { SEGMENTS, WHATSAPP_URL } from '@/lib/constants'
+import { useSiteAssets } from '@/hooks/use-site-assets'
 
 export function Footer() {
+  const { getAssetUrl } = useSiteAssets()
+  const logoUrl = getAssetUrl('logo-principal') || ibisoftLogo
+  const dunsUrl = getAssetUrl('certificado-duns') || dunsPdf
   return (
     <footer className="bg-slate-50 text-slate-600 py-12 lg:py-16 border-t border-slate-200">
       <div className="container mx-auto px-4 md:px-6">
@@ -12,7 +16,7 @@ export function Footer() {
           {/* Brand and Description */}
           <div className="flex flex-col">
             <div className="w-fit mb-6">
-              <img src={ibisoftLogo} alt="ibisoft" className="h-10 object-contain" />
+              <img src={logoUrl} alt="ibisoft" className="h-10 object-contain" />
             </div>
             <p className="text-sm text-slate-600 mb-6 leading-relaxed max-w-xs">
               Transformando desafios complexos em soluções tecnológicas inovadoras. Sua parceira
@@ -150,7 +154,7 @@ export function Footer() {
             <p className="text-xs text-slate-400 text-center md:text-left">
               CNPJ: 78.761.285/0001-70 | DUNS:{' '}
               <a
-                href={dunsPdf}
+                href={dunsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-primary transition-colors underline decoration-transparent hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"

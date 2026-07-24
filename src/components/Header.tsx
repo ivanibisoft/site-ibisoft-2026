@@ -3,9 +3,12 @@ import { Button } from '@/components/ui/button'
 import { Navigation } from '@/components/Navigation'
 import { MobileNav } from '@/components/MobileNav'
 import logoImg from '../assets/botao_ibisoft_2_sem_fundo-74482.png'
+import { useSiteAssets } from '@/hooks/use-site-assets'
 
 export function Header() {
   const location = useLocation()
+  const { getAssetUrl } = useSiteAssets()
+  const logoUrl = getAssetUrl('logo-principal') || logoImg
 
   const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (location.pathname === '/') {
@@ -24,7 +27,7 @@ export function Header() {
             className="flex w-40 items-center md:w-48 cursor-pointer"
           >
             <img
-              src={logoImg}
+              src={logoUrl}
               alt="Ibisoft Tecnologia"
               className="h-10 w-full object-contain cursor-pointer"
             />

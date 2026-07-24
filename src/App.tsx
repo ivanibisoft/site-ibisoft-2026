@@ -24,52 +24,57 @@ import AdminTeam from './pages/admin/Team'
 import AdminProfile from './pages/admin/Profile'
 import AdminHomeConfig from './pages/admin/HomeConfig'
 import AdminPartnerLogos from './pages/admin/PartnerLogos'
+import AdminSiteAssets from './pages/admin/SiteAssets'
 import { ScrollToTop } from './components/ScrollToTop'
 import { AuthProvider } from '@/hooks/use-auth'
+import { SiteAssetsProvider } from '@/hooks/use-site-assets'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { EditorMiddleware } from './components/EditorMiddleware'
 
 const App = () => (
   <ErrorBoundary>
     <AuthProvider>
-      <EditorMiddleware>
-        <BrowserRouter future={{ v7_startTransition: false, v7_relativeSplatPath: false }}>
-          <ScrollToTop />
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <Routes>
-              <Route element={<Layout />}>
-                <Route path="/" element={<Index />} />
-                <Route path="/segmentos/:slug" element={<Segment />} />
-                <Route path="/funcionalidades/:slug" element={<Functionality />} />
-                <Route path="/quero-conhecer" element={<QueroConhecer />} />
-                <Route path="/sobre-erp" element={<SobreErp />} />
-                <Route path="/sobre" element={<About />} />
-                <Route path="/cases" element={<Cases />} />
-                <Route path="/contato" element={<QueroConhecer />} />
-              </Route>
+      <SiteAssetsProvider>
+        <EditorMiddleware>
+          <BrowserRouter future={{ v7_startTransition: false, v7_relativeSplatPath: false }}>
+            <ScrollToTop />
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <Routes>
+                <Route element={<Layout />}>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/segmentos/:slug" element={<Segment />} />
+                  <Route path="/funcionalidades/:slug" element={<Functionality />} />
+                  <Route path="/quero-conhecer" element={<QueroConhecer />} />
+                  <Route path="/sobre-erp" element={<SobreErp />} />
+                  <Route path="/sobre" element={<About />} />
+                  <Route path="/cases" element={<Cases />} />
+                  <Route path="/contato" element={<QueroConhecer />} />
+                </Route>
 
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/forgot-password" element={<AdminForgotPassword />} />
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<AdminDashboard />} />
-                <Route path="leads" element={<AdminLeads />} />
-                <Route path="modules" element={<AdminModules />} />
-                <Route path="modules/:id" element={<AdminModuleDetails />} />
-                <Route path="segments" element={<AdminSegments />} />
-                <Route path="cases" element={<AdminCases />} />
-                <Route path="team" element={<AdminTeam />} />
-                <Route path="profile" element={<AdminProfile />} />
-                <Route path="home-config" element={<AdminHomeConfig />} />
-                <Route path="partner-logos" element={<AdminPartnerLogos />} />
-              </Route>
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/forgot-password" element={<AdminForgotPassword />} />
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="leads" element={<AdminLeads />} />
+                  <Route path="modules" element={<AdminModules />} />
+                  <Route path="modules/:id" element={<AdminModuleDetails />} />
+                  <Route path="segments" element={<AdminSegments />} />
+                  <Route path="cases" element={<AdminCases />} />
+                  <Route path="team" element={<AdminTeam />} />
+                  <Route path="profile" element={<AdminProfile />} />
+                  <Route path="home-config" element={<AdminHomeConfig />} />
+                  <Route path="partner-logos" element={<AdminPartnerLogos />} />
+                  <Route path="assets" element={<AdminSiteAssets />} />
+                </Route>
 
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </TooltipProvider>
-        </BrowserRouter>
-      </EditorMiddleware>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </TooltipProvider>
+          </BrowserRouter>
+        </EditorMiddleware>
+      </SiteAssetsProvider>
     </AuthProvider>
   </ErrorBoundary>
 )
