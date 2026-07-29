@@ -61,6 +61,14 @@ export function Hero({ heroTitle, heroSubtitle, heroImageUrl }: HeroProps) {
             >
               <Link to="/quero-conhecer">Solicitar demonstração</Link>
             </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="w-full sm:w-auto h-14 px-8 text-base font-semibold border-2 border-white text-white hover:bg-white hover:text-black transition-colors duration-300"
+            >
+              <Link to="/admin">Admin</Link>
+            </Button>
           </div>
         </div>
       </div>
