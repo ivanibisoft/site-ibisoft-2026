@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 
@@ -7,14 +8,21 @@ interface HeroProps {
   heroImageUrl: string | null
 }
 
-const DEFAULT_HERO_IMAGE = 'https://img.usecurling.com/p/800/600?q=dashboard%20analytics&color=blue'
-
 export function Hero({ heroTitle, heroSubtitle, heroImageUrl }: HeroProps) {
-  const imageUrl = heroImageUrl || DEFAULT_HERO_IMAGE
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const [imageError, setImageError] = useState(false)
+
+  useEffect(() => {
+    setImageLoaded(false)
+    setImageError(false)
+  }, [heroImageUrl])
+
+  const showImage = heroImageUrl && !imageError
 
   return (
     <section className="relative overflow-hidden bg-primary pt-20 pb-32 text-primary-foreground">
-      <div className="absolute inset-0 bg-[url('https://img.usecurling.com/p/1920/1080?q=abstract%20blue%20waves&color=blue')] opacity-10 bg-cover bg-center mix-blend-overlay"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-secondary opacity-90"></div>
+      <div className="absolute inset-0 hero-grid-pattern opacity-10"></div>
 
       <div className="container relative z-10 grid lg:grid-cols-2 gap-12 items-center">
         <div className="space-y-8 animate-fade-in-up">
@@ -48,12 +56,21 @@ export function Hero({ heroTitle, heroSubtitle, heroImageUrl }: HeroProps) {
         </div>
 
         <div className="relative animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-          <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/50 border border-white/10 bg-white/5 backdrop-blur-sm p-2">
-            <img
-              src={imageUrl}
-              alt="Dashboard ERP ibisoft"
-              className="rounded-xl w-full h-auto object-cover opacity-90 hover:opacity-100 transition-opacity duration-500"
-            />
+          <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/50 border border-white/10 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm p-2 min-h-[300px]">
+            {showImage && (
+              <img
+                src={heroImageUrl!}
+                alt="Dashboard ERP ibisoft"
+                className={`rounded-xl w-full h-auto object-cover transition-opacity duration-700 ${
+                  imageLoaded ? 'opacity-90 hover:opacity-100' : 'opacity-0'
+                }`}
+                onLoad={() => setImageLoaded(true)}
+                onError={() => setImageError(true)}
+              />
+            )}
+            {!imageLoaded && (
+              <div className="absolute inset-2 rounded-xl hero-image-placeholder animate-pulse"></div>
+            )}
           </div>
         </div>
       </div>
