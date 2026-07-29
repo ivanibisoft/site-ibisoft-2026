@@ -13,6 +13,7 @@ import {
   ImageIcon,
   Image,
   Files,
+  ExternalLink,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -65,7 +66,16 @@ export default function AdminLayout() {
             </Link>
           ))}
         </nav>
-        <div className="p-4 border-t">
+        <div className="p-4 border-t space-y-2">
+          <Button
+            asChild
+            variant="ghost"
+            className="w-full justify-start text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+          >
+            <Link to="/">
+              <ExternalLink className="mr-2 h-4 w-4" /> Voltar ao site
+            </Link>
+          </Button>
           <Button
             variant="ghost"
             className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
