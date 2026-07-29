@@ -20,7 +20,12 @@ export function Hero({ heroTitle, heroSubtitle, heroImageUrl }: HeroProps) {
   const showImage = heroImageUrl && !imageError
 
   return (
-    <section className="relative w-full overflow-hidden bg-primary aspect-video min-h-[200px]">
+    <section
+      className="relative w-full overflow-hidden min-h-[300px] md:min-h-[420px] lg:min-h-[500px]"
+      style={{ aspectRatio: '16 / 9' }}
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/80" />
+
       {showImage && (
         <img
           src={heroImageUrl!}
