@@ -76,6 +76,14 @@ export function Footer() {
                   Contato
                 </Link>
               </li>
+              <li>
+                <Link
+                  to="/admin"
+                  className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-md border border-slate-300 text-sm text-slate-700 bg-white hover:bg-slate-100 hover:border-slate-400 hover:text-slate-900 transition-colors"
+                >
+                  Admin
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -137,14 +145,6 @@ export function Footer() {
                     (41) 99116-6264 WhatsApp
                   </a>
                 </span>
-              </li>
-              <li className="flex items-center space-x-3 text-sm">
-                <br />
-              </li>
-              <li>
-                <Link to="/admin" className="text-sm hover:text-primary transition-colors">
-                  Admin
-                </Link>
               </li>
             </ul>
           </div>
