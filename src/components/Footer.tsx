@@ -141,6 +141,11 @@ export function Footer() {
               <li className="flex items-center space-x-3 text-sm">
                 <br />
               </li>
+              <li>
+                <Link to="/admin" className="text-sm hover:text-primary transition-colors">
+                  Admin
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
