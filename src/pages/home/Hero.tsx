@@ -20,14 +20,14 @@ export function Hero({ heroTitle, heroSubtitle, heroImageUrl }: HeroProps) {
   const showImage = heroImageUrl && !imageError
 
   return (
-    <section className="relative w-full overflow-hidden h-[300px] md:h-[420px] lg:h-[500px]">
+    <section className="relative w-full overflow-hidden min-h-[320px] md:min-h-[480px] lg:min-h-[600px]">
       <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/80" />
 
       {showImage && (
         <img
           src={heroImageUrl!}
           alt="Gestão empresarial com ERP ibisoft"
-          className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-500 ${
+          className={`absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-500 ${
             imageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
           onLoad={() => setImageLoaded(true)}
