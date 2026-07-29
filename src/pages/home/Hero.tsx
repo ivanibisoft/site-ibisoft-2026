@@ -20,10 +20,7 @@ export function Hero({ heroTitle, heroSubtitle, heroImageUrl }: HeroProps) {
   const showImage = heroImageUrl && !imageError
 
   return (
-    <section
-      className="relative w-full overflow-hidden min-h-[300px] md:min-h-[420px] lg:min-h-[500px]"
-      style={{ aspectRatio: '16 / 9' }}
-    >
+    <section className="relative w-full overflow-hidden h-[300px] md:h-[420px] lg:h-[500px]">
       <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/80" />
 
       {showImage && (
