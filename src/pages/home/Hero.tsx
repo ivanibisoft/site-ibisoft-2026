@@ -20,7 +20,7 @@ export function Hero({ heroTitle, heroSubtitle, heroImageUrl }: HeroProps) {
   const showImage = heroImageUrl && !imageError
 
   return (
-    <section className="relative min-h-[85vh] w-full overflow-hidden bg-primary">
+    <section className="relative w-full overflow-hidden bg-primary aspect-video min-h-[200px]">
       {showImage && (
         <img
           src={heroImageUrl!}
@@ -39,8 +39,8 @@ export function Hero({ heroTitle, heroSubtitle, heroImageUrl }: HeroProps) {
 
       <div className="absolute inset-0 hero-grid-pattern opacity-10" />
 
-      <div className="relative z-10 container mx-auto flex min-h-[85vh] items-center px-4 md:px-6">
-        <div className="max-w-2xl space-y-6 py-20 animate-fade-in-up">
+      <div className="relative z-10 container mx-auto flex h-full min-h-[200px] items-center px-4 md:px-6">
+        <div className="max-w-2xl space-y-6 py-10 md:py-16 animate-fade-in-up">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold font-display leading-[1.1] text-white drop-shadow-lg">
             {heroTitle}
           </h1>
