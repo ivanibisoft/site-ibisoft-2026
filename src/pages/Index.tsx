@@ -66,7 +66,7 @@ const Index = () => {
     return <IndexLoader />
   }
 
-  const heroImageUrl = homeConfig ? getHeroImageUrl(homeConfig, '800x600') : null
+  const heroImageUrl = homeConfig ? getHeroImageUrl(homeConfig) : null
   const heroTitle =
     homeConfig?.hero_title ||
     'Gestão completa da sua empresa com um ERP simples, integrado e escalável'
