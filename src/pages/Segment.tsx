@@ -93,13 +93,14 @@ export default function Segment() {
               </Button>
             </Link>
           </div>
-          <div className="rounded-2xl overflow-hidden shadow-2xl aspect-[4/3]">
+          <div className="rounded-2xl overflow-hidden shadow-2xl aspect-[4/3] bg-gradient-to-br from-primary/10 to-secondary/10">
             <img
               src={
                 getSegmentImageUrl(segment) ||
                 `https://img.usecurling.com/p/800/600?q=${encodeURIComponent(segment.title.split(' ')[0])}&color=blue`
               }
               alt={segment.title}
+              loading="lazy"
               className="w-full h-full object-cover"
             />
           </div>
