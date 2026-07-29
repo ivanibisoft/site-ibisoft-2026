@@ -25,7 +25,7 @@ export function Hero({ heroTitle, heroSubtitle, heroImageUrl }: HeroProps) {
         <img
           src={heroImageUrl!}
           alt="Gestão empresarial com ERP ibisoft"
-          className={`absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-500 ${
+          className={`absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-500 ${
             imageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
           onLoad={() => setImageLoaded(true)}
