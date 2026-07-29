@@ -37,8 +37,8 @@ export default function SobreErp() {
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">A Jornada do Conhecimento ERP</h2>
             <p className="text-muted-foreground text-lg">
-              Preparamos os conteúdos essenciais, organizados em 3 etapas, para guiar a sua empresa
-              rumo à maturidade em gestão.
+              Preparamos os conteúdos essenciais para guiar a sua empresa rumo à maturidade em
+              gestão.
             </p>
           </div>
 
