@@ -31,6 +31,7 @@ export function useAutoFocus<T extends HTMLElement>(
     let retryTimer: ReturnType<typeof setTimeout>
     let persistTimer: ReturnType<typeof setTimeout>
     let blurLossTimer: ReturnType<typeof setTimeout>
+    let rafId: number
 
     const handlePointerDown = () => {
       userInteractedRef.current = true
@@ -47,7 +48,9 @@ export function useAutoFocus<T extends HTMLElement>(
       if (!el) {
         if (retryCount < retries) {
           retryCount++
-          retryTimer = setTimeout(attemptFocus, delay * retryCount)
+          retryTimer = setTimeout(() => {
+            rafId = requestAnimationFrame(attemptFocus)
+          }, delay * retryCount)
         }
         return
       }
@@ -60,35 +63,41 @@ export function useAutoFocus<T extends HTMLElement>(
         el.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
 
-      el.focus()
+      rafId = requestAnimationFrame(() => {
+        el.focus()
 
-      if (document.activeElement === el) {
-        if (persist) {
-          const onBlur = () => {
-            if (userInteractedRef.current) return
-            clearTimeout(blurLossTimer)
-            blurLossTimer = setTimeout(() => {
-              const active = document.activeElement
-              if (!userInteractedRef.current && !isInteractive(active)) {
-                targetRef.current?.focus()
-              }
-            }, 50)
+        if (document.activeElement === el) {
+          if (persist) {
+            const onBlur = () => {
+              if (userInteractedRef.current) return
+              clearTimeout(blurLossTimer)
+              blurLossTimer = setTimeout(() => {
+                const active = document.activeElement
+                if (!userInteractedRef.current && !isInteractive(active)) {
+                  targetRef.current?.focus()
+                }
+              }, 50)
+            }
+            blurHandlerRef.current = onBlur
+            targetRef.current.addEventListener('blur', onBlur)
+            persistTimer = setTimeout(() => {
+              targetRef.current.removeEventListener('blur', onBlur)
+              blurHandlerRef.current = null
+            }, persistDuration)
           }
-          blurHandlerRef.current = onBlur
-          targetRef.current.addEventListener('blur', onBlur)
-          persistTimer = setTimeout(() => {
-            targetRef.current.removeEventListener('blur', onBlur)
-            blurHandlerRef.current = null
-          }, persistDuration)
+        } else if (retryCount < retries) {
+          retryCount++
+          retryTimer = setTimeout(() => {
+            rafId = requestAnimationFrame(attemptFocus)
+          }, delay * retryCount)
         }
-      } else if (retryCount < retries) {
-        retryCount++
-        retryTimer = setTimeout(attemptFocus, delay * retryCount)
-      }
+      })
     }
 
     document.addEventListener('pointerdown', handlePointerDown, { once: true })
-    const initialTimer = setTimeout(attemptFocus, delay)
+    const initialTimer = setTimeout(() => {
+      rafId = requestAnimationFrame(attemptFocus)
+    }, delay)
 
     return () => {
       document.removeEventListener('pointerdown', handlePointerDown)
@@ -96,6 +105,7 @@ export function useAutoFocus<T extends HTMLElement>(
       clearTimeout(retryTimer)
       clearTimeout(persistTimer)
       clearTimeout(blurLossTimer)
+      cancelAnimationFrame(rafId)
       if (blurHandlerRef.current) {
         targetRef.current.removeEventListener('blur', blurHandlerRef.current)
         blurHandlerRef.current = null

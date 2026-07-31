@@ -191,10 +191,13 @@ export default function QueroConhecer() {
                         <FormLabel>Nome Completo</FormLabel>
                         <FormControl>
                           <Input
-                            ref={nameInputRef}
+                            {...field}
+                            ref={(el) => {
+                              nameInputRef.current = el
+                              field.ref(el)
+                            }}
                             placeholder="Seu nome"
                             aria-label="Nome Completo"
-                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
