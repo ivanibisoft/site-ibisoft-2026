@@ -16,6 +16,12 @@ import { SiteAssetsProvider } from '@/hooks/use-site-assets'
 import { AuthProvider } from '@/hooks/use-auth'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { EditorMiddleware } from './components/EditorMiddleware'
+import { ProtectedRoute } from '@/components/admin/ProtectedRoute'
+import { AdminLayout } from '@/components/admin/AdminLayout'
+import AdminLogin from '@/pages/admin/Login'
+import AdminDashboard from '@/pages/admin/Dashboard'
+import CollectionListPage from '@/pages/admin/CollectionListPage'
+import CollectionFormPage from '@/pages/admin/CollectionFormPage'
 
 const App = () => (
   <ErrorBoundary>
@@ -37,6 +43,16 @@ const App = () => (
                   <Route path="/sobre" element={<About />} />
                   <Route path="/cases" element={<Cases />} />
                   <Route path="/contato" element={<QueroConhecer />} />
+                </Route>
+
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin" element={<ProtectedRoute />}>
+                  <Route element={<AdminLayout />}>
+                    <Route index element={<AdminDashboard />} />
+                    <Route path=":collection" element={<CollectionListPage />} />
+                    <Route path=":collection/new" element={<CollectionFormPage />} />
+                    <Route path=":collection/:id/edit" element={<CollectionFormPage />} />
+                  </Route>
                 </Route>
 
                 <Route path="*" element={<NotFound />} />
