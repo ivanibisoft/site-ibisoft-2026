@@ -12,6 +12,7 @@ interface HeroProps {
 }
 
 const ROTATION_INTERVAL = 4000
+const RESUME_DELAY = 1000
 
 const MESSAGE_CLASS =
   'text-2xl md:text-3xl lg:text-4xl font-bold font-display leading-[1.2] text-white drop-shadow-lg'
@@ -24,11 +25,19 @@ export function Hero({ heroImageUrl }: HeroProps) {
   const [isPaused, setIsPaused] = useState(false)
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
       clearInterval(timerRef.current)
       timerRef.current = null
+    }
+  }, [])
+
+  const clearResumeTimer = useCallback(() => {
+    if (resumeTimerRef.current) {
+      clearTimeout(resumeTimerRef.current)
+      resumeTimerRef.current = null
     }
   }, [])
 
@@ -62,15 +71,27 @@ export function Hero({ heroImageUrl }: HeroProps) {
     return clearTimer
   }, [isPaused, clearTimer, messages.length])
 
-  useEffect(() => () => clearTimer(), [clearTimer])
+  useEffect(
+    () => () => {
+      clearTimer()
+      clearResumeTimer()
+    },
+    [clearTimer, clearResumeTimer],
+  )
 
   const showImage = heroImageUrl && !imageError
 
   return (
     <section
       className="relative w-full overflow-hidden min-h-[320px] md:min-h-[480px] lg:min-h-[600px]"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
+      onMouseEnter={() => {
+        clearResumeTimer()
+        setIsPaused(true)
+      }}
+      onMouseLeave={() => {
+        clearResumeTimer()
+        resumeTimerRef.current = setTimeout(() => setIsPaused(false), RESUME_DELAY)
+      }}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/80" />
 
