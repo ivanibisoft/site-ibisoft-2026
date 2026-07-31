@@ -159,6 +159,13 @@ export function Footer() {
               >
                 905539672
               </a>
+              {' | '}
+              <Link
+                to="/admin"
+                className="hover:text-primary transition-colors underline decoration-transparent hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+              >
+                Admin
+              </Link>
             </p>
           </div>
           <div className="flex items-center space-x-4 text-sm text-slate-500"></div>
