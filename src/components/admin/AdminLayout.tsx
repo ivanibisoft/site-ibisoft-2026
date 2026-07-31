@@ -1,10 +1,11 @@
-import { Outlet, Link, useLocation } from 'react-router-dom'
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { COLLECTIONS } from '@/config/admin-collections'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Menu, ExternalLink } from 'lucide-react'
+import { Menu, ExternalLink, LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/hooks/use-auth'
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const location = useLocation()
@@ -45,6 +46,13 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
 export function AdminLayout() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { signOut } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    signOut()
+    navigate('/')
+  }
 
   return (
     <div className="flex min-h-screen bg-muted/30">
@@ -80,12 +88,18 @@ export function AdminLayout() {
           </Sheet>
 
           <h1 className="font-semibold hidden md:block">Painel Administrativo</h1>
-          <Button variant="ghost" size="sm" asChild className="ml-auto">
-            <a href="/">
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Ver site
-            </a>
-          </Button>
+          <div className="ml-auto flex items-center gap-2">
+            <Button variant="ghost" size="sm" asChild>
+              <a href="/">
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Ver site
+              </a>
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleLogout}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Sair
+            </Button>
+          </div>
         </header>
 
         <main className="flex-1 p-4 md:p-6 overflow-auto">

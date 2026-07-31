@@ -25,11 +25,19 @@ import { getList, deleteRecord } from '@/services/admin'
 import { useRealtime } from '@/hooks/use-realtime'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 
-function formatValue(value: any, field: FieldConfig): string {
+function formatValue(value: any, field: FieldConfig, record?: any): string {
   if (value === null || value === undefined || value === '') return '-'
   if (field.type === 'bool') return value ? 'Sim' : 'Não'
   if (field.type === 'file') return value.split('/').pop() || 'Arquivo'
-  if (field.type === 'relation') return typeof value === 'string' ? value.substring(0, 8) : '-'
+  if (field.type === 'relation') {
+    const expanded = record?.expand?.[field.name]
+    if (expanded && field.relationLabel) {
+      return (
+        expanded[field.relationLabel] || (typeof value === 'string' ? value.substring(0, 8) : '-')
+      )
+    }
+    return typeof value === 'string' ? value.substring(0, 8) : '-'
+  }
   return String(value)
 }
 
@@ -41,15 +49,21 @@ export function AdminList({ collectionName }: { collectionName: string }) {
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
 
+  const expandFields =
+    config?.fields
+      .filter((f) => f.type === 'relation')
+      .map((f) => f.name)
+      .join(',') || undefined
+
   const loadData = useCallback(async () => {
     try {
-      setRecords(await getList(collectionName))
+      setRecords(await getList(collectionName, '-created', expandFields))
     } catch {
       toast.error('Erro ao carregar registros')
     } finally {
       setLoading(false)
     }
-  }, [collectionName])
+  }, [collectionName, expandFields])
 
   useEffect(() => {
     loadData()
@@ -114,7 +128,7 @@ export function AdminList({ collectionName }: { collectionName: string }) {
                 <TableRow key={r.id}>
                   {displayFields.map((f) => (
                     <TableCell key={f.name} className="max-w-[200px] truncate">
-                      {formatValue(r[f.name], f)}
+                      {formatValue(r[f.name], f, r)}
                     </TableCell>
                   ))}
                   <TableCell className="whitespace-nowrap text-sm text-muted-foreground">

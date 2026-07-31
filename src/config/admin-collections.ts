@@ -211,8 +211,8 @@ export const COLLECTIONS: CollectionConfig[] = [
   },
   {
     name: 'site_assets',
-    label: 'Assets do Site',
-    singularLabel: 'Asset',
+    label: 'Conteúdos do Site',
+    singularLabel: 'Conteúdo',
     icon: FileArchive,
     fields: [
       { name: 'name', label: 'Nome', type: 'text', required: true, listDisplay: true },

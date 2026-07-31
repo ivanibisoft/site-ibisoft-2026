@@ -1,7 +1,7 @@
 import pb from '@/lib/pocketbase/client'
 
-export const getList = (collection: string, sort = '-created') =>
-  pb.collection(collection).getFullList({ sort })
+export const getList = (collection: string, sort = '-created', expand?: string) =>
+  pb.collection(collection).getFullList({ sort, expand })
 
 export const getOne = (collection: string, id: string) => pb.collection(collection).getOne(id)
 
