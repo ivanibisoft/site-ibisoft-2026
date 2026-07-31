@@ -29,18 +29,6 @@ export const getActivePartnerLogos = async (): Promise<PartnerLogoWithExpand[]> 
   }
 }
 
-export const getAllPartnerLogos = async (): Promise<PartnerLogoWithExpand[]> => {
-  try {
-    return await pb.collection('partner_logos').getFullList<PartnerLogoWithExpand>({
-      sort: 'segment,order_number',
-      expand: 'segment',
-    })
-  } catch (error) {
-    console.error('Error fetching all partner logos:', error)
-    return []
-  }
-}
-
 export const getLogoUrl = (logo: PartnerLogo): string => {
   return `${pb.baseURL}/api/files/partner_logos/${logo.id}/${logo.logo}`
 }
