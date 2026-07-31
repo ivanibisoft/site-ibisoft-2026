@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
+import { useAutoFocus } from '@/hooks/use-auto-focus'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -43,23 +44,7 @@ export default function QueroConhecer() {
     },
   })
 
-  useEffect(() => {
-    if (!isSuccess && nameInputRef.current) {
-      const timer = setTimeout(() => {
-        const input = nameInputRef.current
-        if (!input) return
-        const rect = input.getBoundingClientRect()
-        const isVisible =
-          rect.top >= 0 &&
-          rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
-        if (!isVisible) {
-          input.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        }
-        input.focus()
-      }, 150)
-      return () => clearTimeout(timer)
-    }
-  }, [isSuccess])
+  useAutoFocus(nameInputRef, { enabled: !isSuccess, delay: 150, retries: 10 })
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true)
