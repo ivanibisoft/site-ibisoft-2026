@@ -21,7 +21,8 @@ export function useAutoFocus<T extends HTMLElement>(
   } = options
 
   const userInteractedRef = useRef(false)
-  const blurHandlerRef = useRef<(() => void) | null>(null)
+const blurHandlerRef = useRef<(() => void) | null>(null)
+const blurTargetRef = useRef<HTMLElement | null>(null)  const blurTargetRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     if (!enabled) return
@@ -79,10 +80,14 @@ export function useAutoFocus<T extends HTMLElement>(
               }, 50)
             }
             blurHandlerRef.current = onBlur
-            targetRef.current.addEventListener('blur', onBlur)
+            blurTargetRef.current = el
+            el.addEventListener('blur', onBlur)
             persistTimer = setTimeout(() => {
-              targetRef.current.removeEventListener('blur', onBlur)
+              if (blurTargetRef.current) {
+                blurTargetRef.current.removeEventListener('blur', onBlur)
+              }
               blurHandlerRef.current = null
+              blurTargetRef.current = null
             }, persistDuration)
           }
         } else if (retryCount < retries) {
@@ -106,10 +111,11 @@ export function useAutoFocus<T extends HTMLElement>(
       clearTimeout(persistTimer)
       clearTimeout(blurLossTimer)
       cancelAnimationFrame(rafId)
-      if (blurHandlerRef.current) {
-        targetRef.current.removeEventListener('blur', blurHandlerRef.current)
-        blurHandlerRef.current = null
+      if (blurHandlerRef.current && blurTargetRef.current) {
+        blurTargetRef.current.removeEventListener('blur', blurHandlerRef.current)
       }
+      blurHandlerRef.current = null
+      blurTargetRef.current = null
     }
   }, [enabled, delay, retries, persist, persistDuration, targetRef])
 }
