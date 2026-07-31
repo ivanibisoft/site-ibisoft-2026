@@ -34,6 +34,15 @@ export function ExitIntentModal() {
     return () => document.removeEventListener('mouseleave', handleMouseLeave)
   }, [])
 
+  useEffect(() => {
+    if (open) {
+      const timer = setTimeout(() => {
+        inputRef.current?.focus()
+      }, 150)
+      return () => clearTimeout(timer)
+    }
+  }, [open])
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
