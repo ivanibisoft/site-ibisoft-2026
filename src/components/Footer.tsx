@@ -161,15 +161,7 @@ export function Footer() {
               </a>
             </p>
           </div>
-          <div className="flex items-center space-x-4 text-sm text-slate-500">
-            <Link to="/privacidade" className="hover:text-primary transition-colors">
-              Política de Privacidade
-            </Link>
-            <span>&bull;</span>
-            <Link to="/termos" className="hover:text-primary transition-colors">
-              Termos de Uso
-            </Link>
-          </div>
+          <div className="flex items-center space-x-4 text-sm text-slate-500"></div>
         </div>
       </div>
     </footer>
