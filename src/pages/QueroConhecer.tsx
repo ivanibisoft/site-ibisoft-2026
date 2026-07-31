@@ -44,10 +44,19 @@ export default function QueroConhecer() {
   })
 
   useEffect(() => {
-    if (!isSuccess) {
+    if (!isSuccess && nameInputRef.current) {
       const timer = setTimeout(() => {
-        nameInputRef.current?.focus()
-      }, 100)
+        const input = nameInputRef.current
+        if (!input) return
+        const rect = input.getBoundingClientRect()
+        const isVisible =
+          rect.top >= 0 &&
+          rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
+        if (!isVisible) {
+          input.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+        input.focus()
+      }, 150)
       return () => clearTimeout(timer)
     }
   }, [isSuccess])
@@ -196,7 +205,12 @@ export default function QueroConhecer() {
                       <FormItem>
                         <FormLabel>Nome Completo</FormLabel>
                         <FormControl>
-                          <Input ref={nameInputRef} placeholder="Seu nome" {...field} />
+                          <Input
+                            ref={nameInputRef}
+                            placeholder="Seu nome"
+                            aria-label="Nome Completo"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

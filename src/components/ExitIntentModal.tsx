@@ -37,8 +37,17 @@ export function ExitIntentModal() {
   useEffect(() => {
     if (open) {
       const timer = setTimeout(() => {
-        inputRef.current?.focus()
-      }, 150)
+        const input = inputRef.current
+        if (!input) return
+        const rect = input.getBoundingClientRect()
+        const isVisible =
+          rect.top >= 0 &&
+          rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
+        if (!isVisible) {
+          input.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+        input.focus()
+      }, 200)
       return () => clearTimeout(timer)
     }
   }, [open])
@@ -69,6 +78,7 @@ export function ExitIntentModal() {
             ref={inputRef}
             placeholder="Seu melhor e-mail corporativo"
             className="h-12"
+            aria-label="E-mail corporativo"
             autoFocus
           />
           <Button size="lg" className="w-full font-semibold" onClick={() => setOpen(false)}>
