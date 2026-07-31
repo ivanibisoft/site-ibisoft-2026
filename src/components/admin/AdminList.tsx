@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import {
   Table,
   TableHeader,
@@ -21,7 +22,7 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
 import { COLLECTIONS, type FieldConfig } from '@/config/admin-collections'
-import { getList, deleteRecord } from '@/services/admin'
+import { getList, deleteRecord, updateRecord } from '@/services/admin'
 import { useRealtime } from '@/hooks/use-realtime'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 
@@ -54,16 +55,17 @@ export function AdminList({ collectionName }: { collectionName: string }) {
       .filter((f) => f.type === 'relation')
       .map((f) => f.name)
       .join(',') || undefined
+  const sortBy = config?.defaultSort || '-created'
 
   const loadData = useCallback(async () => {
     try {
-      setRecords(await getList(collectionName, '-created', expandFields))
+      setRecords(await getList(collectionName, sortBy, expandFields))
     } catch {
       toast.error('Erro ao carregar registros')
     } finally {
       setLoading(false)
     }
-  }, [collectionName, expandFields])
+  }, [collectionName, expandFields, sortBy])
 
   useEffect(() => {
     loadData()
@@ -71,6 +73,15 @@ export function AdminList({ collectionName }: { collectionName: string }) {
   useRealtime(collectionName, () => {
     loadData()
   })
+
+  const handleToggle = async (id: string, field: string, value: boolean) => {
+    try {
+      await updateRecord(collectionName, id, { [field]: !value })
+      setRecords((prev) => prev.map((r) => (r.id === id ? { ...r, [field]: !value } : r)))
+    } catch {
+      toast.error('Erro ao atualizar registro')
+    }
+  }
 
   const handleDelete = async () => {
     if (!deleteId) return
@@ -128,7 +139,14 @@ export function AdminList({ collectionName }: { collectionName: string }) {
                 <TableRow key={r.id}>
                   {displayFields.map((f) => (
                     <TableCell key={f.name} className="max-w-[200px] truncate">
-                      {formatValue(r[f.name], f, r)}
+                      {f.type === 'bool' && f.name === 'is_active' ? (
+                        <Switch
+                          checked={!!r[f.name]}
+                          onCheckedChange={() => handleToggle(r.id, f.name, r[f.name])}
+                        />
+                      ) : (
+                        formatValue(r[f.name], f, r)
+                      )}
                     </TableCell>
                   ))}
                   <TableCell className="whitespace-nowrap text-sm text-muted-foreground">

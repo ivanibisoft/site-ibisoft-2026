@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-31T21:35:18.356Z",
+  "generatedAt": "2026-07-31T22:04:43.303Z",
   "collections": [
     {
       "name": "users",
@@ -749,6 +749,55 @@
       "indexes": [
         "CREATE INDEX idx_testimonials_order ON testimonials (`order`)",
         "CREATE INDEX idx_testimonials_is_active ON testimonials (is_active)"
+      ]
+    },
+    {
+      "name": "hero_messages",
+      "type": "base",
+      "apiRules": {
+        "list": "",
+        "view": "",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "order",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "is_active",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_hero_messages_order ON hero_messages (`order`)",
+        "CREATE INDEX idx_hero_messages_is_active ON hero_messages (is_active)"
       ]
     }
   ]

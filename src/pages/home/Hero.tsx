@@ -2,39 +2,26 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { getActiveHeroMessages, type HeroMessage } from '@/services/hero-messages'
+import { useRealtime } from '@/hooks/use-realtime'
 
 interface HeroProps {
-  heroTitle: string
-  heroSubtitle: string
+  heroTitle?: string
+  heroSubtitle?: string
   heroImageUrl: string | null
 }
 
 const ROTATION_INTERVAL = 4000
 
-export function Hero({ heroTitle, heroSubtitle, heroImageUrl }: HeroProps) {
+const MESSAGE_CLASS =
+  'text-2xl md:text-3xl lg:text-4xl font-bold font-display leading-[1.2] text-white drop-shadow-lg'
+
+export function Hero({ heroImageUrl }: HeroProps) {
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
+  const [messages, setMessages] = useState<HeroMessage[]>([])
   const [activePhrase, setActivePhrase] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
-
-  const phrases = [
-    {
-      text: heroTitle,
-      className:
-        'text-3xl md:text-4xl lg:text-5xl font-bold font-display leading-[1.1] text-white drop-shadow-lg',
-      as: 'h1' as const,
-    },
-    {
-      text: heroSubtitle,
-      className: 'text-xl md:text-2xl text-white/90 font-medium leading-relaxed drop-shadow-md',
-      as: 'p' as const,
-    },
-    {
-      text: 'Mais do que um sistema de ERP, oferecemos vantagem competitiva.',
-      className: 'text-lg text-white/70 leading-relaxed max-w-xl drop-shadow-md',
-      as: 'p' as const,
-    },
-  ]
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -45,29 +32,39 @@ export function Hero({ heroTitle, heroSubtitle, heroImageUrl }: HeroProps) {
     }
   }, [])
 
+  const loadMessages = useCallback(async () => {
+    const data = await getActiveHeroMessages()
+    setMessages(data)
+    setActivePhrase((prev) => (prev >= data.length ? 0 : prev))
+  }, [])
+
+  useEffect(() => {
+    loadMessages()
+  }, [loadMessages])
+
+  useRealtime('hero_messages', () => {
+    loadMessages()
+  })
+
   useEffect(() => {
     setImageLoaded(false)
     setImageError(false)
   }, [heroImageUrl])
 
   useEffect(() => {
-    if (isPaused) {
+    if (isPaused || messages.length <= 1) {
       clearTimer()
       return
     }
     timerRef.current = setInterval(() => {
-      setActivePhrase((prev) => (prev + 1) % phrases.length)
+      setActivePhrase((prev) => (prev + 1) % messages.length)
     }, ROTATION_INTERVAL)
     return clearTimer
-  }, [isPaused, clearTimer, phrases.length])
+  }, [isPaused, clearTimer, messages.length])
 
   useEffect(() => () => clearTimer(), [clearTimer])
 
   const showImage = heroImageUrl && !imageError
-
-  const handleDotClick = (index: number) => {
-    setActivePhrase(index)
-  }
 
   return (
     <section
@@ -90,48 +87,49 @@ export function Hero({ heroTitle, heroSubtitle, heroImageUrl }: HeroProps) {
       )}
 
       <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30" />
-
       <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent" />
-
       <div className="absolute inset-0 hero-grid-pattern opacity-10" />
 
-      <div className="relative z-10 container mx-auto flex h-full min-h-[200px] items-center px-4 md:px-6">
-        <div className="max-w-2xl w-full py-10 md:py-16 animate-fade-in-up">
-          <div className="relative min-h-[180px] md:min-h-[200px] lg:min-h-[220px]">
-            {phrases.map((phrase, index) => {
+      <div className="relative z-10 container mx-auto flex h-full min-h-[320px] md:min-h-[480px] lg:min-h-[600px] items-end pb-10 md:pb-16 px-4 md:px-6">
+        <div className="max-w-2xl w-full animate-fade-in-up">
+          <div className="relative min-h-[100px] md:min-h-[120px] lg:min-h-[140px]">
+            {messages.map((msg, index) => {
               const isActive = index === activePhrase
-              const Tag = phrase.as
               return (
-                <Tag
-                  key={index}
+                <p
+                  key={msg.id}
                   className={cn(
                     'absolute inset-0 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]',
-                    phrase.className,
+                    MESSAGE_CLASS,
                     isActive
                       ? 'opacity-100 translate-y-0'
                       : 'opacity-0 translate-y-4 pointer-events-none',
                   )}
                   aria-hidden={!isActive}
                 >
-                  {phrase.text}
-                </Tag>
+                  {msg.text}
+                </p>
               )
             })}
           </div>
 
-          <div className="flex items-center gap-2 py-6">
-            {phrases.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => handleDotClick(index)}
-                aria-label={`Frase ${index + 1}`}
-                className={cn(
-                  'h-2 rounded-full transition-all duration-300',
-                  index === activePhrase ? 'w-8 bg-accent' : 'w-2 bg-white/40 hover:bg-white/60',
-                )}
-              />
-            ))}
-          </div>
+          {messages.length > 1 && (
+            <div className="flex items-center gap-2 py-6">
+              {messages.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActivePhrase(index)}
+                  aria-label={`Mensagem ${index + 1}`}
+                  className={cn(
+                    'h-2 rounded-full transition-all duration-300',
+                    index === activePhrase ? 'w-8 bg-accent' : 'w-2 bg-white/40 hover:bg-white/60',
+                  )}
+                />
+              ))}
+            </div>
+          )}
+
+          {messages.length <= 1 && <div className="py-6" />}
 
           <div className="flex flex-col sm:flex-row gap-4 pt-2">
             <Button

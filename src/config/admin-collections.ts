@@ -12,6 +12,7 @@ import {
   Image,
   FileArchive,
   MessageSquareQuote,
+  MessageSquare,
 } from 'lucide-react'
 
 export type FieldType =
@@ -41,6 +42,7 @@ export interface CollectionConfig {
   singularLabel: string
   icon: LucideIcon
   fields: FieldConfig[]
+  defaultSort?: string
 }
 
 export const COLLECTIONS: CollectionConfig[] = [
@@ -220,6 +222,18 @@ export const COLLECTIONS: CollectionConfig[] = [
       { name: 'asset_file', label: 'Arquivo', type: 'file' },
       { name: 'alt_text', label: 'Texto Alternativo', type: 'text' },
       { name: 'mime_type', label: 'MIME Type', type: 'text', listDisplay: true },
+    ],
+  },
+  {
+    name: 'hero_messages',
+    label: 'Mensagens do Hero',
+    singularLabel: 'Mensagem',
+    icon: MessageSquare,
+    defaultSort: 'order',
+    fields: [
+      { name: 'text', label: 'Texto', type: 'text', required: true, listDisplay: true },
+      { name: 'order', label: 'Ordem', type: 'number', listDisplay: true },
+      { name: 'is_active', label: 'Ativo', type: 'bool', listDisplay: true },
     ],
   },
   {
