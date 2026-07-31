@@ -21,8 +21,8 @@ export function useAutoFocus<T extends HTMLElement>(
   } = options
 
   const userInteractedRef = useRef(false)
-const blurHandlerRef = useRef<(() => void) | null>(null)
-const blurTargetRef = useRef<HTMLElement | null>(null)  const blurTargetRef = useRef<HTMLElement | null>(null)
+  const blurHandlerRef = useRef<(() => void) | null>(null)
+  const blurTargetRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     if (!enabled) return
