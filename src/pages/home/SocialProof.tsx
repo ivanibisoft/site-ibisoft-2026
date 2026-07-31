@@ -71,9 +71,11 @@ export function SocialProof() {
                                 Math.abs(
                                   testimonial.name.charCodeAt(0) -
                                     testimonial.name.charCodeAt(testimonial.name.length - 1),
-                                ) % 2 === 0
+                                ) %
+                                  2 ===
+                                0
                                   ? 'male'
-                                  : 'female',
+                                  : 'female'
                               }&seed=${testimonial.id.slice(0, 6)}`}
                               alt={testimonial.name}
                             />
