@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useEffect, useState, useCallback } from 'react'
 import { Megaphone } from 'lucide-react'
 import Autoplay from 'embla-carousel-autoplay'
 import {
@@ -10,48 +10,27 @@ import {
 } from '@/components/ui/carousel'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-
-const TESTIMONIALS = [
-  {
-    name: 'Carlos Eduardo',
-    company: 'Atacadão Central',
-    text: 'O ERP transformou a maneira como gerenciamos nosso estoque. Reduzimos perdas em 30% já nos primeiros três meses e a visibilidade operacional melhorou drasticamente.',
-    image: 'https://img.usecurling.com/ppl/medium?gender=male&seed=1',
-  },
-  {
-    name: 'Mariana Silva',
-    company: 'TechSolutions',
-    text: 'A integração financeira e fiscal nos poupou incontáveis horas de trabalho manual. A equipe de suporte da ibisoft é excepcional e sempre nos ajuda prontamente.',
-    image: 'https://img.usecurling.com/ppl/medium?gender=female&seed=2',
-  },
-  {
-    name: 'Roberto Mendes',
-    company: 'Indústria Alpha',
-    text: 'Escalabilidade era nosso maior desafio. Com este sistema, conseguimos dobrar nossa produção sem perder o controle dos custos e mantendo a qualidade.',
-    image: 'https://img.usecurling.com/ppl/medium?gender=male&seed=3',
-  },
-  {
-    name: 'Ana Luiza',
-    company: 'Global Import Export',
-    text: 'A visão completa do negócio que o dashboard oferece mudou nossa forma de tomar decisões estratégicas. O fluxo de caixa nunca foi tão previsível e seguro.',
-    image: 'https://img.usecurling.com/ppl/medium?gender=female&seed=4',
-  },
-  {
-    name: 'Fernando Costa',
-    company: 'AgroGenética Pecuária',
-    text: 'Controlar a rastreabilidade nunca foi tão simples. O sistema atende perfeitamente às especificidades do nosso setor com um nível de detalhes incrível.',
-    image: 'https://img.usecurling.com/ppl/medium?gender=male&seed=5',
-  },
-  {
-    name: 'Juliana Martins',
-    company: 'Serviços Express',
-    text: 'Automatizar a emissão de notas fiscais e boletos foi um divisor de águas. Não imagino nossa rotina sem o sistema hoje, ganhamos muita agilidade no faturamento.',
-    image: 'https://img.usecurling.com/ppl/medium?gender=female&seed=6',
-  },
-]
+import { getActiveTestimonials, type Testimonial } from '@/services/testimonials'
+import { useRealtime } from '@/hooks/use-realtime'
 
 export function SocialProof() {
   const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: true }))
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([])
+
+  const loadTestimonials = useCallback(async () => {
+    const data = await getActiveTestimonials()
+    setTestimonials(data)
+  }, [])
+
+  useEffect(() => {
+    loadTestimonials()
+  }, [loadTestimonials])
+
+  useRealtime('testimonials', () => {
+    loadTestimonials()
+  })
+
+  if (testimonials.length === 0) return null
 
   return (
     <section className="py-24 bg-muted/20 text-center">
@@ -75,19 +54,29 @@ export function SocialProof() {
             onMouseLeave={plugin.current.reset}
           >
             <CarouselContent className="-ml-4 py-4">
-              {TESTIMONIALS.map((testimonial, index) => (
-                <CarouselItem key={index} className="pl-4 md:basis-1/2 lg:basis-1/3">
+              {testimonials.map((testimonial) => (
+                <CarouselItem key={testimonial.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
                   <div className="h-full">
                     <Card className="h-full bg-background border-border/60 shadow-sm hover:shadow-md hover:border-accent/30 transition-all duration-300">
                       <CardContent className="p-8 flex flex-col h-full text-left">
                         <div className="mb-8 flex-grow">
                           <p className="text-foreground/80 leading-relaxed text-[15px]">
-                            "{testimonial.text}"
+                            "{testimonial.content}"
                           </p>
                         </div>
                         <div className="flex items-center gap-4 pt-6 border-t border-border/50 mt-auto">
                           <Avatar className="h-12 w-12 border border-border/50">
-                            <AvatarImage src={testimonial.image} alt={testimonial.name} />
+                            <AvatarImage
+                              src={`https://img.usecurling.com/ppl/medium?gender=${
+                                Math.abs(
+                                  testimonial.name.charCodeAt(0) -
+                                    testimonial.name.charCodeAt(testimonial.name.length - 1),
+                                ) % 2 === 0
+                                  ? 'male'
+                                  : 'female',
+                              }&seed=${testimonial.id.slice(0, 6)}`}
+                              alt={testimonial.name}
+                            />
                             <AvatarFallback className="bg-primary/5 text-primary font-medium">
                               {testimonial.name.slice(0, 2)}
                             </AvatarFallback>
@@ -96,9 +85,11 @@ export function SocialProof() {
                             <p className="text-sm font-semibold text-foreground">
                               {testimonial.name}
                             </p>
-                            <p className="text-xs text-muted-foreground font-medium mt-0.5">
-                              {testimonial.company}
-                            </p>
+                            {testimonial.role && (
+                              <p className="text-xs text-muted-foreground font-medium mt-0.5">
+                                {testimonial.role}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </CardContent>

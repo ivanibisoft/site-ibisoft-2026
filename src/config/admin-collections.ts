@@ -11,6 +11,7 @@ import {
   Home,
   Image,
   FileArchive,
+  MessageSquareQuote,
 } from 'lucide-react'
 
 export type FieldType =
@@ -219,6 +220,19 @@ export const COLLECTIONS: CollectionConfig[] = [
       { name: 'asset_file', label: 'Arquivo', type: 'file' },
       { name: 'alt_text', label: 'Texto Alternativo', type: 'text' },
       { name: 'mime_type', label: 'MIME Type', type: 'text', listDisplay: true },
+    ],
+  },
+  {
+    name: 'testimonials',
+    label: 'Comentários',
+    singularLabel: 'Comentário',
+    icon: MessageSquareQuote,
+    fields: [
+      { name: 'name', label: 'Nome do cliente', type: 'text', required: true, listDisplay: true },
+      { name: 'role', label: 'Cargo / Empresa', type: 'text', listDisplay: true },
+      { name: 'content', label: 'Comentário', type: 'textarea', required: true, listDisplay: true },
+      { name: 'order', label: 'Ordem de exibição', type: 'number', listDisplay: true },
+      { name: 'is_active', label: 'Ativo', type: 'bool', listDisplay: true },
     ],
   },
 ]
