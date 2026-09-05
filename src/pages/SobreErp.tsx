@@ -159,49 +159,67 @@ export default function SobreErp() {
                   post.published_at ||
                   (post.created ? new Date(post.created).toLocaleDateString('pt-BR') : '')
 
+                const cardContent = (
+                  <Card className="h-full overflow-hidden group flex flex-col hover:shadow-md hover:border-primary/40 transition-all">
+                    <div className="relative h-48 overflow-hidden bg-muted">
+                      <img
+                        src={imageUrl}
+                        alt={post.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      {post.category && (
+                        <div className="absolute top-4 left-4">
+                          <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-primary text-xs font-bold rounded-full">
+                            {post.category}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <CardHeader>
+                      <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
+                        {post.title}
+                      </CardTitle>
+                      {post.summary && (
+                        <p className="text-sm text-muted-foreground line-clamp-3 mt-2">
+                          {post.summary}
+                        </p>
+                      )}
+                    </CardHeader>
+                    <CardContent className="mt-auto flex items-center justify-between text-xs text-muted-foreground pt-4 border-t">
+                      {formattedDate ? (
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5" /> {formattedDate}
+                        </div>
+                      ) : (
+                        <span />
+                      )}
+                      {post.read_time && (
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5" /> {post.read_time}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )
+
+                // Se tem slug definido, navega para a página individual do artigo
+                if (post.slug && post.slug.trim()) {
+                  return (
+                    <Link
+                      key={post.id}
+                      to={`/blog/${encodeURIComponent(post.slug.trim())}`}
+                      className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
+                    >
+                      {cardContent}
+                    </Link>
+                  )
+                }
+
+                // Fallback para modal se não tiver slug
                 return (
                   <Dialog key={post.id}>
                     <DialogTrigger asChild>
-                      <Card className="overflow-hidden group flex flex-col cursor-pointer hover:shadow-md hover:border-primary/30 transition-all">
-                        <div className="relative h-48 overflow-hidden bg-muted">
-                          <img
-                            src={imageUrl}
-                            alt={post.title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                          {post.category && (
-                            <div className="absolute top-4 left-4">
-                              <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-primary text-xs font-bold rounded-full">
-                                {post.category}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        <CardHeader>
-                          <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
-                            {post.title}
-                          </CardTitle>
-                          {post.summary && (
-                            <p className="text-sm text-muted-foreground line-clamp-3 mt-2">
-                              {post.summary}
-                            </p>
-                          )}
-                        </CardHeader>
-                        <CardContent className="mt-auto flex items-center justify-between text-xs text-muted-foreground pt-4 border-t">
-                          {formattedDate ? (
-                            <div className="flex items-center gap-1.5">
-                              <Calendar className="h-3.5 w-3.5" /> {formattedDate}
-                            </div>
-                          ) : (
-                            <span />
-                          )}
-                          {post.read_time && (
-                            <div className="flex items-center gap-1.5">
-                              <Clock className="h-3.5 w-3.5" /> {post.read_time}
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
+                      <div className="cursor-pointer">{cardContent}</div>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[700px] max-h-[85vh] overflow-y-auto">
                       <DialogHeader>

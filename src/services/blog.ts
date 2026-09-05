@@ -40,6 +40,32 @@ export const countActiveBlogPosts = async (): Promise<number> => {
   }
 }
 
+export const getBlogPostBySlug = async (slug: string): Promise<BlogPost | null> => {
+  try {
+    const post = await pb
+      .collection('posts')
+      .getFirstListItem<BlogPost>(`slug = "${slug.replace(/"/g, '\\"')}" && is_active = true`)
+    return post
+  } catch (error) {
+    // If not found or inactive
+    return null
+  }
+}
+
+export const getRecentBlogPosts = async (excludeId?: string, limit = 3): Promise<BlogPost[]> => {
+  try {
+    const filter = excludeId ? `is_active = true && id != "${excludeId}"` : 'is_active = true'
+    const result = await pb.collection('posts').getList<BlogPost>(1, limit, {
+      filter,
+      sort: '-created',
+    })
+    return result.items
+  } catch (error) {
+    console.error('Error fetching recent blog posts:', error)
+    return []
+  }
+}
+
 export const getBlogPostImageUrl = (post: BlogPost): string | null => {
   if (!post.image) return null
   return `${pb.baseURL}/api/files/${post.collectionId || 'posts'}/${post.id}/${post.image}`
