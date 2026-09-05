@@ -4,9 +4,11 @@ import ibisoftLogo from '@/assets/botao_ibisoft_2_sem_fundo-74482.png'
 import dunsPdf from '@/assets/ibisoft-tecnologia-duns-number-905539672-3e6be.pdf'
 import { SEGMENTS, WHATSAPP_URL } from '@/lib/constants'
 import { useSiteAssets } from '@/hooks/use-site-assets'
+import { useHasBlogPosts } from '@/hooks/use-has-blog-posts'
 
 export function Footer() {
   const { getAssetUrl } = useSiteAssets()
+  const { hasBlogPosts } = useHasBlogPosts()
   const logoUrl = getAssetUrl('logo-principal') || ibisoftLogo
   const dunsUrl = getAssetUrl('certificado-duns') || dunsPdf
   return (
@@ -71,6 +73,13 @@ export function Footer() {
                   Cases de Sucesso
                 </Link>
               </li>
+              {hasBlogPosts && (
+                <li>
+                  <Link to="/blog" className="text-sm hover:text-primary transition-colors">
+                    Blog
+                  </Link>
+                </li>
+              )}
               <li>
                 <Link to="/contato" className="text-sm hover:text-primary transition-colors">
                   Contato

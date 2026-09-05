@@ -19,11 +19,13 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { getSegments, type Segment } from '@/services/segments'
 import { getModules, type Module } from '@/services/modules'
 import useRealtime from '@/hooks/use-realtime'
+import { useHasBlogPosts } from '@/hooks/use-has-blog-posts'
 import { WHATSAPP_URL } from '@/lib/constants'
 import * as Icons from 'lucide-react'
 
 export function MobileNav() {
   const location = useLocation()
+  const { hasBlogPosts } = useHasBlogPosts()
   const [isOpen, setIsOpen] = useState(false)
   const [segments, setSegments] = useState<Segment[]>([])
   const [modules, setModules] = useState<Module[]>([])
@@ -180,6 +182,16 @@ export function MobileNav() {
             >
               Sobre ERP
             </Link>
+
+            {hasBlogPosts && (
+              <Link
+                to="/blog"
+                onClick={handleLinkClick}
+                className="text-lg font-medium hover:text-primary transition-colors py-2"
+              >
+                Blog
+              </Link>
+            )}
 
             <Link
               to="/contato"

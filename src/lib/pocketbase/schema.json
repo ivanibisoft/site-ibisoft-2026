@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-31T22:37:15.584Z",
+  "generatedAt": "2026-09-05T22:26:04.072Z",
   "collections": [
     {
       "name": "users",
@@ -798,6 +798,91 @@
       "indexes": [
         "CREATE INDEX idx_hero_messages_order ON hero_messages (`order`)",
         "CREATE INDEX idx_hero_messages_is_active ON hero_messages (is_active)"
+      ]
+    },
+    {
+      "name": "posts",
+      "type": "base",
+      "apiRules": {
+        "list": "",
+        "view": "",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "title",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "slug",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "summary",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "content",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "category",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "image",
+          "type": "file",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "read_time",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "published_at",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "is_active",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX idx_posts_slug ON posts (slug)",
+        "CREATE INDEX idx_posts_is_active ON posts (is_active)"
       ]
     }
   ]

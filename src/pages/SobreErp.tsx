@@ -111,8 +111,10 @@ export default function SobreErp() {
               </div>
               <h2 className="text-3xl font-bold">Últimas sobre Gestão e Tecnologia</h2>
             </div>
-            <Button variant="outline" className="hidden md:flex">
-              Ver todos os artigos <ArrowRight className="ml-2 h-4 w-4" />
+            <Button variant="outline" className="hidden md:flex" asChild>
+              <Link to="/blog">
+                Ver todos os artigos <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
             </Button>
           </div>
 
@@ -147,8 +149,10 @@ export default function SobreErp() {
               </Card>
             ))}
           </div>
-          <Button variant="outline" className="w-full mt-8 md:hidden">
-            Ver todos os artigos <ArrowRight className="ml-2 h-4 w-4" />
+          <Button variant="outline" className="w-full mt-8 md:hidden" asChild>
+            <Link to="/blog">
+              Ver todos os artigos <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </Button>
         </div>
       </section>

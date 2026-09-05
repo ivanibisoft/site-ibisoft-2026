@@ -13,6 +13,7 @@ import {
   FileArchive,
   MessageSquareQuote,
   MessageSquare,
+  Newspaper,
 } from 'lucide-react'
 
 export type FieldType =
@@ -246,6 +247,23 @@ export const COLLECTIONS: CollectionConfig[] = [
       { name: 'role', label: 'Cargo / Empresa', type: 'text', listDisplay: true },
       { name: 'content', label: 'Comentário', type: 'textarea', required: true, listDisplay: true },
       { name: 'order', label: 'Ordem de exibição', type: 'number', listDisplay: true },
+      { name: 'is_active', label: 'Ativo', type: 'bool', listDisplay: true },
+    ],
+  },
+  {
+    name: 'posts',
+    label: 'Blog / Notícias',
+    singularLabel: 'Publicação',
+    icon: Newspaper,
+    fields: [
+      { name: 'title', label: 'Título', type: 'text', required: true, listDisplay: true },
+      { name: 'slug', label: 'Slug', type: 'text', required: true },
+      { name: 'summary', label: 'Resumo', type: 'textarea' },
+      { name: 'content', label: 'Conteúdo', type: 'textarea' },
+      { name: 'category', label: 'Categoria', type: 'text', listDisplay: true },
+      { name: 'image', label: 'Imagem', type: 'file' },
+      { name: 'read_time', label: 'Tempo de leitura', type: 'text' },
+      { name: 'published_at', label: 'Data de publicação', type: 'text', listDisplay: true },
       { name: 'is_active', label: 'Ativo', type: 'bool', listDisplay: true },
     ],
   },

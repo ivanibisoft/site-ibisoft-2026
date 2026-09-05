@@ -14,12 +14,14 @@ import {
 import { getSegments, type Segment } from '@/services/segments'
 import { getModules, type Module } from '@/services/modules'
 import useRealtime from '@/hooks/use-realtime'
+import { useHasBlogPosts } from '@/hooks/use-has-blog-posts'
 import * as Icons from 'lucide-react'
 
 export function Navigation() {
   const location = useLocation()
   const [segments, setSegments] = useState<Segment[]>([])
   const [modules, setModules] = useState<Module[]>([])
+  const { hasBlogPosts } = useHasBlogPosts()
 
   const loadData = async () => {
     try {
@@ -113,6 +115,20 @@ export function Navigation() {
             <Link to="/sobre-erp">Sobre ERP</Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
+
+        {hasBlogPosts && (
+          <NavigationMenuItem>
+            <NavigationMenuLink
+              asChild
+              className={cn(
+                navigationMenuTriggerStyle(),
+                location.pathname.startsWith('/blog') && 'text-accent bg-accent/10',
+              )}
+            >
+              <Link to="/blog">Blog</Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+        )}
 
         <NavigationMenuItem>
           <NavigationMenuTrigger
