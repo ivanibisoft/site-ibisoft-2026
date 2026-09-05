@@ -13,6 +13,7 @@ export interface BlogPost {
   is_active: boolean
   created: string
   updated: string
+  collectionId?: string
 }
 
 export const getActiveBlogPosts = async (): Promise<BlogPost[]> => {
