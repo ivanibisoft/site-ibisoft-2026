@@ -11,7 +11,7 @@ interface HeroProps {
   heroImageUrl: string | null
 }
 
-const ROTATION_INTERVAL = 4000
+const ROTATION_INTERVAL = 5000
 const RESUME_DELAY = 1000
 
 const MESSAGE_CLASS =
