@@ -75,30 +75,3 @@ export const FUNNEL_STAGES = [
     ],
   },
 ]
-
-export const BLOG_POSTS = [
-  {
-    id: 1,
-    title: '5 tendências de gestão para o setor atacadista em 2024',
-    category: 'Gestão',
-    date: '12 Mar 2024',
-    readTime: '4 min',
-    image: 'https://img.usecurling.com/p/600/400?q=warehouse&color=blue',
-  },
-  {
-    id: 2,
-    title: 'Como a Inteligência Artificial está transformando o ERP',
-    category: 'Tecnologia',
-    date: '08 Mar 2024',
-    readTime: '6 min',
-    image: 'https://img.usecurling.com/p/600/400?q=artificial%20intelligence&color=blue',
-  },
-  {
-    id: 3,
-    title: 'LGPD: Seu sistema de gestão está realmente preparado?',
-    category: 'Segurança',
-    date: '28 Fev 2024',
-    readTime: '5 min',
-    image: 'https://img.usecurling.com/p/600/400?q=cyber%20security&color=blue',
-  },
-]
