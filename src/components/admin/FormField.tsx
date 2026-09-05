@@ -44,13 +44,19 @@ export function FormField({
         )
       case 'bool':
         return <Switch checked={!!value} onCheckedChange={onChange} />
-      case 'select':
+      case 'select': {
+        const hasCurrentValueInOptions = !value || field.options?.includes(value)
         return (
           <Select value={value || ''} onValueChange={onChange}>
             <SelectTrigger>
               <SelectValue placeholder="Selecione..." />
             </SelectTrigger>
             <SelectContent>
+              {!hasCurrentValueInOptions && value && (
+                <SelectItem key={value} value={value}>
+                  {value} (atual)
+                </SelectItem>
+              )}
               {field.options?.map((opt) => (
                 <SelectItem key={opt} value={opt}>
                   {opt}
@@ -59,6 +65,7 @@ export function FormField({
             </SelectContent>
           </Select>
         )
+      }
       case 'file':
         return (
           <div className="space-y-2">
