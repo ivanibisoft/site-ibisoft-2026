@@ -49,6 +49,7 @@ export function AdminList({ collectionName }: { collectionName: string }) {
   const [loading, setLoading] = useState(true)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [blockingWarning, setBlockingWarning] = useState<string | null>(null)
 
   const expandFields =
     config?.fields
@@ -83,8 +84,38 @@ export function AdminList({ collectionName }: { collectionName: string }) {
     }
   }
 
+  const initiateDelete = async (id: string) => {
+    // Se for categoria de post, verificar se há posts usando essa categoria
+    if (collectionName === 'post_categories') {
+      const recordToDelete = records.find((r) => r.id === id)
+      if (recordToDelete && recordToDelete.name) {
+        try {
+          const { countPostsByCategoryName } = await import('@/services/post-categories')
+          const postsCount = await countPostsByCategoryName(recordToDelete.name)
+          if (postsCount > 0) {
+            setBlockingWarning(
+              `A categoria "${recordToDelete.name}" está associada a ${postsCount} publicação(ões) no Blog. Para manter a integridade dos artigos, altere a categoria dos posts antes de excluí-la.`,
+            )
+            setDeleteId(id)
+            return
+          }
+        } catch (err) {
+          console.error('Erro ao verificar posts da categoria:', err)
+        }
+      }
+    }
+    setBlockingWarning(null)
+    setDeleteId(id)
+  }
+
   const handleDelete = async () => {
     if (!deleteId) return
+    if (blockingWarning) {
+      // Se há bloqueio, não prosseguir
+      setDeleteId(null)
+      setBlockingWarning(null)
+      return
+    }
     setDeleting(true)
     try {
       await deleteRecord(collectionName, deleteId)
@@ -95,6 +126,7 @@ export function AdminList({ collectionName }: { collectionName: string }) {
     } finally {
       setDeleting(false)
       setDeleteId(null)
+      setBlockingWarning(null)
     }
   }
 
@@ -160,7 +192,7 @@ export function AdminList({ collectionName }: { collectionName: string }) {
                     >
                       <Pencil className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => setDeleteId(r.id)}>
+                    <Button variant="ghost" size="icon" onClick={() => initiateDelete(r.id)}>
                       <Trash2 className="w-4 h-4 text-red-500" />
                     </Button>
                   </TableCell>
@@ -171,23 +203,52 @@ export function AdminList({ collectionName }: { collectionName: string }) {
         </Table>
       </div>
 
-      <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
+      <AlertDialog
+        open={!!deleteId}
+        onOpenChange={(o) => {
+          if (!o) {
+            setDeleteId(null)
+            setBlockingWarning(null)
+          }
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogTitle>
+              {blockingWarning ? 'Não é possível excluir' : 'Confirmar exclusão'}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. O registro será permanentemente excluído.
+              {blockingWarning ? (
+                <span className="text-amber-700 dark:text-amber-400 font-medium block">
+                  {blockingWarning}
+                </span>
+              ) : (
+                'Esta ação não pode ser desfeita. O registro será permanentemente excluído.'
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              disabled={deleting}
-              className="bg-red-500 hover:bg-red-600"
-            >
-              {deleting ? 'Excluindo...' : 'Excluir'}
-            </AlertDialogAction>
+            {blockingWarning ? (
+              <AlertDialogAction
+                onClick={() => {
+                  setDeleteId(null)
+                  setBlockingWarning(null)
+                }}
+              >
+                Entendi
+              </AlertDialogAction>
+            ) : (
+              <>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="bg-red-500 hover:bg-red-600"
+                >
+                  {deleting ? 'Excluindo...' : 'Excluir'}
+                </AlertDialogAction>
+              </>
+            )}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

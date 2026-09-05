@@ -1,18 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import {
-  Calendar,
-  Clock,
-  ArrowLeft,
-  ArrowRight,
-  Copy,
-  Check,
-  ChevronRight,
-  Home,
-  BookOpen,
-  Linkedin,
-  MessageCircle,
-} from 'lucide-react'
+import { Calendar, Clock, ArrowLeft, ArrowRight, ChevronRight, Home, BookOpen } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -23,16 +11,14 @@ import {
   getRecentBlogPosts,
   type BlogPost,
 } from '@/services/blog'
+import { BlogPostShareButtons } from '@/components/blog/BlogPostShareButtons'
 import useRealtime from '@/hooks/use-realtime'
-import { useToast } from '@/hooks/use-toast'
 
 export default function BlogPostPage() {
   const { slug } = useParams<{ slug: string }>()
   const [post, setPost] = useState<BlogPost | null>(null)
   const [recentPosts, setRecentPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
-  const [copied, setCopied] = useState(false)
-  const { toast } = useToast()
 
   const loadPost = useCallback(async () => {
     if (!slug) return
@@ -92,51 +78,6 @@ export default function BlogPostPage() {
       }
     }
   }, [post, loading])
-
-  const handleCopyLink = async () => {
-    const shareUrl = window.location.href
-    try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(shareUrl)
-      } else {
-        const textArea = document.createElement('textarea')
-        textArea.value = shareUrl
-        document.body.appendChild(textArea)
-        textArea.select()
-        document.execCommand('copy')
-        document.body.removeChild(textArea)
-      }
-      setCopied(true)
-      toast({
-        title: 'Link copiado!',
-        description: 'O link do artigo foi copiado para sua área de transferência.',
-      })
-      setTimeout(() => setCopied(false), 2500)
-    } catch (err) {
-      console.error('Failed to copy URL:', err)
-      toast({
-        title: 'Não foi possível copiar',
-        description: 'Selecione e copie o endereço na barra do navegador.',
-        variant: 'destructive',
-      })
-    }
-  }
-
-  const handleShareWhatsApp = () => {
-    const shareUrl = window.location.href
-    const title = post?.title ? `${post.title} | Blog ibisoft` : 'Blog ibisoft'
-    const text = encodeURIComponent(`Confira este artigo: "${title}"\n${shareUrl}`)
-    window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer')
-  }
-
-  const handleShareLinkedIn = () => {
-    const shareUrl = encodeURIComponent(window.location.href)
-    window.open(
-      `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`,
-      '_blank',
-      'noopener,noreferrer',
-    )
-  }
 
   // Loading state
   if (loading) {
@@ -247,47 +188,7 @@ export default function BlogPostPage() {
               <span className="text-xs text-muted-foreground mr-1 hidden md:inline">
                 Compartilhar:
               </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleShareWhatsApp}
-                className="rounded-full gap-1.5 text-xs h-8 px-3 text-[#25D366] hover:text-[#20bd5c] hover:bg-[#25D366]/10 border-[#25D366]/30 hover:border-[#25D366]"
-                title="Compartilhar no WhatsApp"
-              >
-                <MessageCircle className="h-3.5 w-3.5 shrink-0 fill-current" />
-                <span>WhatsApp</span>
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleShareLinkedIn}
-                className="rounded-full gap-1.5 text-xs h-8 px-3 text-[#0A66C2] hover:text-[#084e96] hover:bg-[#0A66C2]/10 border-[#0A66C2]/30 hover:border-[#0A66C2]"
-                title="Compartilhar no LinkedIn"
-              >
-                <Linkedin className="h-3.5 w-3.5 shrink-0 fill-current" />
-                <span>LinkedIn</span>
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCopyLink}
-                className="rounded-full gap-1.5 text-xs h-8 px-3"
-                title="Copiar link do artigo"
-              >
-                {copied ? (
-                  <>
-                    <Check className="h-3.5 w-3.5 text-green-600" />
-                    <span className="text-green-600 font-medium">Copiado</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-3.5 w-3.5" />
-                    <span>Copiar link</span>
-                  </>
-                )}
-              </Button>
+              <BlogPostShareButtons title={post.title} slug={post.slug} />
             </div>
           </div>
 
@@ -357,47 +258,7 @@ export default function BlogPostPage() {
             {/* Direct Share Buttons (Bottom) */}
             <div className="flex items-center flex-wrap gap-2">
               <span className="text-xs text-muted-foreground mr-1">Compartilhar:</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleShareWhatsApp}
-                className="gap-1.5 text-xs rounded-full px-3 text-[#25D366] hover:text-[#20bd5c] hover:bg-[#25D366]/10 border-[#25D366]/30 hover:border-[#25D366]"
-                title="Compartilhar no WhatsApp"
-              >
-                <MessageCircle className="h-4 w-4 shrink-0 fill-current" />
-                <span>WhatsApp</span>
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleShareLinkedIn}
-                className="gap-1.5 text-xs rounded-full px-3 text-[#0A66C2] hover:text-[#084e96] hover:bg-[#0A66C2]/10 border-[#0A66C2]/30 hover:border-[#0A66C2]"
-                title="Compartilhar no LinkedIn"
-              >
-                <Linkedin className="h-4 w-4 shrink-0 fill-current" />
-                <span>LinkedIn</span>
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCopyLink}
-                className="gap-1.5 text-xs rounded-full px-3"
-                title="Copiar link do artigo"
-              >
-                {copied ? (
-                  <>
-                    <Check className="h-4 w-4 text-green-600" />
-                    <span className="text-green-600">Link copiado!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-4 w-4" />
-                    <span>Copiar link</span>
-                  </>
-                )}
-              </Button>
+              <BlogPostShareButtons title={post.title} slug={post.slug} />
             </div>
           </div>
         </div>

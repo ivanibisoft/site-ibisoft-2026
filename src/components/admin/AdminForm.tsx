@@ -19,6 +19,7 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
   const [formData, setFormData] = useState<Record<string, any>>({})
   const [files, setFiles] = useState<Record<string, File | null>>({})
   const [relationData, setRelationData] = useState<Record<string, any[]>>({})
+  const [dynamicOptionsData, setDynamicOptionsData] = useState<Record<string, string[]>>({})
   const [errors, setErrors] = useState<FieldErrors>({})
   const [loading, setLoading] = useState(!!recordId)
   const [saving, setSaving] = useState(false)
@@ -42,6 +43,23 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
       getList(f.relationCollection!)
         .then((d) => setRelationData((p) => ({ ...p, [f.name]: d })))
         .catch(() => {})
+    })
+
+    const dynamicSelectFields =
+      config?.fields.filter((f) => f.type === 'select' && f.optionsSourceCollection) || []
+    dynamicSelectFields.forEach((f) => {
+      const sourceCol = f.optionsSourceCollection!
+      const sourceField = f.optionsSourceField || 'name'
+      getList(sourceCol, 'order,name')
+        .then((list) => {
+          const options = list
+            .map((item: any) => item[sourceField])
+            .filter((val: any) => typeof val === 'string' && val.trim().length > 0)
+          setDynamicOptionsData((p) => ({ ...p, [f.name]: options }))
+        })
+        .catch((err) => {
+          console.error(`Erro ao carregar opções dinâmicas para ${f.name}:`, err)
+        })
     })
   }, [config])
 
@@ -111,6 +129,7 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
             onChange={(v) => handleChange(field.name, v)}
             onFileChange={(f) => handleFileChange(field.name, f)}
             relationOptions={relationData[field.name]}
+            dynamicOptions={dynamicOptionsData[field.name]}
             error={errors[field.name]}
             fileUrl={
               recordId && formData[field.name]

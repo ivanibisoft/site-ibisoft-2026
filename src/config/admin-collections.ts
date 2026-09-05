@@ -14,6 +14,7 @@ import {
   MessageSquareQuote,
   MessageSquare,
   Newspaper,
+  Tags,
 } from 'lucide-react'
 
 export type FieldType =
@@ -32,6 +33,9 @@ export interface FieldConfig {
   type: FieldType
   required?: boolean
   options?: string[]
+  optionsSourceCollection?: string
+  optionsSourceField?: string
+  optionsSourceFilter?: string
   relationCollection?: string
   relationLabel?: string
   listDisplay?: boolean
@@ -251,6 +255,18 @@ export const COLLECTIONS: CollectionConfig[] = [
     ],
   },
   {
+    name: 'post_categories',
+    label: 'Categorias do Blog',
+    singularLabel: 'Categoria',
+    icon: Tags,
+    defaultSort: 'order',
+    fields: [
+      { name: 'name', label: 'Nome da Categoria', type: 'text', required: true, listDisplay: true },
+      { name: 'order', label: 'Ordem', type: 'number', listDisplay: true },
+      { name: 'is_active', label: 'Ativo', type: 'bool', listDisplay: true },
+    ],
+  },
+  {
     name: 'posts',
     label: 'Blog / Notícias',
     singularLabel: 'Publicação',
@@ -264,6 +280,8 @@ export const COLLECTIONS: CollectionConfig[] = [
         name: 'category',
         label: 'Categoria',
         type: 'select',
+        optionsSourceCollection: 'post_categories',
+        optionsSourceField: 'name',
         options: [
           'Atacadista e Distribuidora',
           'Comércio Exterior',

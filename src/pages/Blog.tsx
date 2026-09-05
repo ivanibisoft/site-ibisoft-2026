@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { getActiveBlogPosts, getBlogPostImageUrl, type BlogPost } from '@/services/blog'
+import { BlogPostShareButtons } from '@/components/blog/BlogPostShareButtons'
 import useRealtime from '@/hooks/use-realtime'
 
 export default function Blog() {
@@ -204,17 +205,25 @@ export default function Blog() {
                             </p>
                           )}
                         </CardHeader>
-                        <CardContent className="mt-auto flex items-center justify-between text-xs text-muted-foreground pt-4 border-t">
-                          <div className="flex items-center gap-1.5">
-                            <Calendar className="h-3.5 w-3.5" />
-                            {post.published_at ||
-                              new Date(post.created).toLocaleDateString('pt-BR')}
-                          </div>
-                          {post.read_time && (
+                        <CardContent className="mt-auto flex flex-col gap-3 pt-4 border-t text-xs text-muted-foreground">
+                          <div className="flex items-center justify-between">
                             <div className="flex items-center gap-1.5">
-                              <Clock className="h-3.5 w-3.5" /> {post.read_time}
+                              <Calendar className="h-3.5 w-3.5" />
+                              {post.published_at ||
+                                new Date(post.created).toLocaleDateString('pt-BR')}
                             </div>
-                          )}
+                            {post.read_time && (
+                              <div className="flex items-center gap-1.5">
+                                <Clock className="h-3.5 w-3.5" /> {post.read_time}
+                              </div>
+                            )}
+                          </div>
+                          <div className="pt-2 border-t border-border/40 flex items-center justify-between">
+                            <span className="text-[11px] text-muted-foreground font-medium">
+                              Compartilhar:
+                            </span>
+                            <BlogPostShareButtons title={post.title} slug={post.slug} compact />
+                          </div>
                         </CardContent>
                       </Card>
                     )

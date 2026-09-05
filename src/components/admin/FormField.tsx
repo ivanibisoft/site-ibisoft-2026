@@ -17,6 +17,7 @@ interface FormFieldProps {
   onChange: (value: any) => void
   onFileChange?: (file: File | null) => void
   relationOptions?: any[]
+  dynamicOptions?: string[]
   error?: string
   fileUrl?: string | null
 }
@@ -27,6 +28,7 @@ export function FormField({
   onChange,
   onFileChange,
   relationOptions,
+  dynamicOptions,
   error,
   fileUrl,
 }: FormFieldProps) {
@@ -45,7 +47,9 @@ export function FormField({
       case 'bool':
         return <Switch checked={!!value} onCheckedChange={onChange} />
       case 'select': {
-        const hasCurrentValueInOptions = !value || field.options?.includes(value)
+        const availableOptions =
+          dynamicOptions && dynamicOptions.length > 0 ? dynamicOptions : field.options || []
+        const hasCurrentValueInOptions = !value || availableOptions.includes(value)
         return (
           <Select value={value || ''} onValueChange={onChange}>
             <SelectTrigger>
@@ -54,10 +58,10 @@ export function FormField({
             <SelectContent>
               {!hasCurrentValueInOptions && value && (
                 <SelectItem key={value} value={value}>
-                  {value} (atual)
+                  {value} (atual - não catalogada)
                 </SelectItem>
               )}
-              {field.options?.map((opt) => (
+              {availableOptions.map((opt) => (
                 <SelectItem key={opt} value={opt}>
                   {opt}
                 </SelectItem>
