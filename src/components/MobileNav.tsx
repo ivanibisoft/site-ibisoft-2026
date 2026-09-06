@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Menu, MessageCircle } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { CtaButton } from '@/components/CtaButton'
 import {
@@ -143,7 +144,20 @@ export function MobileNav() {
                   </div>
                 </AccordionContent>
               </AccordionItem>
+            </Accordion>
 
+            <Link
+              to="/cases"
+              onClick={handleLinkClick}
+              className={cn(
+                'text-lg font-medium transition-colors py-2',
+                location.pathname === '/cases' ? 'text-accent font-semibold' : 'hover:text-primary',
+              )}
+            >
+              Cases
+            </Link>
+
+            <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="sobre" className="border-b-0">
                 <AccordionTrigger className="text-lg font-medium py-2 hover:no-underline hover:text-primary">
                   Sobre Nós
@@ -179,7 +193,12 @@ export function MobileNav() {
             <Link
               to="/sobre-erp"
               onClick={handleLinkClick}
-              className="text-lg font-medium hover:text-primary transition-colors py-2"
+              className={cn(
+                'text-lg font-medium transition-colors py-2',
+                location.pathname === '/sobre-erp'
+                  ? 'text-accent font-semibold'
+                  : 'hover:text-primary',
+              )}
             >
               Sobre ERP
             </Link>
@@ -188,7 +207,12 @@ export function MobileNav() {
               <Link
                 to="/blog"
                 onClick={handleLinkClick}
-                className="text-lg font-medium hover:text-primary transition-colors py-2"
+                className={cn(
+                  'text-lg font-medium transition-colors py-2',
+                  location.pathname.startsWith('/blog')
+                    ? 'text-accent font-semibold'
+                    : 'hover:text-primary',
+                )}
               >
                 Blog
               </Link>
@@ -197,7 +221,12 @@ export function MobileNav() {
             <Link
               to="/contato"
               onClick={handleLinkClick}
-              className="text-lg font-medium hover:text-primary transition-colors py-2"
+              className={cn(
+                'text-lg font-medium transition-colors py-2',
+                location.pathname === '/contato'
+                  ? 'text-accent font-semibold'
+                  : 'hover:text-primary',
+              )}
             >
               Contato
             </Link>

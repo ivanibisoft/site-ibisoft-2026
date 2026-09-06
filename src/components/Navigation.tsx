@@ -109,6 +109,18 @@ export function Navigation() {
             asChild
             className={cn(
               navigationMenuTriggerStyle(),
+              location.pathname === '/cases' && 'text-accent bg-accent/10',
+            )}
+          >
+            <Link to="/cases">Cases</Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+
+        <NavigationMenuItem>
+          <NavigationMenuLink
+            asChild
+            className={cn(
+              navigationMenuTriggerStyle(),
               location.pathname === '/sobre-erp' && 'text-accent bg-accent/10',
             )}
           >
