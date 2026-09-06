@@ -8,10 +8,6 @@ import {
   CheckCircle2,
   AlertCircle,
   FileText,
-  UserCheck,
-  Calendar,
-  MapPin,
-  ShieldCheck,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -149,10 +145,10 @@ export default function Cnpj() {
                       href={cnpjPdfUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      aria-label="Abrir cartão CNPJ em PDF em nova aba"
+                      aria-label="Abrir PDF em nova aba"
                     >
                       <ExternalLink className="h-4 w-4" />
-                      Consultar cartão CNPJ
+                      Abrir em nova aba
                     </a>
                   </Button>
                 </>
