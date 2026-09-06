@@ -22,7 +22,9 @@ export default function About() {
   useEffect(() => {
     getTeamMembers()
       .then((members) => {
-        const ceoMember = members.find((m) => m.role === 'CEO')
+        const ceoMember = members.find(
+          (m) => m.role === 'CEO' || m.role === 'Fundador e CEO' || m.order === 1,
+        )
         if (ceoMember) setCeo(ceoMember)
       })
       .catch(console.error)
@@ -205,7 +207,7 @@ export default function About() {
               <div className="md:col-span-3 space-y-6">
                 <div>
                   <h3 className="text-2xl font-bold font-display">{ceo.name}</h3>
-                  <p className="text-accent font-medium">{ceo.role}</p>
+                  <p className="text-accent font-medium">Fundador e CEO</p>
                 </div>
                 <p className="text-lg text-muted-foreground leading-relaxed italic border-l-4 border-accent pl-4">
                   "Acreditamos que a tecnologia não deve ser um obstáculo, mas sim a ponte para o
