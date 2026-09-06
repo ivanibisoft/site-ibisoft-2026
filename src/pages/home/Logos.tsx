@@ -254,43 +254,46 @@ export function Logos() {
                 scheduleAutoplayResume()
               }}
             >
-              <CarouselContent className="flex items-center py-6 -ml-16 md:-ml-24 lg:-ml-32">
+              <CarouselContent className="flex items-center py-8 -ml-8 sm:-ml-10 md:-ml-12 lg:-ml-16">
                 {items.map((item, index) => {
                   const isActive = index === activeIndex
 
                   return (
                     <CarouselItem
                       key={item.id}
-                      className="pl-16 md:pl-24 lg:pl-32 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 shrink-0"
+                      className="pl-8 sm:pl-10 md:pl-12 lg:pl-16 basis-2/3 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 shrink-0"
                     >
-                      <div
-                        className={cn(
-                          'flex items-center justify-center p-4 sm:p-6 md:p-8 rounded-2xl group cursor-pointer select-none',
-                          prefersReducedMotion
-                            ? 'transition-none'
-                            : 'transition-all duration-500 ease-out',
-                          isActive
-                            ? 'scale-[1.18] z-20'
-                            : 'scale-95 sm:scale-100 z-10 hover:opacity-80',
-                        )}
-                        onClick={() => {
-                          api?.scrollTo(index)
-                          scheduleAutoplayResume()
-                        }}
-                      >
-                        <img
-                          src={item.url}
-                          alt={`Logo ${item.name}`}
+                      {/* Container com padding de segurança para absorver scale-[1.18] sem transbordar nos vizinhos */}
+                      <div className="w-full flex items-center justify-center px-4 sm:px-5 md:px-6 py-2">
+                        <div
                           className={cn(
-                            'h-16 md:h-20 lg:h-24 w-auto object-contain max-w-[180px] md:max-w-[220px] animate-fade-in',
+                            'w-full max-w-[240px] md:max-w-[260px] flex items-center justify-center p-3 sm:p-4 rounded-2xl group cursor-pointer select-none origin-center',
                             prefersReducedMotion
                               ? 'transition-none'
                               : 'transition-all duration-500 ease-out',
                             isActive
-                              ? 'opacity-100 grayscale-0 drop-shadow-md'
-                              : 'opacity-50 grayscale group-hover:opacity-80 group-hover:grayscale-0',
+                              ? 'scale-[1.18] z-20'
+                              : 'scale-95 sm:scale-100 z-10 hover:opacity-80',
                           )}
-                        />
+                          onClick={() => {
+                            api?.scrollTo(index)
+                            scheduleAutoplayResume()
+                          }}
+                        >
+                          <img
+                            src={item.url}
+                            alt={`Logo ${item.name}`}
+                            className={cn(
+                              'h-14 sm:h-16 md:h-20 lg:h-20 w-auto max-w-full object-contain animate-fade-in',
+                              prefersReducedMotion
+                                ? 'transition-none'
+                                : 'transition-all duration-500 ease-out',
+                              isActive
+                                ? 'opacity-100 grayscale-0 drop-shadow-md'
+                                : 'opacity-50 grayscale group-hover:opacity-80 group-hover:grayscale-0',
+                            )}
+                          />
+                        </div>
                       </div>
                     </CarouselItem>
                   )
