@@ -1,20 +1,27 @@
 import { useState } from 'react'
-import { Download, FileCheck, ExternalLink, ShieldCheck, ArrowLeft, RefreshCw } from 'lucide-react'
+import {
+  Download,
+  FileCheck,
+  ExternalLink,
+  ShieldCheck,
+  ArrowLeft,
+  FileQuestion,
+  Loader2,
+} from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import dunsPdf from '@/assets/ibisoft-tecnologia-duns-number-905539672-3e6be.pdf'
 import { useSiteAssets } from '@/hooks/use-site-assets'
 
 export default function Duns() {
-  const { getAssetUrl } = useSiteAssets()
+  const { getAssetUrl, loading: assetsLoading } = useSiteAssets()
   const [isDownloading, setIsDownloading] = useState(false)
-  const [useFallbackLocal, setUseFallbackLocal] = useState(false)
 
-  // PDF local embutido como fonte prioritária garantida, com fallback ou opção de asset remoto se disponível
-  const remoteDunsUrl = getAssetUrl('certificado-duns')
-  const pdfSource = useFallbackLocal && remoteDunsUrl ? remoteDunsUrl : dunsPdf
+  // Asset do PDF: exclusivamente o arquivo registrado no Admin (site_assets)
+  const pdfSource = getAssetUrl('certificado-duns')
+  const isAvailable = Boolean(pdfSource)
 
   const handleDownload = async () => {
+    if (!pdfSource) return
     setIsDownloading(true)
     const fileName = 'ibisoft-tecnologia-duns-number-905539672.pdf'
 
@@ -91,25 +98,32 @@ export default function Duns() {
             <div className="flex flex-wrap items-center gap-3 shrink-0">
               <Button
                 onClick={handleDownload}
-                disabled={isDownloading}
+                disabled={!isAvailable || isDownloading}
                 className="gap-2 shadow-sm"
                 size="lg"
               >
                 <Download className="h-4 w-4" />
-                {isDownloading ? 'Baixando...' : 'Baixar PDF'}
+                {isDownloading ? 'Baixando...' : isAvailable ? 'Baixar PDF' : 'Disponível em breve'}
               </Button>
 
-              <Button variant="outline" size="lg" asChild className="gap-2">
-                <a
-                  href={pdfSource}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Abrir PDF em nova aba"
-                >
+              {isAvailable ? (
+                <Button variant="outline" size="lg" asChild className="gap-2">
+                  <a
+                    href={pdfSource}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Abrir PDF em nova aba"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Abrir em nova aba
+                  </a>
+                </Button>
+              ) : (
+                <Button variant="outline" size="lg" disabled className="gap-2">
                   <ExternalLink className="h-4 w-4" />
                   Abrir em nova aba
-                </a>
-              </Button>
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -120,51 +134,58 @@ export default function Duns() {
             <span className="inline-flex items-center gap-1.5 font-medium">
               <FileCheck className="h-4 w-4 text-primary" /> Visualização do Documento Oficial
             </span>
-            {remoteDunsUrl && (
-              <button
-                type="button"
-                onClick={() => setUseFallbackLocal((prev) => !prev)}
-                className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
-                title={
-                  useFallbackLocal
-                    ? 'Alternar para o PDF local embutido'
-                    : 'Alternar para a versão remota'
-                }
-              >
-                <RefreshCw className="h-3 w-3" />
-                {useFallbackLocal ? 'Usar PDF local embutido' : 'Ver versão remota'}
-              </button>
-            )}
           </div>
 
-          <div className="relative w-full bg-slate-200/50 min-h-[600px] md:min-h-[820px] flex items-stretch">
-            <iframe
-              src={`${pdfSource}#toolbar=1&navpanes=0`}
-              title="Certificado DUNS Registered - ibisoft Tecnologia"
-              className="w-full h-[600px] md:h-[820px] border-0"
-            />
-          </div>
+          {assetsLoading ? (
+            <div className="min-h-[500px] flex flex-col items-center justify-center p-8 text-center text-slate-500 bg-slate-50">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
+              <p className="text-sm font-medium">Carregando documento oficial...</p>
+            </div>
+          ) : isAvailable && pdfSource ? (
+            <>
+              <div className="relative w-full bg-slate-200/50 min-h-[600px] md:min-h-[820px] flex items-stretch">
+                <iframe
+                  src={`${pdfSource}#toolbar=1&navpanes=0`}
+                  title="Certificado DUNS Registered - ibisoft Tecnologia"
+                  className="w-full h-[600px] md:h-[820px] border-0"
+                />
+              </div>
 
-          <div className="p-4 bg-slate-50 border-t border-slate-200 text-center text-xs text-slate-500">
-            Não conseguiu visualizar o certificado?{' '}
-            <button
-              type="button"
-              onClick={handleDownload}
-              className="text-primary hover:underline font-medium focus:outline-none"
-            >
-              Clique aqui para baixar o PDF diretamente
-            </button>
-            {' ou '}
-            <a
-              href={pdfSource}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline font-medium"
-            >
-              abra em uma nova aba
-            </a>
-            .
-          </div>
+              <div className="p-4 bg-slate-50 border-t border-slate-200 text-center text-xs text-slate-500">
+                Não conseguiu visualizar o certificado?{' '}
+                <button
+                  type="button"
+                  onClick={handleDownload}
+                  className="text-primary hover:underline font-medium focus:outline-none"
+                >
+                  Clique aqui para baixar o PDF diretamente
+                </button>
+                {' ou '}
+                <a
+                  href={pdfSource}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline font-medium"
+                >
+                  abra em uma nova aba
+                </a>
+                .
+              </div>
+            </>
+          ) : (
+            <div className="min-h-[420px] flex flex-col items-center justify-center p-8 text-center bg-slate-50">
+              <div className="w-14 h-14 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mb-4">
+                <FileQuestion className="h-7 w-7" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-1">
+                Certificado DUNS disponível em breve
+              </h3>
+              <p className="text-sm text-slate-600 max-w-md">
+                O arquivo PDF oficial do Certificado DUNS Registered está sendo atualizado no painel
+                administrativo e estará disponível para visualização e download em instantes.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
