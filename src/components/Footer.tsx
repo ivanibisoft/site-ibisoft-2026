@@ -204,12 +204,14 @@ export function Footer() {
             </Tooltip>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-slate-500 pt-2 border-t border-slate-100">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap items-center sm:justify-start gap-1 sm:gap-2 text-sm text-slate-500 pt-2 border-t border-slate-100">
             <p className="text-center sm:text-left">
               © {new Date().getFullYear()} ibisoft Tecnologia da Informação. Todos os direitos
               reservados.
             </p>
-
+            <span className="hidden sm:inline text-slate-400" aria-hidden="true">
+              -
+            </span>
             <Link
               to="/admin"
               className="hover:text-primary transition-colors underline decoration-transparent hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm text-slate-400 hover:text-slate-600 text-xs px-1"
