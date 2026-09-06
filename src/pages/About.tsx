@@ -59,7 +59,7 @@ export default function About() {
 
       {/* Nossa História */}
       <section id="historia" className="py-24 scroll-mt-20">
-        <div className="container grid md:grid-cols-2 gap-12 items-center">
+        <div className="container grid md:grid-cols-2 gap-12 items-start">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary font-medium text-sm mb-6">
               <Building2 className="h-4 w-4" /> Nossa História
@@ -80,15 +80,25 @@ export default function About() {
               até ferramentas específicas, desenhadas para atender às particularidades de cada
               modelo de negócio.
             </p>
-            <p className="text-muted-foreground text-lg leading-relaxed mb-6">
+            <p className="text-muted-foreground text-lg leading-relaxed">
               Nossa missão é clara: democratizar o acesso à tecnologia de ponta. Acreditamos que
               pequenas e médias empresas dos setores de comércio, indústria e serviços merecem
               decidir com base em dados precisos e em tempo real. Na ibisoft, não entregamos apenas
               software; entregamos o diferencial competitivo necessário para impulsionar a
               eficiência e o crescimento sustentável dos nossos clientes.
             </p>
+          </div>
 
-            {/* Bloco de credibilidade: DUNS Registered e Cartão CNPJ */}
+          <div className="flex flex-col gap-6">
+            <div className="rounded-2xl overflow-hidden shadow-2xl">
+              <img
+                src={historyImageUrl}
+                alt="Nossa História"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Bloco de credibilidade: DUNS Registered e Cartão CNPJ posicionados ao lado do texto, abaixo da imagem */}
             <div className="space-y-3">
               <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-3">
@@ -117,13 +127,6 @@ export default function About() {
               {/* Card Cartão CNPJ */}
               <CnpjLink variant="card" />
             </div>
-          </div>
-          <div className="rounded-2xl overflow-hidden shadow-2xl">
-            <img
-              src={historyImageUrl}
-              alt="Nossa História"
-              className="w-full h-full object-cover"
-            />
           </div>
         </div>
       </section>
