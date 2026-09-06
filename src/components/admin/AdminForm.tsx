@@ -107,14 +107,35 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
     try {
       const hasFiles = Object.values(files).some((f) => f !== null)
       let data: any = { ...formData }
+
+      // Se for criação em coleção reordenável e não há ordem definida, definir como última
+      if (
+        !recordId &&
+        config.reorderable &&
+        config.orderField &&
+        data[config.orderField] === undefined
+      ) {
+        try {
+          const existing = await getList(collectionName, `-${config.orderField}`)
+          const maxOrder =
+            existing.length > 0 && typeof existing[0][config.orderField] === 'number'
+              ? existing[0][config.orderField]
+              : existing.length
+          data[config.orderField] = maxOrder + 1
+        } catch {
+          data[config.orderField] = 1
+        }
+      }
+
       if (hasFiles) {
-        data = new FormData()
-        for (const [k, v] of Object.entries(formData)) {
-          if (v !== null && v !== undefined) data.append(k, String(v))
+        const formDataPayload = new FormData()
+        for (const [k, v] of Object.entries(data)) {
+          if (v !== null && v !== undefined) formDataPayload.append(k, String(v))
         }
         for (const [k, f] of Object.entries(files)) {
-          if (f) data.append(k, f)
+          if (f) formDataPayload.append(k, f)
         }
+        data = formDataPayload
       }
       if (recordId) {
         await updateRecord(collectionName, recordId, data)

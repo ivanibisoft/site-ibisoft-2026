@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T14:29:39.563Z",
+  "generatedAt": "2026-09-06T14:48:40.039Z",
   "collections": [
     {
       "name": "users",
@@ -80,9 +80,15 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "sort_order",
+          "type": "number",
+          "required": false,
+          "system": false
         }
       ],
-      "indexes": []
+      "indexes": ["CREATE INDEX `idx_cases_sort_order` ON `cases` (`sort_order`)"]
     },
     {
       "name": "team_members",

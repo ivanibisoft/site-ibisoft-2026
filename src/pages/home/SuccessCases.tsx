@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, useCallback } from 'react'
 import { Trophy } from 'lucide-react'
 import Autoplay from 'embla-carousel-autoplay'
 import {
@@ -10,14 +10,21 @@ import {
 } from '@/components/ui/carousel'
 import { Card, CardContent } from '@/components/ui/card'
 import { getCases, getCaseImageUrl, type CaseItem } from '@/services/cases'
+import { useRealtime } from '@/hooks/use-realtime'
 
 export function SuccessCases() {
   const plugin = useRef(Autoplay({ delay: 6000, stopOnInteraction: true }))
   const [cases, setCases] = useState<CaseItem[]>([])
 
-  useEffect(() => {
+  const fetchCases = useCallback(() => {
     getCases().then(setCases).catch(console.error)
   }, [])
+
+  useEffect(() => {
+    fetchCases()
+  }, [fetchCases])
+
+  useRealtime('cases', fetchCases)
 
   if (cases.length === 0) return null
 

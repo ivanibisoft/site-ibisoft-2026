@@ -4,14 +4,16 @@ export interface CaseItem {
   id: string
   image?: string
   description?: string
+  sort_order?: number
   created?: string
   updated?: string
 }
 
 export const getCases = async (): Promise<CaseItem[]> => {
   try {
+    // Ordena primariamente por sort_order (ascendente) e secundariamente por -created como fallback
     return await pb.collection('cases').getFullList({
-      sort: '-created',
+      sort: '+sort_order,-created',
     })
   } catch (error) {
     console.error('Error fetching cases:', error)

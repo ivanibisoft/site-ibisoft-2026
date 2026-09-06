@@ -53,6 +53,8 @@ export interface CollectionConfig {
   icon: LucideIcon
   fields: FieldConfig[]
   defaultSort?: string
+  reorderable?: boolean
+  orderField?: string
 }
 
 export const COLLECTIONS: CollectionConfig[] = [
@@ -61,6 +63,9 @@ export const COLLECTIONS: CollectionConfig[] = [
     label: 'Cases',
     singularLabel: 'Case',
     icon: Briefcase,
+    defaultSort: 'sort_order',
+    reorderable: true,
+    orderField: 'sort_order',
     fields: [
       { name: 'image', label: 'Imagem', type: 'file', required: true, listDisplay: true },
       { name: 'description', label: 'Texto', type: 'textarea', required: true, listDisplay: true },

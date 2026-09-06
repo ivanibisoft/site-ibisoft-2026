@@ -1,15 +1,17 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { Trophy, ArrowRight, Building2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { getCases, getCaseImageUrl, type CaseItem } from '@/services/cases'
+import { useRealtime } from '@/hooks/use-realtime'
 
 export default function Cases() {
   const [cases, setCases] = useState<CaseItem[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  const fetchCases = useCallback((showLoading = false) => {
+    if (showLoading) setLoading(true)
     getCases()
       .then((data) => {
         setCases(data)
@@ -18,9 +20,15 @@ export default function Cases() {
         console.error('Erro ao buscar cases:', err)
       })
       .finally(() => {
-        setLoading(false)
+        if (showLoading) setLoading(false)
       })
   }, [])
+
+  useEffect(() => {
+    fetchCases(true)
+  }, [fetchCases])
+
+  useRealtime('cases', () => fetchCases(false))
 
   return (
     <div className="animate-fade-in">
