@@ -11,6 +11,9 @@ import { useSiteAssets } from '@/hooks/use-site-assets'
 
 export default function About() {
   const location = useLocation()
+  const DEFAULT_CEO_BIO =
+    'À frente da ibisoft desde 1985, Ivan une sólida formação técnica à visão empreendedora. É tecnólogo em Processamento de Dados pela UFPR (1989), com pós-graduação em Administração de Empresas pela FAE (2000), e concluiu o programa Empretec do SEBRAE/ONU (2005). Essa combinação de tecnologia e gestão orienta a forma como a ibisoft desenvolve soluções: engenharia rigorosa com foco no resultado do negócio do cliente.'
+
   const [ceo, setCeo] = useState<any>(null)
   const { getAssetUrl } = useSiteAssets()
   const ceoPhotoUrl = getAssetUrl('foto-ceo')
@@ -218,7 +221,9 @@ export default function About() {
                   mas uma verdadeira vantagem competitiva estruturada para nossos parceiros."
                 </p>
                 <div className="pt-4">
-                  <p className="text-muted-foreground whitespace-pre-line">{ceo.bio}</p>
+                  <p className="text-muted-foreground whitespace-pre-line">
+                    {ceo.bio || DEFAULT_CEO_BIO}
+                  </p>
                 </div>
               </div>
             </div>
