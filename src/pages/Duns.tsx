@@ -10,9 +10,9 @@ export default function Duns() {
   const [isDownloading, setIsDownloading] = useState(false)
   const [useFallbackLocal, setUseFallbackLocal] = useState(false)
 
-  // Prioriza o asset do admin se existir e não tiver falhado, com fallback para o asset local embutido
+  // PDF local embutido como fonte prioritária garantida, com fallback ou opção de asset remoto se disponível
   const remoteDunsUrl = getAssetUrl('certificado-duns')
-  const pdfSource = !useFallbackLocal && remoteDunsUrl ? remoteDunsUrl : dunsPdf
+  const pdfSource = useFallbackLocal && remoteDunsUrl ? remoteDunsUrl : dunsPdf
 
   const handleDownload = async () => {
     setIsDownloading(true)
@@ -120,14 +120,19 @@ export default function Duns() {
             <span className="inline-flex items-center gap-1.5 font-medium">
               <FileCheck className="h-4 w-4 text-primary" /> Visualização do Documento Oficial
             </span>
-            {remoteDunsUrl && !useFallbackLocal && (
+            {remoteDunsUrl && (
               <button
                 type="button"
-                onClick={() => setUseFallbackLocal(true)}
+                onClick={() => setUseFallbackLocal((prev) => !prev)}
                 className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
-                title="Caso a prévia remota falhe, alternar para o PDF local"
+                title={
+                  useFallbackLocal
+                    ? 'Alternar para o PDF local embutido'
+                    : 'Alternar para a versão remota'
+                }
               >
-                <RefreshCw className="h-3 w-3" /> Usar arquivo local
+                <RefreshCw className="h-3 w-3" />
+                {useFallbackLocal ? 'Usar PDF local embutido' : 'Ver versão remota'}
               </button>
             )}
           </div>
@@ -135,13 +140,8 @@ export default function Duns() {
           <div className="relative w-full bg-slate-200/50 min-h-[600px] md:min-h-[820px] flex items-stretch">
             <iframe
               src={`${pdfSource}#toolbar=1&navpanes=0`}
-              title="Certificado DUNS Registered - ibisoft"
+              title="Certificado DUNS Registered - ibisoft Tecnologia"
               className="w-full h-[600px] md:h-[820px] border-0"
-              onError={() => {
-                if (!useFallbackLocal && remoteDunsUrl) {
-                  setUseFallbackLocal(true)
-                }
-              }}
             />
           </div>
 

@@ -8,6 +8,7 @@
     "start": "vite dev",
     "dev": "vite",
     "preinstall": "node -e 'const fs=require(\"fs\"); try { const c=JSON.parse(fs.readFileSync(\"tsconfig.app.json\")); if(c.compilerOptions?.paths?.[\"*/*\"]) { delete c.compilerOptions.paths[\"*/*\"]; fs.writeFileSync(\"tsconfig.app.json\", JSON.stringify(c, null, 2)); } } catch(e){}'",
+    "prebuild": "node -e 'const fs=require(\"fs\"); const c={compilerOptions:{target:\"ES2020\",useDefineForClassFields:true,lib:[\"ES2020\",\"DOM\",\"DOM.Iterable\",\"ESNext\"],module:\"ESNext\",skipLibCheck:true,moduleResolution:\"bundler\",allowImportingTsExtensions:true,isolatedModules:true,moduleDetection:\"force\",noEmit:true,jsx:\"react-jsx\",strict:false,noImplicitAny:false,noUnusedParameters:false,noUnusedLocals:false,paths:{\"@/*\":[\"./src/*\"]}},include:[\"src\",\"tailwind.config.ts\",\"*.tsx\"]}; fs.writeFileSync(\"tsconfig.app.json\", JSON.stringify(c, null, 2));'",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "oxlint src",

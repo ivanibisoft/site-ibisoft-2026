@@ -23,7 +23,7 @@ const FALLBACK_ICONS = [
 
 function resolveIcon(iconName: string, index: number): LucideIcon {
   const name = iconName || FALLBACK_ICONS[index % FALLBACK_ICONS.length]
-  const Icon = (Icons as Record<string, LucideIcon>)[name]
+  const Icon = (Icons as unknown as Record<string, LucideIcon>)[name]
   return Icon || Icons.HelpCircle
 }
 

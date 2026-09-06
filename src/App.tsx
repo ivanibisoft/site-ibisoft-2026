@@ -31,7 +31,7 @@ const App = () => (
     <AuthProvider>
       <SiteAssetsProvider>
         <EditorMiddleware>
-          <BrowserRouter future={{ v7_startTransition: false, v7_relativeSplatPath: false }}>
+          <BrowserRouter>
             <ScrollToTop />
             <TooltipProvider>
               <Toaster />
