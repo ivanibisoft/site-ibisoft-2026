@@ -47,18 +47,13 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/sobre" className="text-sm hover:text-primary transition-colors">
-                  Sobre Nós
+                <Link to="/cases" className="text-sm hover:text-primary transition-colors">
+                  Cases de Sucesso
                 </Link>
               </li>
               <li>
                 <Link to="/sobre-erp" className="text-sm hover:text-primary transition-colors">
                   Sobre ERP
-                </Link>
-              </li>
-              <li>
-                <Link to="/cases" className="text-sm hover:text-primary transition-colors">
-                  Cases de Sucesso
                 </Link>
               </li>
               {hasBlogPosts && (
