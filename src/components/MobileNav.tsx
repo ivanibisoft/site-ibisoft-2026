@@ -96,7 +96,7 @@ export function MobileNav() {
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="segmentos" className="border-b-0">
                 <AccordionTrigger className="text-lg font-medium py-2 hover:no-underline hover:text-primary">
-                  Segmentos
+                  Soluções
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="flex flex-col space-y-3 pl-4 pt-2">

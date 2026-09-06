@@ -78,7 +78,7 @@ export function Footer() {
 
           {/* Segments */}
           <div>
-            <h3 className="text-slate-900 font-semibold mb-6">Segmentos</h3>
+            <h3 className="text-slate-900 font-semibold mb-6">Soluções</h3>
             <ul className="space-y-4">
               {SEGMENTS.filter((s) => s.id !== 'outros').map((segment) => (
                 <li key={segment.id}>
