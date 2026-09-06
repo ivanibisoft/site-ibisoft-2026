@@ -121,7 +121,7 @@ export function Logos() {
                 aria-label="Todos os segmentos"
                 className="rounded-full px-4 py-2 text-sm font-medium"
               >
-                Todos
+                Todos Segmentos
               </ToggleGroupItem>
               {segmentsWithLogos.map((seg) => (
                 <ToggleGroupItem
