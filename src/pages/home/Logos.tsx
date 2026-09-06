@@ -54,9 +54,6 @@ export function Logos() {
   )
   const resumeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [api, setApi] = useState<CarouselApi>()
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [snapCount, setSnapCount] = useState(0)
-
   const [logos, setLogos] = useState<PartnerLogoWithExpand[]>([])
   const [segments, setSegments] = useState<Segment[]>([])
   const [selectedSegment, setSelectedSegment] = useState<string>('all')
@@ -99,31 +96,6 @@ export function Logos() {
 
   const showFilter = !useFallback && segmentsWithLogos.length > 0
   const showEmptyState = !useFallback && filteredLogos.length === 0
-
-  // Atualizar contagem de snaps e índice selecionado
-  const onSelect = useCallback((carouselApi: CarouselApi) => {
-    if (!carouselApi) return
-    setCurrentIndex(carouselApi.selectedScrollSnap())
-  }, [])
-
-  const onInitOrReInit = useCallback((carouselApi: CarouselApi) => {
-    if (!carouselApi) return
-    setSnapCount(carouselApi.scrollSnapList().length)
-    setCurrentIndex(carouselApi.selectedScrollSnap())
-  }, [])
-
-  useEffect(() => {
-    if (!api) return
-
-    onInitOrReInit(api)
-    api.on('reInit', onInitOrReInit)
-    api.on('select', onSelect)
-
-    return () => {
-      api.off('reInit', onInitOrReInit)
-      api.off('select', onSelect)
-    }
-  }, [api, onInitOrReInit, onSelect])
 
   // Função auxiliar para agendar a retomada do autoplay após qualquer ação do usuário
   const scheduleAutoplayResume = useCallback(() => {
@@ -278,54 +250,24 @@ export function Logos() {
               </CarouselContent>
 
               {items.length > 1 && (
-                <>
+                <div className="flex items-center justify-center gap-3 mt-6">
                   <CarouselPrevious
                     onClick={() => {
                       scheduleAutoplayResume()
                     }}
                     aria-label="Ver parceiros anteriores"
-                    className="flex left-1 sm:left-2 md:-left-4 z-20 h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-background/90 md:bg-background border-border shadow-md hover:bg-accent hover:text-white hover:border-accent transition-all backdrop-blur-sm"
+                    className="static translate-y-0 translate-x-0 h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-background border-border shadow-md hover:bg-accent hover:text-white hover:border-accent transition-all"
                   />
                   <CarouselNext
                     onClick={() => {
                       scheduleAutoplayResume()
                     }}
                     aria-label="Ver próximos parceiros"
-                    className="flex right-1 sm:right-2 md:-right-4 z-20 h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-background/90 md:bg-background border-border shadow-md hover:bg-accent hover:text-white hover:border-accent transition-all backdrop-blur-sm"
+                    className="static translate-y-0 translate-x-0 h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-background border-border shadow-md hover:bg-accent hover:text-white hover:border-accent transition-all"
                   />
-                </>
+                </div>
               )}
             </Carousel>
-
-            {snapCount > 1 && (
-              <div
-                className="flex items-center justify-center gap-2 mt-6 flex-wrap"
-                role="tablist"
-                aria-label="Navegar entre empresas parceiras"
-              >
-                {Array.from({ length: snapCount }).map((_, index) => {
-                  const isActive = currentIndex === index
-                  return (
-                    <button
-                      key={index}
-                      type="button"
-                      role="tab"
-                      aria-selected={isActive}
-                      aria-label={`Ir para a posição ${index + 1} de ${snapCount}`}
-                      onClick={() => {
-                        api?.scrollTo(index)
-                        scheduleAutoplayResume()
-                      }}
-                      className={`h-2.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
-                        isActive
-                          ? 'w-7 bg-primary'
-                          : 'w-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/60'
-                      }`}
-                    />
-                  )
-                })}
-              </div>
-            )}
           </div>
         )}
 

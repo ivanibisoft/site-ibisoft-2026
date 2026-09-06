@@ -1,35 +1,18 @@
-import { useRef, useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Trophy } from 'lucide-react'
-import Autoplay from 'embla-carousel-autoplay'
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  type CarouselApi,
 } from '@/components/ui/carousel'
 import { Card, CardContent } from '@/components/ui/card'
 import { CtaButton } from '@/components/CtaButton'
 import { getCases, getCaseImageUrl, type CaseItem } from '@/services/cases'
 import { useRealtime } from '@/hooks/use-realtime'
-import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 
 export function SuccessCases() {
-  const prefersReducedMotion = usePrefersReducedMotion()
-  const plugin = useRef(
-    Autoplay({
-      delay: 5000,
-      stopOnInteraction: false,
-      stopOnMouseEnter: true,
-      active: !prefersReducedMotion,
-    }),
-  )
-  const resumeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [api, setApi] = useState<CarouselApi>()
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [snapCount, setSnapCount] = useState(0)
-
   const [cases, setCases] = useState<CaseItem[]>([])
 
   const fetchCases = useCallback(() => {
@@ -41,79 +24,6 @@ export function SuccessCases() {
   }, [fetchCases])
 
   useRealtime('cases', fetchCases)
-
-  // Atualizar contagem de snaps e índice selecionado
-  const onSelect = useCallback((carouselApi: CarouselApi) => {
-    if (!carouselApi) return
-    setCurrentIndex(carouselApi.selectedScrollSnap())
-  }, [])
-
-  const onInitOrReInit = useCallback((carouselApi: CarouselApi) => {
-    if (!carouselApi) return
-    setSnapCount(carouselApi.scrollSnapList().length)
-    setCurrentIndex(carouselApi.selectedScrollSnap())
-  }, [])
-
-  useEffect(() => {
-    if (!api) return
-
-    onInitOrReInit(api)
-    api.on('reInit', onInitOrReInit)
-    api.on('select', onSelect)
-
-    return () => {
-      api.off('reInit', onInitOrReInit)
-      api.off('select', onSelect)
-    }
-  }, [api, onInitOrReInit, onSelect])
-
-  // Função para agendar retomada automática do autoplay
-  const scheduleAutoplayResume = useCallback(() => {
-    if (prefersReducedMotion) return
-    if (resumeTimeoutRef.current) {
-      clearTimeout(resumeTimeoutRef.current)
-    }
-    resumeTimeoutRef.current = setTimeout(() => {
-      try {
-        const autoplayPlugin = api?.plugins()?.autoplay as { play?: () => void } | undefined
-        if (autoplayPlugin && typeof autoplayPlugin.play === 'function') {
-          autoplayPlugin.play()
-        }
-      } catch {
-        // Ignora caso api já tenha sido desmontada
-      }
-    }, 2500)
-  }, [api, prefersReducedMotion])
-
-  // Ouvir pointerUp e pointerCancel no embla para garantir retomada pós arrasto touch/mouse
-  useEffect(() => {
-    if (!api) return
-
-    const handlePointerUp = () => {
-      scheduleAutoplayResume()
-    }
-
-    api.on('pointerUp', handlePointerUp)
-
-    return () => {
-      api.off('pointerUp', handlePointerUp)
-      if (resumeTimeoutRef.current) {
-        clearTimeout(resumeTimeoutRef.current)
-      }
-    }
-  }, [api, scheduleAutoplayResume])
-
-  // Atualizar plugin caso preferência de movimento mude
-  useEffect(() => {
-    const autoplayPlugin = api?.plugins()?.autoplay as
-      | { stop?: () => void; play?: () => void }
-      | undefined
-    if (prefersReducedMotion) {
-      autoplayPlugin?.stop?.()
-    } else {
-      autoplayPlugin?.play?.()
-    }
-  }, [api, prefersReducedMotion])
 
   if (cases.length === 0) return null
 
@@ -127,22 +37,13 @@ export function SuccessCases() {
           <Trophy className="w-8 h-8 md:w-10 md:h-10 text-primary shrink-0" aria-hidden="true" />
         </div>
 
-        <div className="relative max-w-6xl mx-auto px-2 sm:px-10 md:px-12 lg:px-16">
+        <div className="relative max-w-6xl mx-auto px-2 sm:px-6">
           <Carousel
-            setApi={setApi}
             opts={{
               align: 'start',
               loop: cases.length > 1,
             }}
-            plugins={[plugin.current]}
             className="w-full relative"
-            onMouseEnter={() => {
-              if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current)
-              plugin.current.stop()
-            }}
-            onMouseLeave={() => {
-              scheduleAutoplayResume()
-            }}
           >
             <CarouselContent className="-ml-4 py-4">
               {cases.map((caseItem) => {
@@ -172,54 +73,18 @@ export function SuccessCases() {
               })}
             </CarouselContent>
             {cases.length > 1 && (
-              <>
+              <div className="flex items-center justify-center gap-3 mt-6">
                 <CarouselPrevious
-                  onClick={() => {
-                    scheduleAutoplayResume()
-                  }}
                   aria-label="Ver case anterior"
-                  className="flex left-0 sm:-left-3 md:-left-4 lg:-left-6 z-20 h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-background/90 md:bg-background border-border shadow-md hover:bg-accent hover:text-white hover:border-accent transition-all backdrop-blur-sm"
+                  className="static translate-y-0 translate-x-0 h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-background border-border shadow-md hover:bg-accent hover:text-white hover:border-accent transition-all"
                 />
                 <CarouselNext
-                  onClick={() => {
-                    scheduleAutoplayResume()
-                  }}
                   aria-label="Ver próximo case"
-                  className="flex right-0 sm:-right-3 md:-right-4 lg:-right-6 z-20 h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-background/90 md:bg-background border-border shadow-md hover:bg-accent hover:text-white hover:border-accent transition-all backdrop-blur-sm"
+                  className="static translate-y-0 translate-x-0 h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-background border-border shadow-md hover:bg-accent hover:text-white hover:border-accent transition-all"
                 />
-              </>
+              </div>
             )}
           </Carousel>
-
-          {snapCount > 1 && (
-            <div
-              className="flex items-center justify-center gap-2 mt-6 flex-wrap"
-              role="tablist"
-              aria-label="Navegar entre cases de sucesso"
-            >
-              {Array.from({ length: snapCount }).map((_, index) => {
-                const isActive = currentIndex === index
-                return (
-                  <button
-                    key={index}
-                    type="button"
-                    role="tab"
-                    aria-selected={isActive}
-                    aria-label={`Ir para o case ${index + 1} de ${snapCount}`}
-                    onClick={() => {
-                      api?.scrollTo(index)
-                      scheduleAutoplayResume()
-                    }}
-                    className={`h-2.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
-                      isActive
-                        ? 'w-7 bg-primary'
-                        : 'w-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/60'
-                    }`}
-                  />
-                )
-              })}
-            </div>
-          )}
         </div>
 
         <div className="mt-12 flex justify-center">
