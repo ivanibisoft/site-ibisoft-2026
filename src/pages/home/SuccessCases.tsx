@@ -8,30 +8,18 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getFeaturedCases } from '@/services/cases'
-import pb from '@/lib/pocketbase/client'
+import { Card, CardContent } from '@/components/ui/card'
+import { getCases, getCaseImageUrl, type CaseItem } from '@/services/cases'
 
 export function SuccessCases() {
   const plugin = useRef(Autoplay({ delay: 6000, stopOnInteraction: true }))
-  const [cases, setCases] = useState<any[]>([])
+  const [cases, setCases] = useState<CaseItem[]>([])
 
   useEffect(() => {
-    getFeaturedCases().then(setCases).catch(console.error)
+    getCases().then(setCases).catch(console.error)
   }, [])
 
   if (cases.length === 0) return null
-
-  const getLogo = (category: string) => {
-    const map: Record<string, string> = {
-      Distribuição: 'https://img.usecurling.com/i?q=distribution&color=blue&shape=fill',
-      Agronegócio: 'https://img.usecurling.com/i?q=agriculture&color=green&shape=fill',
-      Indústria: 'https://img.usecurling.com/i?q=industry&color=gray&shape=fill',
-      'Comércio Exterior': 'https://img.usecurling.com/i?q=globe&color=cyan&shape=outline',
-      Serviços: 'https://img.usecurling.com/i?q=technology&color=blue&shape=outline',
-    }
-    return map[category] || 'https://img.usecurling.com/i?q=business&color=gray&shape=fill'
-  }
 
   return (
     <section id="cases-de-sucesso" className="py-24 bg-background text-center scroll-mt-20">
@@ -47,7 +35,7 @@ export function SuccessCases() {
           <Carousel
             opts={{
               align: 'start',
-              loop: true,
+              loop: cases.length > 1,
             }}
             plugins={[plugin.current]}
             className="w-full"
@@ -55,41 +43,38 @@ export function SuccessCases() {
             onMouseLeave={plugin.current.reset}
           >
             <CarouselContent className="-ml-4 py-4">
-              {cases.map((caseItem) => (
-                <CarouselItem key={caseItem.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                  <div className="h-full">
-                    <Card className="h-full bg-card border-border/60 shadow-sm hover:shadow-md hover:border-accent/30 transition-all duration-300 flex flex-col text-left group">
-                      <CardHeader className="pb-4">
-                        <div className="h-12 w-auto mb-6 flex items-center justify-start">
-                          <img
-                            src={
-                              caseItem.image
-                                ? pb.files.getUrl(caseItem, caseItem.image)
-                                : getLogo(caseItem.category)
-                            }
-                            alt={`Logo ${caseItem.client_name}`}
-                            className="h-10 w-auto object-contain max-w-[120px] grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500"
-                          />
-                        </div>
-                        <CardTitle className="text-xl leading-tight text-foreground">
-                          {caseItem.title}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="flex flex-col flex-grow">
-                        <p className="text-muted-foreground text-[15px] leading-relaxed mb-8 flex-grow">
-                          {caseItem.description}
-                        </p>
-                        <p className="text-sm font-medium text-accent mt-auto">
-                          {caseItem.client_name}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </CarouselItem>
-              ))}
+              {cases.map((caseItem) => {
+                const imageUrl = getCaseImageUrl(caseItem)
+                return (
+                  <CarouselItem key={caseItem.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                    <div className="h-full">
+                      <Card className="h-full bg-card border-border/60 shadow-sm hover:shadow-md hover:border-accent/30 transition-all duration-300 flex flex-col text-left group overflow-hidden">
+                        {imageUrl && (
+                          <div className="w-full h-48 sm:h-52 overflow-hidden bg-muted/40 flex items-center justify-center p-4 border-b border-border/40">
+                            <img
+                              src={imageUrl}
+                              alt="Case de sucesso"
+                              className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                            />
+                          </div>
+                        )}
+                        <CardContent className="flex flex-col flex-grow p-6">
+                          <p className="text-muted-foreground text-[15px] leading-relaxed whitespace-pre-line">
+                            {caseItem.description}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                )
+              })}
             </CarouselContent>
-            <CarouselPrevious className="hidden md:flex -left-4 lg:-left-6 h-10 w-10 border-border shadow-sm hover:bg-accent hover:text-white hover:border-accent transition-colors" />
-            <CarouselNext className="hidden md:flex -right-4 lg:-right-6 h-10 w-10 border-border shadow-sm hover:bg-accent hover:text-white hover:border-accent transition-colors" />
+            {cases.length > 1 && (
+              <>
+                <CarouselPrevious className="hidden md:flex -left-4 lg:-left-6 h-10 w-10 border-border shadow-sm hover:bg-accent hover:text-white hover:border-accent transition-colors" />
+                <CarouselNext className="hidden md:flex -right-4 lg:-right-6 h-10 w-10 border-border shadow-sm hover:bg-accent hover:text-white hover:border-accent transition-colors" />
+              </>
+            )}
           </Carousel>
         </div>
       </div>

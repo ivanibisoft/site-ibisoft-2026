@@ -57,14 +57,8 @@ export const COLLECTIONS: CollectionConfig[] = [
     singularLabel: 'Case',
     icon: Briefcase,
     fields: [
-      { name: 'title', label: 'Título', type: 'text', required: true, listDisplay: true },
-      { name: 'slug', label: 'Slug', type: 'text', required: true },
-      { name: 'description', label: 'Descrição', type: 'textarea' },
-      { name: 'category', label: 'Categoria', type: 'text', listDisplay: true },
-      { name: 'client_name', label: 'Cliente', type: 'text', listDisplay: true },
-      { name: 'image', label: 'Imagem', type: 'file' },
-      { name: 'content', label: 'Conteúdo', type: 'textarea' },
-      { name: 'featured', label: 'Destacado', type: 'bool', listDisplay: true },
+      { name: 'image', label: 'Imagem', type: 'file', required: true, listDisplay: true },
+      { name: 'description', label: 'Texto', type: 'textarea', required: true, listDisplay: true },
     ],
   },
   {

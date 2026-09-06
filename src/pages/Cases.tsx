@@ -1,72 +1,27 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Trophy, ArrowRight, CheckCircle2, Building2 } from 'lucide-react'
+import { Trophy, ArrowRight, Building2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
-
-const CASES_DATA = [
-  {
-    id: 1,
-    title: 'Expansão ágil com controle total',
-    company: 'Distribuidora Central',
-    logo: 'https://img.usecurling.com/i?q=distribution&color=blue&shape=fill',
-    description:
-      'A Distribuidora Central precisava expandir suas operações para 3 novos estados. Com o ERP ibisoft, conseguiram unificar o controle de estoque multissites e automatizar o faturamento, suportando o crescimento sem aumentar a equipe de backoffice.',
-    metric: '+150% de pedidos processados',
-    segment: 'Atacadista e Distribuidora',
-  },
-  {
-    id: 2,
-    title: 'Visibilidade e redução de perdas',
-    company: 'AgroSul S/A',
-    logo: 'https://img.usecurling.com/i?q=agriculture&color=green&shape=fill',
-    description:
-      'Enfrentando desafios com validade de produtos e rastreabilidade, a AgroSul implementou nosso módulo de gestão de lotes. O resultado foi imediato: redução drástica no desperdício e total conformidade com as exigências regulatórias.',
-    metric: '98% de redução de perdas',
-    segment: 'Genética Animal',
-  },
-  {
-    id: 3,
-    title: 'Integração contábil e fiscal ágil',
-    company: 'Indústria Metálica Forte',
-    logo: 'https://img.usecurling.com/i?q=industry&color=gray&shape=fill',
-    description:
-      'O fechamento mensal demorava mais de 15 dias devido a sistemas desconectados. A substituição pelo ERP ibisoft integrou o PCP ao financeiro e fiscal. Hoje, o fechamento é realizado com 100% de precisão nos impostos apurados.',
-    metric: 'Fechamento fiscal 7x mais rápido',
-    segment: 'Indústria',
-  },
-  {
-    id: 4,
-    title: 'Transformação do Comércio Exterior',
-    company: 'Global Import',
-    logo: 'https://img.usecurling.com/i?q=globe&color=cyan&shape=outline',
-    description:
-      'Gerenciar dezenas de processos de importação em planilhas causava atrasos aduaneiros constantes. O módulo Comex automatizou a geração de LIs e o cálculo de custo nacionalizado, aumentando a margem de lucro.',
-    metric: 'Zero multas aduaneiras no ano',
-    segment: 'Comércio Exterior',
-  },
-  {
-    id: 5,
-    title: 'Excelência na prestação de serviços',
-    company: 'TechServ Soluções',
-    logo: 'https://img.usecurling.com/i?q=technology&color=blue&shape=outline',
-    description:
-      'A medição de contratos e faturamento de horas trabalhadas era um gargalo. A automação permitiu que os técnicos registrassem horas via app, integrando diretamente com o faturamento automático no final do mês.',
-    metric: 'Faturamento 100% automatizado',
-    segment: 'Serviços',
-  },
-  {
-    id: 6,
-    title: 'Controle de ponta a ponta',
-    company: 'Varejo e Cia',
-    logo: 'https://img.usecurling.com/i?q=retail&color=orange&shape=fill',
-    description:
-      'A falta de integração entre as frentes de loja e a retaguarda gerava furos de estoque. Com a implantação do ecossistema ibisoft, a empresa conquistou controle de ponta a ponta e elevou a satisfação do consumidor final.',
-    metric: 'Estoque 100% sincronizado',
-    segment: 'Varejo',
-  },
-]
+import { Card, CardContent } from '@/components/ui/card'
+import { getCases, getCaseImageUrl, type CaseItem } from '@/services/cases'
 
 export default function Cases() {
+  const [cases, setCases] = useState<CaseItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getCases()
+      .then((data) => {
+        setCases(data)
+      })
+      .catch((err) => {
+        console.error('Erro ao buscar cases:', err)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [])
+
   return (
     <div className="animate-fade-in">
       {/* Hero Section */}
@@ -87,44 +42,49 @@ export default function Cases() {
       {/* Cases Grid */}
       <section className="py-24 bg-muted/30">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {CASES_DATA.map((caseItem) => (
-              <Card
-                key={caseItem.id}
-                className="flex flex-col h-full hover:shadow-lg transition-all duration-300 border-border/60 hover:border-accent/30 group"
-              >
-                <CardHeader>
-                  <div className="flex justify-between items-start mb-6">
-                    <div className="h-12 w-auto flex items-center justify-start">
-                      <img
-                        src={caseItem.logo}
-                        alt={`Logo ${caseItem.company}`}
-                        className="h-10 w-auto object-contain max-w-[120px] grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500"
-                      />
-                    </div>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                      {caseItem.segment}
-                    </span>
-                  </div>
-                  <CardTitle className="text-xl leading-tight group-hover:text-primary transition-colors">
-                    {caseItem.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <p className="text-muted-foreground text-[15px] leading-relaxed mb-6">
-                    {caseItem.description}
-                  </p>
-                  <div className="bg-accent/10 rounded-lg p-4 flex items-start gap-3 mt-auto">
-                    <CheckCircle2 className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">Grande Conquista</p>
-                      <p className="text-accent font-bold">{caseItem.metric}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex justify-center items-center py-16">
+              <div className="animate-pulse text-muted-foreground">Carregando cases...</div>
+            </div>
+          ) : cases.length === 0 ? (
+            <div className="text-center py-16 max-w-md mx-auto">
+              <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+                <Trophy className="w-8 h-8 opacity-70" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Novos cases em breve</h3>
+              <p className="text-muted-foreground text-sm">
+                Estamos preparando os próximos depoimentos e histórias de sucesso dos nossos
+                clientes.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {cases.map((caseItem) => {
+                const imageUrl = getCaseImageUrl(caseItem)
+                return (
+                  <Card
+                    key={caseItem.id}
+                    className="flex flex-col h-full hover:shadow-lg transition-all duration-300 border-border/60 hover:border-accent/30 group overflow-hidden bg-card"
+                  >
+                    {imageUrl && (
+                      <div className="w-full h-56 sm:h-64 overflow-hidden bg-muted/40 flex items-center justify-center p-4 border-b border-border/40">
+                        <img
+                          src={imageUrl}
+                          alt="Case de sucesso"
+                          className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
+                    )}
+                    <CardContent className="flex flex-col flex-grow p-6">
+                      <p className="text-muted-foreground text-[15px] leading-relaxed whitespace-pre-line">
+                        {caseItem.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          )}
         </div>
       </section>
 
