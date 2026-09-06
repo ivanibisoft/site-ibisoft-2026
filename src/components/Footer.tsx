@@ -1,26 +1,65 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Linkedin, MapPin, Phone, ShieldCheck, Award } from 'lucide-react'
+import { Linkedin, MapPin, Phone, ShieldCheck, Award, ChevronDown } from 'lucide-react'
 import ibisoftLogo from '@/assets/botao_ibisoft_2_sem_fundo-74482.png'
-import { SEGMENTS, WHATSAPP_URL } from '@/lib/constants'
+import { WHATSAPP_URL } from '@/lib/constants'
 import { CnpjLink } from '@/components/CnpjLink'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useSiteAssets } from '@/hooks/use-site-assets'
 import { useHasBlogPosts } from '@/hooks/use-has-blog-posts'
+import { getSegments, type Segment } from '@/services/segments'
+import { getModules, type Module } from '@/services/modules'
+import useRealtime from '@/hooks/use-realtime'
+import { cn } from '@/lib/utils'
 
 export function Footer() {
   const { getAssetUrl } = useSiteAssets()
   const { hasBlogPosts } = useHasBlogPosts()
   const logoUrl = getAssetUrl('logo-principal') || ibisoftLogo
+
+  const [segments, setSegments] = useState<Segment[]>([])
+  const [modules, setModules] = useState<Module[]>([])
+  const [solutionsOpen, setSolutionsOpen] = useState(false)
+  const [functionalitiesOpen, setFunctionalitiesOpen] = useState(false)
+
+  const loadData = async () => {
+    try {
+      const segData = await getSegments()
+      setSegments(segData)
+    } catch (err) {
+      console.error('Failed to load segments for footer:', err)
+    }
+
+    try {
+      const modData = await getModules()
+      setModules(modData)
+    } catch (err) {
+      console.error('Failed to load modules for footer:', err)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  useRealtime('segments', () => {
+    getSegments().then(setSegments).catch(console.error)
+  })
+
+  useRealtime('modules', () => {
+    getModules().then(setModules).catch(console.error)
+  })
+
   return (
     <footer className="bg-slate-50 text-slate-600 py-12 lg:py-16 border-t border-slate-200">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12">
           {/* Brand and Description */}
-          <div className="flex flex-col">
+          <div className="flex flex-col lg:col-span-5">
             <div className="w-fit mb-6">
               <img src={logoUrl} alt="ibisoft" className="h-10 object-contain" />
             </div>
-            <p className="text-sm text-slate-600 mb-6 leading-relaxed max-w-xs">
+            <p className="text-sm text-slate-600 mb-6 leading-relaxed max-w-md">
               Transformando desafios complexos em soluções tecnológicas inovadoras. Sua parceira
               estratégica em TI para impulsionar resultados e garantir o sucesso do seu negócio.
             </p>
@@ -38,58 +77,123 @@ export function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div>
+          <div className="lg:col-span-4">
             <h3 className="text-slate-900 font-semibold mb-6">Links Rápidos</h3>
-            <ul className="space-y-4">
+            <ul className="space-y-3.5">
               <li>
-                <Link to="/" className="text-sm hover:text-primary transition-colors">
+                <Link to="/" className="text-sm hover:text-primary transition-colors block">
                   Início
                 </Link>
               </li>
+
+              {/* Soluções (Accordion) */}
               <li>
-                <Link to="/cases" className="text-sm hover:text-primary transition-colors">
+                <button
+                  type="button"
+                  onClick={() => setSolutionsOpen((prev) => !prev)}
+                  className="flex items-center justify-between w-full text-sm text-left hover:text-primary transition-colors group py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                  aria-expanded={solutionsOpen}
+                >
+                  <span
+                    className={cn('transition-colors', solutionsOpen && 'text-primary font-medium')}
+                  >
+                    Soluções
+                  </span>
+                  <ChevronDown
+                    className={cn(
+                      'h-4 w-4 text-slate-400 group-hover:text-primary transition-transform duration-200 shrink-0 ml-2',
+                      solutionsOpen && 'rotate-180 text-primary',
+                    )}
+                  />
+                </button>
+                {solutionsOpen && (
+                  <ul className="mt-2.5 pl-3 border-l-2 border-slate-200 space-y-2 text-xs">
+                    {segments.map((segment) => (
+                      <li key={segment.id}>
+                        <Link
+                          to={`/segmentos/${segment.slug}`}
+                          className="text-slate-500 hover:text-primary transition-colors block py-0.5"
+                        >
+                          {segment.title}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+
+              {/* Funcionalidades (Accordion) */}
+              <li>
+                <button
+                  type="button"
+                  onClick={() => setFunctionalitiesOpen((prev) => !prev)}
+                  className="flex items-center justify-between w-full text-sm text-left hover:text-primary transition-colors group py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                  aria-expanded={functionalitiesOpen}
+                >
+                  <span
+                    className={cn(
+                      'transition-colors',
+                      functionalitiesOpen && 'text-primary font-medium',
+                    )}
+                  >
+                    Funcionalidades
+                  </span>
+                  <ChevronDown
+                    className={cn(
+                      'h-4 w-4 text-slate-400 group-hover:text-primary transition-transform duration-200 shrink-0 ml-2',
+                      functionalitiesOpen && 'rotate-180 text-primary',
+                    )}
+                  />
+                </button>
+                {functionalitiesOpen && (
+                  <ul className="mt-2.5 pl-3 border-l-2 border-slate-200 space-y-2 text-xs max-h-64 overflow-y-auto">
+                    {modules.map((mod) => (
+                      <li key={mod.id}>
+                        <Link
+                          to={`/funcionalidades/${mod.slug}`}
+                          className="text-slate-500 hover:text-primary transition-colors block py-0.5"
+                        >
+                          {mod.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+
+              <li>
+                <Link to="/cases" className="text-sm hover:text-primary transition-colors block">
                   Cases de Sucesso
                 </Link>
               </li>
+
               <li>
-                <Link to="/sobre-erp" className="text-sm hover:text-primary transition-colors">
+                <Link
+                  to="/sobre-erp"
+                  className="text-sm hover:text-primary transition-colors block"
+                >
                   Sobre ERP
                 </Link>
               </li>
+
               {hasBlogPosts && (
                 <li>
-                  <Link to="/blog" className="text-sm hover:text-primary transition-colors">
+                  <Link to="/blog" className="text-sm hover:text-primary transition-colors block">
                     Blog
                   </Link>
                 </li>
               )}
+
               <li>
-                <Link to="/contato" className="text-sm hover:text-primary transition-colors">
+                <Link to="/contato" className="text-sm hover:text-primary transition-colors block">
                   Contato
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Segments */}
-          <div>
-            <h3 className="text-slate-900 font-semibold mb-6">Soluções</h3>
-            <ul className="space-y-4">
-              {SEGMENTS.filter((s) => s.id !== 'outros').map((segment) => (
-                <li key={segment.id}>
-                  <Link
-                    to={`/segmentos/${segment.title === 'Atacadista e Distribuidora' ? 'atacadista-e-distribuidora' : segment.id}`}
-                    className="text-sm hover:text-primary transition-colors"
-                  >
-                    {segment.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
           {/* Contact */}
-          <div>
+          <div className="lg:col-span-3">
             <h3 className="text-slate-900 font-semibold mb-6">Fale Conosco</h3>
             <ul className="space-y-4">
               <li>
