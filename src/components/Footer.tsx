@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Linkedin, MapPin, Phone } from 'lucide-react'
+import { Linkedin, MapPin, Phone, ShieldCheck } from 'lucide-react'
 import ibisoftLogo from '@/assets/botao_ibisoft_2_sem_fundo-74482.png'
 import { SEGMENTS, WHATSAPP_URL } from '@/lib/constants'
 import { useSiteAssets } from '@/hooks/use-site-assets'
@@ -143,23 +143,30 @@ export function Footer() {
               © {new Date().getFullYear()} ibisoft Tecnologia da Informação. Todos os direitos
               reservados.
             </p>
-            <p className="text-xs text-slate-400 text-center md:text-left">
-              CNPJ: 78.761.285/0001-70 | DUNS:{' '}
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-3 gap-y-1 text-xs text-slate-500 pt-1">
+              <span>CNPJ: 78.761.285/0001-70</span>
+              <span>•</span>
               <Link
                 to="/duns"
-                className="hover:text-primary transition-colors underline decoration-transparent hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm cursor-pointer"
-                aria-label="Ver Certificado DUNS Registered"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-200/60 hover:bg-primary/10 text-slate-700 hover:text-primary transition-all font-medium border border-slate-300/70 hover:border-primary/30 group"
+                aria-label="Ver Certificado D-U-N-S Registered Nº 905539672"
+                title="Certificação internacional de idoneidade empresarial da Dun & Bradstreet. Clique para ver o certificado."
               >
-                905539672
+                <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                <span>
+                  Certificada D-U-N-S Nº{' '}
+                  <strong className="text-slate-900 group-hover:text-primary">905539672</strong>
+                </span>
+                <span className="text-emerald-600 font-bold">✓</span>
               </Link>
-              {' | '}
+              <span>•</span>
               <Link
                 to="/admin"
-                className="hover:text-primary transition-colors underline decoration-transparent hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+                className="hover:text-primary transition-colors underline decoration-transparent hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm text-slate-400 hover:text-slate-600"
               >
                 Admin
               </Link>
-            </p>
+            </div>
           </div>
           <div className="flex items-center space-x-4 text-sm text-slate-500"></div>
         </div>

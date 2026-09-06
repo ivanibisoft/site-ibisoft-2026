@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getActiveTestimonials, type Testimonial } from '@/services/testimonials'
 import { useRealtime } from '@/hooks/use-realtime'
+import { DunsBadge } from '@/components/DunsBadge'
 
 export function SocialProof() {
   const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: true }))
@@ -35,11 +36,16 @@ export function SocialProof() {
   return (
     <section className="py-24 bg-muted/20 text-center">
       <div className="container px-4 md:px-6 mx-auto">
-        <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4 mb-12">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4 mb-8">
           <h2 className="text-3xl md:text-4xl font-display font-bold text-primary">
             O que nossos clientes dizem
           </h2>
           <Megaphone className="w-8 h-8 md:w-10 md:h-10 text-primary shrink-0" aria-hidden="true" />
+        </div>
+
+        {/* Selo DUNS Registered na seção de confiança */}
+        <div className="flex justify-center mb-10">
+          <DunsBadge variant="badge" showExternalIcon />
         </div>
 
         <div className="relative max-w-6xl mx-auto px-6 md:px-12 lg:px-16">

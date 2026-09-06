@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { Building2, Lightbulb, UserCircle2 } from 'lucide-react'
+import { Building2, Lightbulb, UserCircle2, ShieldCheck, ArrowRight } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { getTeamMembers } from '@/services/team_members'
 import pb from '@/lib/pocketbase/client'
 import ivanPhoto from '@/assets/ivan-2-7b6a6.jpg'
@@ -76,13 +77,38 @@ export default function About() {
               até ferramentas específicas, desenhadas para atender às particularidades de cada
               modelo de negócio.
             </p>
-            <p className="text-muted-foreground text-lg leading-relaxed">
+            <p className="text-muted-foreground text-lg leading-relaxed mb-6">
               Nossa missão é clara: democratizar o acesso à tecnologia de ponta. Acreditamos que
               pequenas e médias empresas dos setores de comércio, indústria e serviços merecem
               decidir com base em dados precisos e em tempo real. Na ibisoft, não entregamos apenas
               software; entregamos o diferencial competitivo necessário para impulsionar a
               eficiência e o crescimento sustentável dos nossos clientes.
             </p>
+
+            {/* Certificação D-U-N-S Registered na narrativa */}
+            <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <span className="font-semibold text-slate-900 block">
+                    Idoneidade Empresarial Reconhecida Globalmente
+                  </span>
+                  <span className="text-muted-foreground">
+                    A ibisoft possui a certificação internacional{' '}
+                    <strong>D&amp;B D-U-N-S® Registered</strong> sob o Nº{' '}
+                    <strong className="text-slate-900">905539672</strong>, assegurando nossa solidez
+                    e transparência no mercado corporativo.
+                  </span>
+                </div>
+              </div>
+              <Link
+                to="/duns"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline shrink-0 group"
+              >
+                Ver certificado{' '}
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </div>
           </div>
           <div className="rounded-2xl overflow-hidden shadow-2xl">
             <img
