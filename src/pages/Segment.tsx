@@ -147,9 +147,7 @@ export default function Segment() {
                   size="lg"
                   className="w-full sm:w-auto text-base font-semibold px-8"
                 >
-                  {segment?.title?.trim()
-                    ? `Conheça a solução para ${segment.title.trim()}`
-                    : 'Conheça a solução'}
+                  Conheça a solução para este segmento
                 </CtaButton>
               </div>
             </>
