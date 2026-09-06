@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Linkedin, MapPin, Phone, ShieldCheck, Award } from 'lucide-react'
 import ibisoftLogo from '@/assets/botao_ibisoft_2_sem_fundo-74482.png'
 import { SEGMENTS, WHATSAPP_URL } from '@/lib/constants'
+import { CnpjLink } from '@/components/CnpjLink'
 import { useSiteAssets } from '@/hooks/use-site-assets'
 import { useHasBlogPosts } from '@/hooks/use-has-blog-posts'
 
@@ -144,7 +145,7 @@ export function Footer() {
               reservados.
             </p>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-3 gap-y-1 text-xs text-slate-500 pt-1">
-              <span>CNPJ: 78.761.285/0001-70</span>
+              <CnpjLink variant="inline" showExternalIcon />
               <span>•</span>
               <Link
                 to="/duns"

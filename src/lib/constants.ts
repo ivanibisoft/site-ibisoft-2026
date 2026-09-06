@@ -1,6 +1,12 @@
 export const WHATSAPP_URL =
   'https://wa.me/5541991166264?text=Olá%2C%20gostaria%20de%20saber%20mais%20sobre%20o%20ERP%20da%20ibisoft.'
 
+export const CNPJ_NUMBER = '78.761.285/0001-70'
+export const CNPJ_RECEITA_FEDERAL_URL =
+  'https://solucoes.receita.fazenda.gov.br/servicos/cnpjreva/cnpjreva_solicitacao.asp'
+export const CNPJ_TOOLTIP_TEXT =
+  'Verifique os dados cadastrais da ibisoft na Receita Federal (Cartão CNPJ oficial). Clique para consultar na Receita Federal.'
+
 import {
   Building2,
   Globe2,

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { Building2, Lightbulb, UserCircle2, ShieldCheck, ArrowRight, Award } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { CnpjLink } from '@/components/CnpjLink'
 import { getTeamMembers } from '@/services/team_members'
 import pb from '@/lib/pocketbase/client'
 import ivanPhoto from '@/assets/ivan-2-7b6a6.jpg'
@@ -85,8 +86,8 @@ export default function About() {
               eficiência e o crescimento sustentável dos nossos clientes.
             </p>
 
-            {/* Bloco de credibilidade: DUNS Registered */}
-            <div>
+            {/* Bloco de credibilidade: DUNS Registered e Cartão CNPJ Receita Federal */}
+            <div className="space-y-3">
               <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-3">
                   <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
@@ -110,6 +111,9 @@ export default function About() {
                   <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </div>
+
+              {/* Card CNPJ Oficial Receita Federal */}
+              <CnpjLink variant="card" />
             </div>
           </div>
           <div className="rounded-2xl overflow-hidden shadow-2xl">
