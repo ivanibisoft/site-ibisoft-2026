@@ -2,7 +2,11 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { getActiveHeroMessages, type HeroMessage } from '@/services/hero-messages'
+import {
+  getActiveHeroMessages,
+  getHeroMessageImageUrl,
+  type HeroMessage,
+} from '@/services/hero-messages'
 import { useRealtime } from '@/hooks/use-realtime'
 import { TypewriterHero } from '@/components/home/TypewriterHero'
 
@@ -25,11 +29,17 @@ export function Hero({
   typewriterPauseSeconds,
   typewriterTypingSpeed,
 }: HeroProps) {
-  const [imageLoaded, setImageLoaded] = useState(false)
-  const [imageError, setImageError] = useState(false)
   const [messages, setMessages] = useState<HeroMessage[]>([])
   const [activePhrase, setActivePhrase] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
+  const [failedImageUrls, setFailedImageUrls] = useState<Record<string, boolean>>({})
+
+  // Two-layer cross-fade state for smooth transitions
+  const [displayedImageUrl, setDisplayedImageUrl] = useState<string | null>(null)
+  const [displayedAlt, setDisplayedAlt] = useState<string>('Gestão empresarial com ERP ibisoft')
+  const [incomingImageUrl, setIncomingImageUrl] = useState<string | null>(null)
+  const [incomingAlt, setIncomingAlt] = useState<string>('Gestão empresarial com ERP ibisoft')
+  const [isCrossFading, setIsCrossFading] = useState(false)
 
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -54,11 +64,6 @@ export function Hero({
     loadMessages()
   })
 
-  useEffect(() => {
-    setImageLoaded(false)
-    setImageError(false)
-  }, [heroImageUrl])
-
   useEffect(
     () => () => {
       clearResumeTimer()
@@ -75,6 +80,91 @@ export function Hero({
     }
     return ['Gestão completa da sua empresa com um ERP simples, integrado e escalável']
   }, [messages, heroTitle])
+
+  // Determine current target image URL for the active phrase, with safe fallback to heroImageUrl
+  const currentTargetImageUrl = useMemo(() => {
+    if (messages.length > 0 && activePhrase < messages.length) {
+      const activeMsg = messages[activePhrase]
+      if (activeMsg?.image) {
+        const msgImageUrl = getHeroMessageImageUrl(activeMsg)
+        if (msgImageUrl && !failedImageUrls[msgImageUrl]) {
+          return msgImageUrl
+        }
+      }
+    }
+    if (heroImageUrl && !failedImageUrls[heroImageUrl]) {
+      return heroImageUrl
+    }
+    return null
+  }, [messages, activePhrase, heroImageUrl, failedImageUrls])
+
+  const currentTargetAlt = useMemo(() => {
+    if (messages.length > 0 && activePhrase < messages.length) {
+      const activeMsg = messages[activePhrase]
+      if (activeMsg?.text) {
+        return activeMsg.text
+      }
+    }
+    return heroTitle || 'Gestão empresarial com ERP ibisoft'
+  }, [messages, activePhrase, heroTitle])
+
+  // Handle smooth image cross-fade when target image changes
+  useEffect(() => {
+    if (!currentTargetImageUrl) {
+      // No valid image available
+      setDisplayedImageUrl(null)
+      setIncomingImageUrl(null)
+      setIsCrossFading(false)
+      return
+    }
+
+    // Initial mount or transition from empty
+    if (!displayedImageUrl) {
+      setDisplayedImageUrl(currentTargetImageUrl)
+      setDisplayedAlt(currentTargetAlt)
+      setIncomingImageUrl(null)
+      setIsCrossFading(false)
+      return
+    }
+
+    // Already displaying this exact image URL
+    if (displayedImageUrl === currentTargetImageUrl) {
+      setDisplayedAlt(currentTargetAlt)
+      return
+    }
+
+    // Preload incoming image then trigger smooth cross-fade
+    let isCancelled = false
+    const img = new Image()
+    img.src = currentTargetImageUrl
+    img.onload = () => {
+      if (isCancelled) return
+      setIncomingImageUrl(currentTargetImageUrl)
+      setIncomingAlt(currentTargetAlt)
+      setIsCrossFading(true)
+    }
+    img.onerror = () => {
+      if (isCancelled) return
+      setFailedImageUrls((prev) => ({ ...prev, [currentTargetImageUrl]: true }))
+    }
+
+    return () => {
+      isCancelled = true
+    }
+  }, [currentTargetImageUrl, currentTargetAlt, displayedImageUrl])
+
+  // Complete cross-fade after CSS transition duration (700ms)
+  useEffect(() => {
+    if (isCrossFading && incomingImageUrl) {
+      const timer = setTimeout(() => {
+        setDisplayedImageUrl(incomingImageUrl)
+        setDisplayedAlt(incomingAlt)
+        setIncomingImageUrl(null)
+        setIsCrossFading(false)
+      }, 700)
+      return () => clearTimeout(timer)
+    }
+  }, [isCrossFading, incomingImageUrl, incomingAlt])
 
   const handleAdvance = useCallback(() => {
     setActivePhrase((prev) => (prev + 1) % phraseList.length)
@@ -100,8 +190,6 @@ export function Hero({
       ? typewriterTypingSpeed
       : 35
 
-  const showImage = heroImageUrl && !imageError
-
   return (
     <section
       className="relative w-full overflow-hidden min-h-[320px] md:min-h-[480px] lg:min-h-[600px]"
@@ -116,15 +204,37 @@ export function Hero({
     >
       <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/80" />
 
-      {showImage && (
+      {/* Base/Current Image Layer */}
+      {displayedImageUrl && (
         <img
-          src={heroImageUrl!}
-          alt="Gestão empresarial com ERP ibisoft"
-          className={`absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-500 ${
-            imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-          onLoad={() => setImageLoaded(true)}
-          onError={() => setImageError(true)}
+          key={displayedImageUrl}
+          src={displayedImageUrl}
+          alt={displayedAlt}
+          className={cn(
+            'absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-700 ease-in-out',
+            isCrossFading ? 'opacity-0' : 'opacity-100',
+          )}
+          onError={() => {
+            setFailedImageUrls((prev) => ({ ...prev, [displayedImageUrl]: true }))
+          }}
+        />
+      )}
+
+      {/* Incoming Image Layer for smooth cross-fade */}
+      {incomingImageUrl && (
+        <img
+          key={incomingImageUrl}
+          src={incomingImageUrl}
+          alt={incomingAlt}
+          className={cn(
+            'absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-700 ease-in-out',
+            isCrossFading ? 'opacity-100' : 'opacity-0',
+          )}
+          onError={() => {
+            setFailedImageUrls((prev) => ({ ...prev, [incomingImageUrl]: true }))
+            setIsCrossFading(false)
+            setIncomingImageUrl(null)
+          }}
         />
       )}
 

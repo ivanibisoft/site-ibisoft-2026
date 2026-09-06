@@ -258,12 +258,20 @@ export const COLLECTIONS: CollectionConfig[] = [
   },
   {
     name: 'hero_messages',
-    label: 'Mensagens do Hero',
+    label: 'Mensagens do Carrossel',
     singularLabel: 'Mensagem',
     icon: MessageSquare,
     defaultSort: 'order',
     fields: [
       { name: 'text', label: 'Texto', type: 'text', required: true, listDisplay: true },
+      {
+        name: 'image',
+        label: 'Imagem (opcional)',
+        type: 'file',
+        helpText:
+          'Substitui a imagem padrão do hero enquanto esta frase for exibida no carrossel. Se não enviada, a imagem padrão será mantida.',
+        listDisplay: true,
+      },
       { name: 'order', label: 'Ordem', type: 'number', listDisplay: true },
       { name: 'is_active', label: 'Ativo', type: 'bool', listDisplay: true },
     ],
