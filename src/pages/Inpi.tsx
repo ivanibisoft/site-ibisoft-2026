@@ -12,10 +12,14 @@ import {
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { useSiteAssets } from '@/hooks/use-site-assets'
+import { useToast } from '@/hooks/use-toast'
+import { openPdfInNewTab } from '@/lib/pdf-viewer'
 
 export default function Inpi() {
   const { getAssetUrl, loading: assetsLoading } = useSiteAssets()
+  const { toast } = useToast()
   const [isDownloading, setIsDownloading] = useState(false)
+  const [isOpeningTab, setIsOpeningTab] = useState(false)
 
   // SEO dinâmico de título e descrição
   useEffect(() => {
@@ -46,6 +50,25 @@ export default function Inpi() {
   // Asset do PDF: exclusivamente o arquivo registrado no Admin (site_assets)
   const pdfSource = getAssetUrl('certificado-inpi')
   const isAvailable = Boolean(pdfSource)
+
+  const handleOpenInNewTab = async () => {
+    if (!pdfSource || isOpeningTab) return
+    setIsOpeningTab(true)
+
+    try {
+      await openPdfInNewTab(pdfSource, 'Certificado de Registro de Marca INPI 828485216 - ibisoft')
+    } catch (error) {
+      console.error('Erro ao abrir PDF em nova aba:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Não foi possível abrir o PDF',
+        description:
+          'Ocorreu uma falha ao carregar o arquivo. Você pode usar a opção "Baixar PDF" para salvá-lo no seu dispositivo.',
+      })
+    } finally {
+      setIsOpeningTab(false)
+    }
+  }
 
   const handleDownload = async () => {
     if (!pdfSource) return
@@ -139,24 +162,26 @@ export default function Inpi() {
                 {isDownloading ? 'Baixando...' : isAvailable ? 'Baixar PDF' : 'Disponível em breve'}
               </Button>
 
-              {isAvailable ? (
-                <Button variant="outline" size="lg" asChild className="gap-2">
-                  <a
-                    href={pdfSource}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Abrir PDF do certificado INPI em nova aba"
-                  >
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={handleOpenInNewTab}
+                disabled={!isAvailable || isOpeningTab}
+                className="gap-2"
+                aria-label="Abrir PDF do certificado INPI em nova aba"
+              >
+                {isOpeningTab ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Abrindo...
+                  </>
+                ) : (
+                  <>
                     <ExternalLink className="h-4 w-4" />
                     Abrir em nova aba
-                  </a>
-                </Button>
-              ) : (
-                <Button variant="outline" size="lg" disabled className="gap-2">
-                  <ExternalLink className="h-4 w-4" />
-                  Abrir em nova aba
-                </Button>
-              )}
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         </div>
@@ -194,14 +219,14 @@ export default function Inpi() {
                   Clique aqui para baixar o PDF diretamente
                 </button>
                 {' ou '}
-                <a
-                  href={pdfSource}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline font-medium"
+                <button
+                  type="button"
+                  onClick={handleOpenInNewTab}
+                  disabled={isOpeningTab}
+                  className="text-primary hover:underline font-medium focus:outline-none disabled:opacity-60"
                 >
-                  abra em uma nova aba
-                </a>
+                  {isOpeningTab ? 'abrindo em nova aba...' : 'abra em uma nova aba'}
+                </button>
                 .
               </div>
             </>
