@@ -86,7 +86,7 @@ export default function About() {
               eficiência e o crescimento sustentável dos nossos clientes.
             </p>
 
-            {/* Bloco de credibilidade: DUNS Registered e CNPJ Minha Receita */}
+            {/* Bloco de credibilidade: DUNS Registered e Cartão CNPJ */}
             <div className="space-y-3">
               <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-3">
@@ -112,7 +112,7 @@ export default function About() {
                 </Link>
               </div>
 
-              {/* Card CNPJ Minha Receita */}
+              {/* Card Cartão CNPJ */}
               <CnpjLink variant="card" />
             </div>
           </div>

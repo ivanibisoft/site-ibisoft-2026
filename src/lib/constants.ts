@@ -6,7 +6,7 @@ export const CNPJ_MINHA_RECEITA_URL = 'https://minhareceita.org/78.761.285-0001-
 // Mantemos o alias para retrocompatibilidade caso algum módulo ainda o importe
 export const CNPJ_RECEITA_FEDERAL_URL = CNPJ_MINHA_RECEITA_URL
 export const CNPJ_TOOLTIP_TEXT =
-  'Consulte os dados cadastrais da ibisoft via Minha Receita (dados públicos oficiais da Receita Federal). Clique para abrir.'
+  'Consulte os dados cadastrais e o cartão CNPJ oficial da ibisoft. Clique para ver os detalhes.'
 
 import {
   Building2,

@@ -1,7 +1,8 @@
-import { ExternalLink, Building2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ExternalLink, Building2, ArrowRight } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
-import { CNPJ_NUMBER, CNPJ_MINHA_RECEITA_URL, CNPJ_TOOLTIP_TEXT } from '@/lib/constants'
+import { CNPJ_NUMBER, CNPJ_TOOLTIP_TEXT } from '@/lib/constants'
 
 export interface CnpjLinkProps {
   /**
@@ -43,13 +44,13 @@ export function CnpjLink({
                 <span className="text-muted-foreground">
                   A ibisoft está regularmente inscrita sob o CNPJ{' '}
                   <strong className="text-slate-900">{CNPJ_NUMBER}</strong> perante a Receita
-                  Federal do Brasil.
+                  Federal do Brasil (Situação ATIVA).
                 </span>
               </div>
             </div>
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline shrink-0 group">
-              Consultar CNPJ no Minha Receita
-              <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              Consultar cartão CNPJ
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </span>
           </div>
         )
@@ -99,15 +100,13 @@ export function CnpjLink({
   })()
 
   const linkElement = (
-    <a
-      href={CNPJ_MINHA_RECEITA_URL}
-      target="_blank"
-      rel="noopener noreferrer"
+    <Link
+      to="/cnpj"
       className="inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm transition-transform active:scale-[0.99]"
-      aria-label={`Consultar CNPJ ${CNPJ_NUMBER} no Minha Receita (dados públicos da Receita Federal, abre em nova aba)`}
+      aria-label={`Consultar dados e Cartão CNPJ ${CNPJ_NUMBER}`}
     >
       {content}
-    </a>
+    </Link>
   )
 
   if (!showTooltip) {
@@ -123,7 +122,7 @@ export function CnpjLink({
         className="max-w-xs text-xs font-normal text-center p-2.5 shadow-lg border-primary/20"
       >
         <p className="font-semibold mb-1 text-primary flex items-center justify-center gap-1">
-          <Building2 className="h-3.5 w-3.5" /> Consulta CNPJ • Minha Receita
+          <Building2 className="h-3.5 w-3.5" /> Cartão CNPJ • Dados Oficiais
         </p>
         <p className="text-slate-200">{CNPJ_TOOLTIP_TEXT}</p>
       </TooltipContent>
