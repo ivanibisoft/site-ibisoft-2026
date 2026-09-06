@@ -59,19 +59,18 @@ export function CnpjLink({
         return (
           <div
             className={cn(
-              'group inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-200/60 hover:bg-primary/10 text-slate-700 hover:text-primary transition-all font-medium border border-slate-300/70 hover:border-primary/30',
+              'group inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-200/60 hover:bg-primary/10 text-slate-700 hover:text-primary transition-all font-medium border border-slate-300/70 hover:border-primary/30',
               className,
             )}
           >
-            <Building2 className="h-3.5 w-3.5 text-primary" />
+            <Building2 className="h-3.5 w-3.5 text-primary shrink-0" />
             <span>
-              {showLabel && 'CNPJ: '}
-              <strong className="text-slate-900 group-hover:text-primary font-semibold">
-                {CNPJ_NUMBER}
-              </strong>
+              {showLabel && 'CNPJ '}
+              <strong className="text-slate-900 group-hover:text-primary">{CNPJ_NUMBER}</strong>
             </span>
+            <span className="text-emerald-600 font-bold">✓</span>
             {showExternalIcon && (
-              <ExternalLink className="h-3 w-3 opacity-70 group-hover:opacity-100 transition-opacity" />
+              <ExternalLink className="h-3 w-3 opacity-70 group-hover:opacity-100 transition-opacity ml-0.5 shrink-0" />
             )}
           </div>
         )
@@ -102,8 +101,12 @@ export function CnpjLink({
   const linkElement = (
     <Link
       to="/cnpj"
-      className="inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm transition-transform active:scale-[0.99]"
+      className={cn(
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-transform active:scale-[0.99]',
+        variant === 'badge' ? 'inline-block rounded-full' : 'inline-block rounded-sm',
+      )}
       aria-label={`Consultar dados e Cartão CNPJ ${CNPJ_NUMBER}`}
+      title={showTooltip ? undefined : CNPJ_TOOLTIP_TEXT}
     >
       {content}
     </Link>

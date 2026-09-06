@@ -3,6 +3,7 @@ import { Linkedin, MapPin, Phone, ShieldCheck, Award } from 'lucide-react'
 import ibisoftLogo from '@/assets/botao_ibisoft_2_sem_fundo-74482.png'
 import { SEGMENTS, WHATSAPP_URL } from '@/lib/constants'
 import { CnpjLink } from '@/components/CnpjLink'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useSiteAssets } from '@/hooks/use-site-assets'
 import { useHasBlogPosts } from '@/hooks/use-has-blog-posts'
 
@@ -144,40 +145,74 @@ export function Footer() {
               © {new Date().getFullYear()} ibisoft Tecnologia da Informação. Todos os direitos
               reservados.
             </p>
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-3 gap-y-1 text-xs text-slate-500 pt-1">
-              <CnpjLink variant="inline" showExternalIcon />
-              <span>•</span>
-              <Link
-                to="/duns"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-200/60 hover:bg-primary/10 text-slate-700 hover:text-primary transition-all font-medium border border-slate-300/70 hover:border-primary/30 group"
-                aria-label="Ver Certificado D-U-N-S Registered Nº 905539672"
-                title="Certificação internacional de idoneidade empresarial da Dun & Bradstreet. Clique para ver o certificado."
-              >
-                <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                <span>
-                  Certificada D-U-N-S Nº{' '}
-                  <strong className="text-slate-900 group-hover:text-primary">905539672</strong>
-                </span>
-                <span className="text-emerald-600 font-bold">✓</span>
-              </Link>
-              <span>•</span>
-              <Link
-                to="/inpi"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-200/60 hover:bg-primary/10 text-slate-700 hover:text-primary transition-all font-medium border border-slate-300/70 hover:border-primary/30 group"
-                aria-label="Ver Certificado de Marca Registrada no INPI Processo nº 828485216"
-                title="Marca oficial registrada no INPI sob Processo nº 828485216. Vigência até 08/11/2031. Clique para ver o certificado."
-              >
-                <Award className="h-3.5 w-3.5 text-primary" />
-                <span>
-                  Marca registrada no INPI{' '}
-                  <strong className="text-slate-900 group-hover:text-primary">828485216</strong>
-                </span>
-                <span className="text-emerald-600 font-bold">✓</span>
-              </Link>
-              <span>•</span>
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 text-xs text-slate-500 pt-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    to="/duns"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-200/60 hover:bg-primary/10 text-slate-700 hover:text-primary transition-all font-medium border border-slate-300/70 hover:border-primary/30 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    aria-label="Ver Certificado D-U-N-S Registered Nº 905539672"
+                  >
+                    <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                    <span>
+                      Certificada D-U-N-S Nº{' '}
+                      <strong className="text-slate-900 group-hover:text-primary">905539672</strong>
+                    </span>
+                    <span className="text-emerald-600 font-bold">✓</span>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  align="center"
+                  className="max-w-xs text-xs font-normal text-center p-2.5 shadow-lg border-primary/20"
+                >
+                  <p className="font-semibold mb-1 text-primary flex items-center justify-center gap-1">
+                    <ShieldCheck className="h-3.5 w-3.5" /> D&amp;B D-U-N-S® Registered
+                  </p>
+                  <p className="text-slate-200">
+                    Certificação internacional de idoneidade empresarial da Dun &amp; Bradstreet.
+                    Clique para ver o certificado.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    to="/inpi"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-200/60 hover:bg-primary/10 text-slate-700 hover:text-primary transition-all font-medium border border-slate-300/70 hover:border-primary/30 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    aria-label="Ver Certificado de Marca Registrada no INPI Processo nº 828485216"
+                  >
+                    <Award className="h-3.5 w-3.5 text-primary" />
+                    <span>
+                      Marca registrada no INPI{' '}
+                      <strong className="text-slate-900 group-hover:text-primary">828485216</strong>
+                    </span>
+                    <span className="text-emerald-600 font-bold">✓</span>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  align="center"
+                  className="max-w-xs text-xs font-normal text-center p-2.5 shadow-lg border-primary/20"
+                >
+                  <p className="font-semibold mb-1 text-primary flex items-center justify-center gap-1">
+                    <Award className="h-3.5 w-3.5" /> Marca Registrada INPI
+                  </p>
+                  <p className="text-slate-200">
+                    Marca oficial registrada no INPI sob Processo nº 828485216. Vigência até
+                    08/11/2031. Clique para ver o certificado.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+
+              <CnpjLink variant="badge" />
+
+              <span className="text-slate-300 hidden sm:inline">•</span>
+
               <Link
                 to="/admin"
-                className="hover:text-primary transition-colors underline decoration-transparent hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm text-slate-400 hover:text-slate-600"
+                className="hover:text-primary transition-colors underline decoration-transparent hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm text-slate-400 hover:text-slate-600 text-xs px-1"
               >
                 Admin
               </Link>
