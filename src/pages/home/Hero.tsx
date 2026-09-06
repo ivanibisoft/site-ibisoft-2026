@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { getActiveHeroMessages, type HeroMessage } from '@/services/hero-messages'
 import { useRealtime } from '@/hooks/use-realtime'
+import { TypewriterHero } from '@/components/home/TypewriterHero'
 
 interface HeroProps {
   heroTitle?: string
@@ -11,28 +12,19 @@ interface HeroProps {
   heroImageUrl: string | null
 }
 
-const ROTATION_INTERVAL = 5000
 const RESUME_DELAY = 1000
 
 const MESSAGE_CLASS =
   'text-2xl md:text-3xl lg:text-4xl font-bold font-display leading-[1.2] text-white drop-shadow-lg'
 
-export function Hero({ heroImageUrl }: HeroProps) {
+export function Hero({ heroImageUrl, heroTitle }: HeroProps) {
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
   const [messages, setMessages] = useState<HeroMessage[]>([])
   const [activePhrase, setActivePhrase] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
 
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const clearTimer = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-      timerRef.current = null
-    }
-  }, [])
 
   const clearResumeTimer = useCallback(() => {
     if (resumeTimerRef.current) {
@@ -44,7 +36,7 @@ export function Hero({ heroImageUrl }: HeroProps) {
   const loadMessages = useCallback(async () => {
     const data = await getActiveHeroMessages()
     setMessages(data)
-    setActivePhrase((prev) => (prev >= data.length ? 0 : prev))
+    setActivePhrase((prev) => (data.length > 0 && prev >= data.length ? 0 : prev))
   }, [])
 
   useEffect(() => {
@@ -60,24 +52,26 @@ export function Hero({ heroImageUrl }: HeroProps) {
     setImageError(false)
   }, [heroImageUrl])
 
-  useEffect(() => {
-    if (isPaused || messages.length <= 1) {
-      clearTimer()
-      return
-    }
-    timerRef.current = setInterval(() => {
-      setActivePhrase((prev) => (prev + 1) % messages.length)
-    }, ROTATION_INTERVAL)
-    return clearTimer
-  }, [isPaused, clearTimer, messages.length])
-
   useEffect(
     () => () => {
-      clearTimer()
       clearResumeTimer()
     },
-    [clearTimer, clearResumeTimer],
+    [clearResumeTimer],
   )
+
+  const phraseList = useMemo(() => {
+    if (messages.length > 0) {
+      return messages.map((m) => m.text)
+    }
+    if (heroTitle) {
+      return [heroTitle]
+    }
+    return ['Gestão completa da sua empresa com um ERP simples, integrado e escalável']
+  }, [messages, heroTitle])
+
+  const handleAdvance = useCallback(() => {
+    setActivePhrase((prev) => (prev + 1) % phraseList.length)
+  }, [phraseList.length])
 
   const showImage = heroImageUrl && !imageError
 
@@ -114,29 +108,20 @@ export function Hero({ heroImageUrl }: HeroProps) {
       <div className="relative z-10 container mx-auto flex h-full min-h-[320px] md:min-h-[480px] lg:min-h-[600px] items-end pb-10 md:pb-16 px-4 md:px-6">
         <div className="max-w-2xl w-full animate-fade-in-up">
           <div className="relative min-h-[100px] md:min-h-[120px] lg:min-h-[140px]">
-            {messages.map((msg, index) => {
-              const isActive = index === activePhrase
-              return (
-                <p
-                  key={msg.id}
-                  className={cn(
-                    'absolute inset-0 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]',
-                    MESSAGE_CLASS,
-                    isActive
-                      ? 'opacity-100 translate-y-0'
-                      : 'opacity-0 translate-y-4 pointer-events-none',
-                  )}
-                  aria-hidden={!isActive}
-                >
-                  {msg.text}
-                </p>
-              )
-            })}
+            <TypewriterHero
+              phrases={phraseList}
+              currentIndex={activePhrase}
+              isPaused={isPaused}
+              onAdvance={handleAdvance}
+              charactersPerSecond={50}
+              pauseAfterComplete={2800}
+              className={MESSAGE_CLASS}
+            />
           </div>
 
-          {messages.length > 1 && (
+          {phraseList.length > 1 && (
             <div className="flex items-center gap-2 py-6">
-              {messages.map((_, index) => (
+              {phraseList.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setActivePhrase(index)}
@@ -150,7 +135,7 @@ export function Hero({ heroImageUrl }: HeroProps) {
             </div>
           )}
 
-          {messages.length <= 1 && <div className="py-6" />}
+          {phraseList.length <= 1 && <div className="py-6" />}
 
           <div className="flex flex-col sm:flex-row gap-4 pt-2">
             <Button
