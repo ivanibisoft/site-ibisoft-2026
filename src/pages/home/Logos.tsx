@@ -253,6 +253,7 @@ export function Logos() {
                 <div className="flex items-center justify-center gap-3 mt-6">
                   <CarouselPrevious
                     onClick={() => {
+                      api?.scrollPrev()
                       scheduleAutoplayResume()
                     }}
                     aria-label="Ver parceiros anteriores"
@@ -260,6 +261,7 @@ export function Logos() {
                   />
                   <CarouselNext
                     onClick={() => {
+                      api?.scrollNext()
                       scheduleAutoplayResume()
                     }}
                     aria-label="Ver próximos parceiros"
