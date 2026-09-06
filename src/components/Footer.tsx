@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Facebook, Instagram, Linkedin, MapPin, Phone } from 'lucide-react'
+import { Linkedin, MapPin, Phone } from 'lucide-react'
 import ibisoftLogo from '@/assets/botao_ibisoft_2_sem_fundo-74482.png'
 import dunsPdf from '@/assets/ibisoft-tecnologia-duns-number-905539672-3e6be.pdf'
 import { SEGMENTS, WHATSAPP_URL } from '@/lib/constants'
@@ -26,25 +26,13 @@ export function Footer() {
             </p>
             <div className="flex items-center space-x-4">
               <a
-                href="#"
+                href="https://www.linkedin.com/in/ivan-ibisoft"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-slate-400 hover:text-slate-900 transition-colors"
                 aria-label="LinkedIn"
               >
                 <Linkedin className="h-5 w-5" />
-              </a>
-              <a
-                href="#"
-                className="text-slate-400 hover:text-slate-900 transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a
-                href="#"
-                className="text-slate-400 hover:text-slate-900 transition-colors"
-                aria-label="Facebook"
-              >
-                <Facebook className="h-5 w-5" />
               </a>
             </div>
           </div>
