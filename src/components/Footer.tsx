@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Linkedin, MapPin, Phone, ShieldCheck } from 'lucide-react'
+import { Linkedin, MapPin, Phone, ShieldCheck, Award } from 'lucide-react'
 import ibisoftLogo from '@/assets/botao_ibisoft_2_sem_fundo-74482.png'
 import { SEGMENTS, WHATSAPP_URL } from '@/lib/constants'
 import { useSiteAssets } from '@/hooks/use-site-assets'
@@ -156,6 +156,20 @@ export function Footer() {
                 <span>
                   Certificada D-U-N-S Nº{' '}
                   <strong className="text-slate-900 group-hover:text-primary">905539672</strong>
+                </span>
+                <span className="text-emerald-600 font-bold">✓</span>
+              </Link>
+              <span>•</span>
+              <Link
+                to="/inpi"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-200/60 hover:bg-primary/10 text-slate-700 hover:text-primary transition-all font-medium border border-slate-300/70 hover:border-primary/30 group"
+                aria-label="Ver Certificado de Marca Registrada no INPI Processo nº 828485216"
+                title="Marca oficial registrada no INPI sob Processo nº 828485216. Vigência até 08/11/2031. Clique para ver o certificado."
+              >
+                <Award className="h-3.5 w-3.5 text-primary" />
+                <span>
+                  Marca registrada no INPI{' '}
+                  <strong className="text-slate-900 group-hover:text-primary">828485216</strong>
                 </span>
                 <span className="text-emerald-600 font-bold">✓</span>
               </Link>

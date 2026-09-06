@@ -13,6 +13,7 @@ import Cases from './pages/Cases'
 import Blog from './pages/Blog'
 import BlogPostPage from './pages/BlogPostPage'
 import Duns from './pages/Duns'
+import Inpi from './pages/Inpi'
 import NotFound from './pages/NotFound'
 import { ScrollToTop } from './components/ScrollToTop'
 import { SiteAssetsProvider } from '@/hooks/use-site-assets'
@@ -49,6 +50,7 @@ const App = () => (
                   <Route path="/blog/:slug" element={<BlogPostPage />} />
                   <Route path="/contato" element={<QueroConhecer />} />
                   <Route path="/duns" element={<Duns />} />
+                  <Route path="/inpi" element={<Inpi />} />
                 </Route>
 
                 <Route path="/admin/login" element={<AdminLogin />} />

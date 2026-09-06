@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getActiveTestimonials, type Testimonial } from '@/services/testimonials'
 import { useRealtime } from '@/hooks/use-realtime'
 import { DunsBadge } from '@/components/DunsBadge'
+import { InpiBadge } from '@/components/InpiBadge'
 
 export function SocialProof() {
   const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: true }))
@@ -43,9 +44,10 @@ export function SocialProof() {
           <Megaphone className="w-8 h-8 md:w-10 md:h-10 text-primary shrink-0" aria-hidden="true" />
         </div>
 
-        {/* Selo DUNS Registered na seção de confiança */}
-        <div className="flex justify-center mb-10">
+        {/* Selos de credibilidade DUNS Registered e Marca Registrada INPI lado a lado */}
+        <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4 mb-10">
           <DunsBadge variant="badge" showExternalIcon />
+          <InpiBadge variant="badge" showExternalIcon />
         </div>
 
         <div className="relative max-w-6xl mx-auto px-6 md:px-12 lg:px-16">

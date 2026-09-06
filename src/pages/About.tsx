@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { Building2, Lightbulb, UserCircle2, ShieldCheck, ArrowRight } from 'lucide-react'
+import { Building2, Lightbulb, UserCircle2, ShieldCheck, ArrowRight, Award } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { getTeamMembers } from '@/services/team_members'
 import pb from '@/lib/pocketbase/client'
@@ -85,29 +85,56 @@ export default function About() {
               eficiência e o crescimento sustentável dos nossos clientes.
             </p>
 
-            {/* Certificação D-U-N-S Registered na narrativa */}
-            <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-start gap-3">
-                <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <span className="font-semibold text-slate-900 block">
-                    Idoneidade Empresarial Reconhecida Globalmente
-                  </span>
-                  <span className="text-muted-foreground">
-                    A ibisoft possui a certificação internacional{' '}
-                    <strong>D&amp;B D-U-N-S® Registered</strong> sob o Nº{' '}
-                    <strong className="text-slate-900">905539672</strong>, assegurando nossa solidez
-                    e transparência no mercado corporativo.
-                  </span>
+            {/* Blocos de credibilidade: DUNS Registered e Marca Registrada INPI */}
+            <div className="space-y-3">
+              <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <span className="font-semibold text-slate-900 block">
+                      Idoneidade Empresarial Reconhecida Globalmente
+                    </span>
+                    <span className="text-muted-foreground">
+                      A ibisoft possui a certificação internacional{' '}
+                      <strong>D&amp;B D-U-N-S® Registered</strong> sob o Nº{' '}
+                      <strong className="text-slate-900">905539672</strong>, assegurando nossa
+                      solidez e transparência no mercado corporativo.
+                    </span>
+                  </div>
                 </div>
+                <Link
+                  to="/duns"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline shrink-0 group"
+                >
+                  Ver certificado{' '}
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                </Link>
               </div>
-              <Link
-                to="/duns"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline shrink-0 group"
-              >
-                Ver certificado{' '}
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-              </Link>
+
+              {/* Card Marca Registrada INPI */}
+              <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <Award className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <span className="font-semibold text-slate-900 block">
+                      Marca Registrada no INPI
+                    </span>
+                    <span className="text-muted-foreground">
+                      A marca <strong>ibisoft</strong> é oficialmente registrada junto ao Instituto
+                      Nacional da Propriedade Industrial sob o Processo nº{' '}
+                      <strong className="text-slate-900">828485216</strong> (Classe NCL 42), com
+                      registro prorrogado e vigente até 08/11/2031.
+                    </span>
+                  </div>
+                </div>
+                <Link
+                  to="/inpi"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline shrink-0 group"
+                >
+                  Ver certificado{' '}
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              </div>
             </div>
           </div>
           <div className="rounded-2xl overflow-hidden shadow-2xl">

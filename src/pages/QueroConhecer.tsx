@@ -19,6 +19,7 @@ import pb from '@/lib/pocketbase/client'
 import { useToast } from '@/hooks/use-toast'
 import { WHATSAPP_URL } from '@/lib/constants'
 import { DunsBadge } from '@/components/DunsBadge'
+import { InpiBadge } from '@/components/InpiBadge'
 
 const formSchema = z.object({
   name: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
@@ -166,9 +167,10 @@ export default function QueroConhecer() {
 
           {/* Contact Form */}
           <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
-            {/* Selo de credibilidade DUNS Registered logo no topo do formulário */}
-            <div className="mb-6">
+            {/* Selos de credibilidade DUNS Registered e Marca Registrada INPI no topo do formulário */}
+            <div className="mb-6 space-y-2.5">
               <DunsBadge variant="form" />
+              <InpiBadge variant="form" />
             </div>
 
             <h3 className="text-2xl font-semibold text-slate-900 mb-8">Envie uma Mensagem</h3>
