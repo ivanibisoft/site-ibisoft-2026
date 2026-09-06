@@ -116,39 +116,43 @@ export default function Segment() {
             Como a ibisoft resolve seus desafios
           </h2>
           {challenges.length > 0 ? (
-            <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-              {challenges.map((challenge, index) => {
-                const num = challenge.order || index + 1
-                const cleanTitle = challenge.title.replace(/^\d+\.\s*/, '')
+            <>
+              <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+                {challenges.map((challenge, index) => {
+                  const num = challenge.order || index + 1
+                  const cleanTitle = challenge.title.replace(/^\d+\.\s*/, '')
 
-                return (
-                  <div
-                    key={challenge.id}
-                    className="flex gap-5 p-6 rounded-2xl bg-background border shadow-sm hover:shadow-md transition-all duration-300"
-                  >
-                    <CheckCircle2 className="h-7 w-7 text-accent shrink-0 mt-1" />
-                    <div className="flex flex-col flex-1">
-                      <h3 className="font-bold text-xl mb-3 leading-tight text-primary">
-                        {num}. {cleanTitle}
-                      </h3>
-                      <p className="text-muted-foreground leading-relaxed text-base mb-6">
-                        {challenge.description}
-                      </p>
-                      <div className="mt-auto pt-2 flex justify-center">
-                        <CtaButton
-                          to="/quero-conhecer"
-                          className="w-full sm:w-auto text-sm sm:text-base font-semibold"
-                        >
-                          {segment?.title?.trim()
-                            ? `Conheça a solução para ${segment.title.trim()}`
-                            : 'Conheça a solução'}
-                        </CtaButton>
+                  return (
+                    <div
+                      key={challenge.id}
+                      className="flex gap-5 p-6 rounded-2xl bg-background border shadow-sm hover:shadow-md transition-all duration-300"
+                    >
+                      <CheckCircle2 className="h-7 w-7 text-accent shrink-0 mt-1" />
+                      <div className="flex flex-col flex-1">
+                        <h3 className="font-bold text-xl mb-3 leading-tight text-primary">
+                          {num}. {cleanTitle}
+                        </h3>
+                        <p className="text-muted-foreground leading-relaxed text-base">
+                          {challenge.description}
+                        </p>
                       </div>
                     </div>
-                  </div>
-                )
-              })}
-            </div>
+                  )
+                })}
+              </div>
+
+              <div className="mt-12 md:mt-16 flex justify-center">
+                <CtaButton
+                  to="/quero-conhecer"
+                  size="lg"
+                  className="w-full sm:w-auto text-base font-semibold px-8"
+                >
+                  {segment?.title?.trim()
+                    ? `Conheça a solução para ${segment.title.trim()}`
+                    : 'Conheça a solução'}
+                </CtaButton>
+              </div>
+            </>
           ) : (
             <div className="text-center text-muted-foreground">
               Nenhum desafio cadastrado para este segmento ainda.
