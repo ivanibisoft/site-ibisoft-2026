@@ -26,7 +26,7 @@ export function TypewriterHero({
   isPaused = false,
   onAdvance,
   charactersPerSecond = 35,
-  pauseAfterComplete = 2800,
+  pauseAfterComplete = 3000,
   className,
   cursorClassName,
 }: TypewriterTextProps) {

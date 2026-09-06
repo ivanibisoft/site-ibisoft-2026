@@ -114,7 +114,7 @@ export function Hero({ heroImageUrl, heroTitle }: HeroProps) {
               isPaused={isPaused}
               onAdvance={handleAdvance}
               charactersPerSecond={35}
-              pauseAfterComplete={2800}
+              pauseAfterComplete={3000}
               className={MESSAGE_CLASS}
             />
           </div>
