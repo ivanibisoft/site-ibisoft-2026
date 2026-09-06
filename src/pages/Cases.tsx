@@ -114,14 +114,6 @@ export default function Cases() {
             >
               Quero ser um case de sucesso
             </CtaButton>
-            <CtaButton
-              to="/sobre-erp"
-              size="lg"
-              variant="outline"
-              className="w-full sm:w-auto h-14 px-10 text-base font-semibold"
-            >
-              Entenda mais sobre o ERP
-            </CtaButton>
           </div>
         </div>
       </section>
