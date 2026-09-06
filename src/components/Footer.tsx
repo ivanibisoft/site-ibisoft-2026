@@ -1,84 +1,28 @@
-import { useEffect, useState, useCallback } from 'react'
-import { Link } from 'react-router-dom'
-import { Linkedin, MapPin, Phone, ShieldCheck, Award, ChevronDown } from 'lucide-react'
-import * as Icons from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom'
+import { Linkedin, MapPin, Phone, ShieldCheck, Award } from 'lucide-react'
 import ibisoftLogo from '@/assets/botao_ibisoft_2_sem_fundo-74482.png'
 import { WHATSAPP_URL } from '@/lib/constants'
 import { CnpjLink } from '@/components/CnpjLink'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Card, CardContent } from '@/components/ui/card'
 import { useSiteAssets } from '@/hooks/use-site-assets'
 import { useHasBlogPosts } from '@/hooks/use-has-blog-posts'
-import { getSegments, type Segment } from '@/services/segments'
-import { getModules, type Module } from '@/services/modules'
-import useRealtime from '@/hooks/use-realtime'
-import { cn } from '@/lib/utils'
-
-const FALLBACK_SEGMENT_ICONS = [
-  'Building2',
-  'Globe',
-  'Wrench',
-  'Factory',
-  'Dna',
-  'Tractor',
-  'Truck',
-  'ShoppingCart',
-] as const
-
-function resolveSegmentIcon(iconName: string, index: number): LucideIcon {
-  const name = iconName || FALLBACK_SEGMENT_ICONS[index % FALLBACK_SEGMENT_ICONS.length]
-  const Icon = (Icons as unknown as Record<string, LucideIcon>)[name]
-  return Icon || Icons.HelpCircle
-}
 
 export function Footer() {
+  const location = useLocation()
   const { getAssetUrl } = useSiteAssets()
   const { hasBlogPosts } = useHasBlogPosts()
   const logoUrl = getAssetUrl('logo-principal') || ibisoftLogo
 
-  const [segments, setSegments] = useState<Segment[]>([])
-  const [modules, setModules] = useState<Module[]>([])
-  const [solutionsOpen, setSolutionsOpen] = useState(false)
-  const [functionalitiesOpen, setFunctionalitiesOpen] = useState(false)
-
-  const loadData = useCallback(async () => {
-    try {
-      const segData = await getSegments()
-      setSegments(segData || [])
-    } catch (err) {
-      console.error('Failed to load segments for footer:', err)
-      setSegments([])
+  const handleSectionClick = (elementId: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (location.pathname === '/') {
+      e.preventDefault()
+      const element = document.getElementById(elementId)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        window.history.pushState(null, '', `/#${elementId}`)
+      }
     }
-
-    try {
-      const modData = await getModules()
-      setModules(modData || [])
-    } catch (err) {
-      console.error('Failed to load modules for footer:', err)
-      setModules([])
-    }
-  }, [])
-
-  useEffect(() => {
-    loadData()
-  }, [loadData])
-
-  useRealtime('segments', () => {
-    getSegments()
-      .then((data) => setSegments(data || []))
-      .catch((err) => {
-        console.error('Failed to update segments in footer realtime:', err)
-      })
-  })
-
-  useRealtime('modules', () => {
-    getModules()
-      .then((data) => setModules(data || []))
-      .catch((err) => {
-        console.error('Failed to update modules in footer realtime:', err)
-      })
-  })
+  }
 
   return (
     <footer className="bg-slate-50 text-slate-600 py-12 lg:py-16 border-t border-slate-200">
@@ -116,130 +60,24 @@ export function Footer() {
                 </Link>
               </li>
 
-              {/* Soluções (Accordion) */}
               <li>
-                <button
-                  type="button"
-                  onClick={() => setSolutionsOpen((prev) => !prev)}
-                  className="flex items-center justify-between w-full text-sm text-left hover:text-primary transition-colors group py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
-                  aria-expanded={solutionsOpen}
+                <Link
+                  to="/#para-quem-e-o-nosso-erp"
+                  onClick={handleSectionClick('para-quem-e-o-nosso-erp')}
+                  className="text-sm hover:text-primary transition-colors block"
                 >
-                  <span
-                    className={cn('transition-colors', solutionsOpen && 'text-primary font-medium')}
-                  >
-                    Soluções
-                  </span>
-                  <ChevronDown
-                    className={cn(
-                      'h-4 w-4 text-slate-400 group-hover:text-primary transition-transform duration-200 shrink-0 ml-2',
-                      solutionsOpen && 'rotate-180 text-primary',
-                    )}
-                  />
-                </button>
-                {solutionsOpen && (
-                  <div className="mt-3 pt-2 pb-1 border-l-2 border-slate-200 pl-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2.5">
-                      Para quem é o nosso ERP?
-                    </p>
-                    {segments.length === 0 ? (
-                      <p className="text-xs text-slate-400 italic py-1">
-                        Nenhum segmento disponível no momento.
-                      </p>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-80 overflow-y-auto pr-1">
-                        {segments.map((seg, index) => {
-                          const Icon = resolveSegmentIcon(seg.icon, index)
-                          return (
-                            <Link
-                              key={seg.id}
-                              to={`/segmentos/${seg.slug}`}
-                              className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 rounded-lg"
-                            >
-                              <Card
-                                className={cn(
-                                  'border border-slate-200/80 shadow-xs hover:shadow-sm transition-all duration-200',
-                                  'text-center group bg-white cursor-pointer',
-                                  'hover:-translate-y-0.5 hover:border-primary/30',
-                                )}
-                              >
-                                <CardContent className="p-3 pt-3.5">
-                                  <div className="mx-auto h-9 w-9 rounded-full bg-primary/5 flex items-center justify-center mb-2 group-hover:bg-accent/10 transition-colors">
-                                    <Icon className="h-4 w-4 text-primary group-hover:text-accent transition-colors" />
-                                  </div>
-                                  <h4 className="font-semibold text-xs text-foreground group-hover:text-primary transition-colors leading-snug line-clamp-2">
-                                    {seg.title}
-                                  </h4>
-                                </CardContent>
-                              </Card>
-                            </Link>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )}
+                  Soluções
+                </Link>
               </li>
 
-              {/* Funcionalidades (Accordion) */}
               <li>
-                <button
-                  type="button"
-                  onClick={() => setFunctionalitiesOpen((prev) => !prev)}
-                  className="flex items-center justify-between w-full text-sm text-left hover:text-primary transition-colors group py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
-                  aria-expanded={functionalitiesOpen}
+                <Link
+                  to="/#funcionalidades-erp"
+                  onClick={handleSectionClick('funcionalidades-erp')}
+                  className="text-sm hover:text-primary transition-colors block"
                 >
-                  <span
-                    className={cn(
-                      'transition-colors',
-                      functionalitiesOpen && 'text-primary font-medium',
-                    )}
-                  >
-                    Funcionalidades
-                  </span>
-                  <ChevronDown
-                    className={cn(
-                      'h-4 w-4 text-slate-400 group-hover:text-primary transition-transform duration-200 shrink-0 ml-2',
-                      functionalitiesOpen && 'rotate-180 text-primary',
-                    )}
-                  />
-                </button>
-                {functionalitiesOpen && (
-                  <div className="mt-3 pt-2 pb-1 border-l-2 border-slate-200 pl-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2.5">
-                      Tudo que sua empresa precisa em um só lugar
-                    </p>
-                    {modules.length === 0 ? (
-                      <p className="text-xs text-slate-400 italic py-1">
-                        Nenhuma funcionalidade disponível no momento.
-                      </p>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto pr-1">
-                        {modules.map((mod) => {
-                          const IconComponent =
-                            mod.icon && (Icons as unknown as Record<string, LucideIcon>)[mod.icon]
-                              ? (Icons as unknown as Record<string, LucideIcon>)[mod.icon]
-                              : Icons.Box
-                          return (
-                            <Link
-                              key={mod.id}
-                              to={`/funcionalidades/${mod.slug}`}
-                              className="block h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 rounded-lg"
-                            >
-                              <Card className="flex flex-col items-center justify-center gap-2 p-3 text-center hover:border-accent/50 hover:shadow-sm transition-all duration-200 group border-slate-200/80 bg-white h-full min-h-[92px]">
-                                <div className="h-8 w-8 rounded-lg bg-primary/5 flex items-center justify-center group-hover:bg-accent/10 transition-colors shrink-0">
-                                  <IconComponent className="h-4 w-4 text-primary group-hover:text-accent transition-colors" />
-                                </div>
-                                <span className="text-[11px] font-medium text-foreground leading-snug line-clamp-2">
-                                  {mod.name}
-                                </span>
-                              </Card>
-                            </Link>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )}
+                  Funcionalidades
+                </Link>
               </li>
 
               <li>

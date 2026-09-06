@@ -57,9 +57,10 @@ export function Segments() {
 
   return (
     <section
+      id="para-quem-e-o-nosso-erp"
       ref={sectionRef}
       className={cn(
-        'py-24 bg-secondary/20 border-y border-border/50 shadow-[inset_0_40px_40px_-40px_rgba(0,0,0,0.03)]',
+        'py-24 bg-secondary/20 border-y border-border/50 shadow-[inset_0_40px_40px_-40px_rgba(0,0,0,0.03)] scroll-mt-20',
         isVisible ? 'animate-fade-in-up' : 'opacity-0',
       )}
     >
