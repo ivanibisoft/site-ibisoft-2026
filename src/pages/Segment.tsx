@@ -127,13 +127,23 @@ export default function Segment() {
                     className="flex gap-5 p-6 rounded-2xl bg-background border shadow-sm hover:shadow-md transition-all duration-300"
                   >
                     <CheckCircle2 className="h-7 w-7 text-accent shrink-0 mt-1" />
-                    <div className="flex flex-col">
+                    <div className="flex flex-col flex-1">
                       <h3 className="font-bold text-xl mb-3 leading-tight text-primary">
                         {num}. {cleanTitle}
                       </h3>
-                      <p className="text-muted-foreground leading-relaxed text-base">
+                      <p className="text-muted-foreground leading-relaxed text-base mb-6">
                         {challenge.description}
                       </p>
+                      <div className="mt-auto pt-2 flex justify-center">
+                        <CtaButton
+                          to="/quero-conhecer"
+                          className="w-full sm:w-auto text-sm sm:text-base font-semibold"
+                        >
+                          {segment?.title?.trim()
+                            ? `Conheça a solução para ${segment.title.trim()}`
+                            : 'Conheça a solução'}
+                        </CtaButton>
+                      </div>
                     </div>
                   </div>
                 )
