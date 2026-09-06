@@ -279,9 +279,9 @@ export default function SobreErp() {
             <CtaButton
               to="/quero-conhecer"
               size="lg"
-              className="bg-accent hover:bg-accent/90 text-white font-semibold shadow-lg shadow-accent/20"
+              className="w-full sm:w-auto bg-accent hover:bg-accent/90 text-white font-semibold shadow-lg shadow-accent/20"
             >
-              Agendar Diagnóstico Gratuito
+              Quero conhecer o ERP
             </CtaButton>
           </div>
         </div>
