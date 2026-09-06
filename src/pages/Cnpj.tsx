@@ -16,7 +16,7 @@ import {
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { useSiteAssets } from '@/hooks/use-site-assets'
-import { CNPJ_NUMBER } from '@/lib/constants'
+import { CNPJ_NUMBER, COMPANY_RAZAO_SOCIAL } from '@/lib/constants'
 
 export default function Cnpj() {
   const { getAssetUrl, loading } = useSiteAssets()
@@ -33,7 +33,7 @@ export default function Cnpj() {
 
     document.title = `Cartão CNPJ ${CNPJ_NUMBER} | ibisoft Tecnologia`
 
-    const seoDescription = `Comprovante de Inscrição e Situação Cadastral no CNPJ sob o nº ${CNPJ_NUMBER} - IBISOFT SERVIÇOS DE INFORMÁTICA LTDA - EPP. Situação cadastral ATIVA.`
+    const seoDescription = `Comprovante de Inscrição e Situação Cadastral no CNPJ sob o nº ${CNPJ_NUMBER} - ${COMPANY_RAZAO_SOCIAL}. Situação cadastral ATIVA.`
 
     if (!metaDescriptionEl) {
       metaDescriptionEl = document.createElement('meta')
@@ -116,7 +116,7 @@ export default function Cnpj() {
                 </span>
                 <span className="hidden sm:inline">•</span>
                 <span>
-                  <strong>Razão Social:</strong> IBISOFT SERVIÇOS DE INFORMÁTICA LTDA - EPP
+                  <strong>Razão Social:</strong> {COMPANY_RAZAO_SOCIAL}
                 </span>
                 <span className="hidden sm:inline">•</span>
                 <span>
@@ -199,7 +199,7 @@ export default function Cnpj() {
               <div className="relative w-full bg-slate-200/50 min-h-[600px] md:min-h-[820px] flex items-stretch">
                 <iframe
                   src={`${cnpjPdfUrl}#toolbar=1&navpanes=0`}
-                  title={`Cartão CNPJ - ${CNPJ_NUMBER} - IBISOFT SERVIÇOS DE INFORMÁTICA LTDA`}
+                  title={`Cartão CNPJ - ${CNPJ_NUMBER} - ${COMPANY_RAZAO_SOCIAL}`}
                   className="w-full h-[600px] md:h-[820px] border-0"
                 />
               </div>
