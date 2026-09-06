@@ -113,7 +113,7 @@ export function Hero({ heroImageUrl, heroTitle }: HeroProps) {
               currentIndex={activePhrase}
               isPaused={isPaused}
               onAdvance={handleAdvance}
-              charactersPerSecond={50}
+              charactersPerSecond={35}
               pauseAfterComplete={2800}
               className={MESSAGE_CLASS}
             />

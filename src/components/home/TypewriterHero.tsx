@@ -9,7 +9,7 @@ interface TypewriterTextProps {
   onPhraseComplete?: (index: number) => void
   onAdvance?: () => void
   /**
-   * Average speed in characters per second. Default 50 (middle of 40-60 chars/s range).
+   * Average speed in characters per second. Default 35.
    */
   charactersPerSecond?: number
   /**
@@ -25,7 +25,7 @@ export function TypewriterHero({
   currentIndex,
   isPaused = false,
   onAdvance,
-  charactersPerSecond = 50,
+  charactersPerSecond = 35,
   pauseAfterComplete = 2800,
   className,
   cursorClassName,
@@ -44,7 +44,7 @@ export function TypewriterHero({
   // Whether the current phrase has completed typing
   const [isTypingComplete, setIsTypingComplete] = useState(false)
 
-  // Calculate typing delay per character in ms (~20ms for 50 chars/sec)
+  // Calculate typing delay per character in ms (~28-29ms for 35 chars/sec)
   const charDelay = Math.max(12, Math.round(1000 / charactersPerSecond))
 
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
