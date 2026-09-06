@@ -1,7 +1,14 @@
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import Autoplay from 'embla-carousel-autoplay'
 import { ThumbsUp, CheckCircle2, Building2 } from 'lucide-react'
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+  type CarouselApi,
+} from '@/components/ui/carousel'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { CtaButton } from '@/components/CtaButton'
 import {
@@ -11,6 +18,7 @@ import {
 } from '@/services/partner-logos'
 import { getSegments, type Segment } from '@/services/segments'
 import { useRealtime } from '@/hooks/use-realtime'
+import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 
 const FALLBACK_LOGOS = [
   'google',
@@ -35,7 +43,20 @@ const FALLBACK_LOGOS = [
 ]
 
 export function Logos() {
-  const plugin = useRef(Autoplay({ delay: 3000, stopOnInteraction: false }))
+  const prefersReducedMotion = usePrefersReducedMotion()
+  const plugin = useRef(
+    Autoplay({
+      delay: 3500,
+      stopOnInteraction: false,
+      stopOnMouseEnter: true,
+      active: !prefersReducedMotion,
+    }),
+  )
+  const resumeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [api, setApi] = useState<CarouselApi>()
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [snapCount, setSnapCount] = useState(0)
+
   const [logos, setLogos] = useState<PartnerLogoWithExpand[]>([])
   const [segments, setSegments] = useState<Segment[]>([])
   const [selectedSegment, setSelectedSegment] = useState<string>('all')
@@ -78,6 +99,79 @@ export function Logos() {
 
   const showFilter = !useFallback && segmentsWithLogos.length > 0
   const showEmptyState = !useFallback && filteredLogos.length === 0
+
+  // Atualizar contagem de snaps e índice selecionado
+  const onSelect = useCallback((carouselApi: CarouselApi) => {
+    if (!carouselApi) return
+    setCurrentIndex(carouselApi.selectedScrollSnap())
+  }, [])
+
+  const onInitOrReInit = useCallback((carouselApi: CarouselApi) => {
+    if (!carouselApi) return
+    setSnapCount(carouselApi.scrollSnapList().length)
+    setCurrentIndex(carouselApi.selectedScrollSnap())
+  }, [])
+
+  useEffect(() => {
+    if (!api) return
+
+    onInitOrReInit(api)
+    api.on('reInit', onInitOrReInit)
+    api.on('select', onSelect)
+
+    return () => {
+      api.off('reInit', onInitOrReInit)
+      api.off('select', onSelect)
+    }
+  }, [api, onInitOrReInit, onSelect])
+
+  // Função auxiliar para agendar a retomada do autoplay após qualquer ação do usuário
+  const scheduleAutoplayResume = useCallback(() => {
+    if (prefersReducedMotion) return
+    if (resumeTimeoutRef.current) {
+      clearTimeout(resumeTimeoutRef.current)
+    }
+    resumeTimeoutRef.current = setTimeout(() => {
+      try {
+        const autoplayPlugin = api?.plugins()?.autoplay as { play?: () => void } | undefined
+        if (autoplayPlugin && typeof autoplayPlugin.play === 'function') {
+          autoplayPlugin.play()
+        }
+      } catch {
+        // Ignora caso api já tenha sido desmontada
+      }
+    }, 2500)
+  }, [api, prefersReducedMotion])
+
+  // Ouvir pointerUp e pointerCancel no embla para garantir retomada pós arrasto touch/mouse
+  useEffect(() => {
+    if (!api) return
+
+    const handlePointerUp = () => {
+      scheduleAutoplayResume()
+    }
+
+    api.on('pointerUp', handlePointerUp)
+
+    return () => {
+      api.off('pointerUp', handlePointerUp)
+      if (resumeTimeoutRef.current) {
+        clearTimeout(resumeTimeoutRef.current)
+      }
+    }
+  }, [api, scheduleAutoplayResume])
+
+  // Atualizar plugin caso preferência de movimento mude
+  useEffect(() => {
+    const autoplayPlugin = api?.plugins()?.autoplay as
+      | { stop?: () => void; play?: () => void }
+      | undefined
+    if (prefersReducedMotion) {
+      autoplayPlugin?.stop?.()
+    } else {
+      autoplayPlugin?.play?.()
+    }
+  }, [api, prefersReducedMotion])
 
   // Se não houver itens para exibir no total (nem fallback nem logos), o bloco se oculta
   if (items.length === 0) return null
@@ -145,21 +239,26 @@ export function Logos() {
             </p>
           </div>
         ) : (
-          <div className="relative max-w-6xl mx-auto">
-            <div className="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none"></div>
-            <div className="absolute right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>
+          <div className="relative max-w-6xl mx-auto px-2 sm:px-6">
+            <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-20 md:w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none"></div>
+            <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-20 md:w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>
 
             <Carousel
               key={selectedSegment}
+              setApi={setApi}
               opts={{
                 align: 'start',
                 loop: true,
-                dragFree: true,
               }}
               plugins={[plugin.current]}
-              className="w-full"
-              onMouseEnter={plugin.current.stop}
-              onMouseLeave={plugin.current.reset}
+              className="w-full relative"
+              onMouseEnter={() => {
+                if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current)
+                plugin.current.stop()
+              }}
+              onMouseLeave={() => {
+                scheduleAutoplayResume()
+              }}
             >
               <CarouselContent className="flex items-center -ml-16 md:-ml-24 lg:-ml-32">
                 {items.map((item) => (
@@ -177,7 +276,56 @@ export function Logos() {
                   </CarouselItem>
                 ))}
               </CarouselContent>
+
+              {items.length > 1 && (
+                <>
+                  <CarouselPrevious
+                    onClick={() => {
+                      scheduleAutoplayResume()
+                    }}
+                    aria-label="Ver parceiros anteriores"
+                    className="flex left-1 sm:left-2 md:-left-4 z-20 h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-background/90 md:bg-background border-border shadow-md hover:bg-accent hover:text-white hover:border-accent transition-all backdrop-blur-sm"
+                  />
+                  <CarouselNext
+                    onClick={() => {
+                      scheduleAutoplayResume()
+                    }}
+                    aria-label="Ver próximos parceiros"
+                    className="flex right-1 sm:right-2 md:-right-4 z-20 h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-background/90 md:bg-background border-border shadow-md hover:bg-accent hover:text-white hover:border-accent transition-all backdrop-blur-sm"
+                  />
+                </>
+              )}
             </Carousel>
+
+            {snapCount > 1 && (
+              <div
+                className="flex items-center justify-center gap-2 mt-6 flex-wrap"
+                role="tablist"
+                aria-label="Navegar entre empresas parceiras"
+              >
+                {Array.from({ length: snapCount }).map((_, index) => {
+                  const isActive = currentIndex === index
+                  return (
+                    <button
+                      key={index}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      aria-label={`Ir para a posição ${index + 1} de ${snapCount}`}
+                      onClick={() => {
+                        api?.scrollTo(index)
+                        scheduleAutoplayResume()
+                      }}
+                      className={`h-2.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+                        isActive
+                          ? 'w-7 bg-primary'
+                          : 'w-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/60'
+                      }`}
+                    />
+                  )
+                })}
+              </div>
+            )}
           </div>
         )}
 
