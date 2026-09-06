@@ -149,10 +149,34 @@ export function Footer() {
               CNPJ: 78.761.285/0001-70 | DUNS:{' '}
               <a
                 href={dunsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-primary transition-colors underline decoration-transparent hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
-                aria-label="Ver Certificado DUNS"
+                download="ibisoft-tecnologia-duns-number-905539672.pdf"
+                onClick={async (e) => {
+                  e.preventDefault()
+                  try {
+                    const response = await fetch(dunsUrl)
+                    if (!response.ok) throw new Error('Falha no download')
+                    const blob = await response.blob()
+                    const blobUrl = window.URL.createObjectURL(blob)
+                    const tempLink = document.createElement('a')
+                    tempLink.href = blobUrl
+                    tempLink.download = 'ibisoft-tecnologia-duns-number-905539672.pdf'
+                    document.body.appendChild(tempLink)
+                    tempLink.click()
+                    document.body.removeChild(tempLink)
+                    window.URL.revokeObjectURL(blobUrl)
+                  } catch {
+                    const fallbackLink = document.createElement('a')
+                    fallbackLink.href = dunsUrl
+                    fallbackLink.download = 'ibisoft-tecnologia-duns-number-905539672.pdf'
+                    fallbackLink.target = '_blank'
+                    fallbackLink.rel = 'noopener noreferrer'
+                    document.body.appendChild(fallbackLink)
+                    fallbackLink.click()
+                    document.body.removeChild(fallbackLink)
+                  }
+                }}
+                className="hover:text-primary transition-colors underline decoration-transparent hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm cursor-pointer"
+                aria-label="Baixar Certificado DUNS"
               >
                 905539672
               </a>
