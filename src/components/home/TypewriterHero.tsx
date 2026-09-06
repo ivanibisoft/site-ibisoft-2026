@@ -44,8 +44,25 @@ export function TypewriterHero({
   // Whether the current phrase has completed typing
   const [isTypingComplete, setIsTypingComplete] = useState(false)
 
+  // Validate and clamp/fallback charactersPerSecond and pauseAfterComplete
+  const safeSpeed =
+    typeof charactersPerSecond === 'number' &&
+    !Number.isNaN(charactersPerSecond) &&
+    charactersPerSecond >= 10 &&
+    charactersPerSecond <= 120
+      ? charactersPerSecond
+      : 35
+
+  const safePauseMs =
+    typeof pauseAfterComplete === 'number' &&
+    !Number.isNaN(pauseAfterComplete) &&
+    pauseAfterComplete >= 1000 &&
+    pauseAfterComplete <= 15000
+      ? pauseAfterComplete
+      : 3000
+
   // Calculate typing delay per character in ms (~28-29ms for 35 chars/sec)
-  const charDelay = Math.max(12, Math.round(1000 / charactersPerSecond))
+  const charDelay = Math.max(8, Math.round(1000 / safeSpeed))
 
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -92,7 +109,7 @@ export function TypewriterHero({
           if (!isPausedRef.current) {
             onAdvance()
           }
-        }, pauseAfterComplete + 2000)
+        }, safePauseMs + 2000)
       }
       return () => {
         if (advanceTimerRef.current) {
@@ -129,7 +146,7 @@ export function TypewriterHero({
           if (!isPausedRef.current) {
             onAdvance()
           }
-        }, pauseAfterComplete)
+        }, safePauseMs)
       }
 
       return () => {
@@ -146,7 +163,7 @@ export function TypewriterHero({
     prefersReducedMotion,
     phrases.length,
     onAdvance,
-    pauseAfterComplete,
+    safePauseMs,
     isPaused,
   ])
 
@@ -159,7 +176,7 @@ export function TypewriterHero({
       onAdvance &&
       !advanceTimerRef.current
     ) {
-      const waitTime = prefersReducedMotion ? pauseAfterComplete + 2000 : pauseAfterComplete
+      const waitTime = prefersReducedMotion ? safePauseMs + 2000 : safePauseMs
       advanceTimerRef.current = setTimeout(() => {
         if (!isPausedRef.current) {
           onAdvance()
@@ -173,14 +190,7 @@ export function TypewriterHero({
         advanceTimerRef.current = null
       }
     }
-  }, [
-    isPaused,
-    isTypingComplete,
-    phrases.length,
-    onAdvance,
-    pauseAfterComplete,
-    prefersReducedMotion,
-  ])
+  }, [isPaused, isTypingComplete, phrases.length, onAdvance, safePauseMs, prefersReducedMotion])
 
   // Clean up on unmount
   useEffect(() => {

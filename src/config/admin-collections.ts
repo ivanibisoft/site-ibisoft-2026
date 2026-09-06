@@ -32,6 +32,11 @@ export interface FieldConfig {
   label: string
   type: FieldType
   required?: boolean
+  min?: number
+  max?: number
+  step?: number
+  placeholder?: string
+  helpText?: string
   options?: string[]
   optionsSourceCollection?: string
   optionsSourceField?: string
@@ -188,6 +193,29 @@ export const COLLECTIONS: CollectionConfig[] = [
       { name: 'hero_image', label: 'Imagem Hero', type: 'file' },
       { name: 'hero_title', label: 'Título Hero', type: 'text', listDisplay: true },
       { name: 'hero_subtitle', label: 'Subtítulo Hero', type: 'text', listDisplay: true },
+      {
+        name: 'typewriter_pause_seconds',
+        label: 'Pausa após cada mensagem do carrossel (segundos)',
+        type: 'number',
+        min: 1,
+        max: 15,
+        step: 0.5,
+        placeholder: '3',
+        helpText:
+          'Tempo de espera antes de avançar para a próxima mensagem (entre 1 e 15 segundos). Padrão: 3',
+        listDisplay: true,
+      },
+      {
+        name: 'typewriter_typing_speed',
+        label: 'Velocidade de digitação do carrossel (caracteres por segundo)',
+        type: 'number',
+        min: 10,
+        max: 120,
+        step: 1,
+        placeholder: '35',
+        helpText: 'Velocidade com que o texto é digitado (entre 10 e 120 cps). Padrão: 35',
+        listDisplay: true,
+      },
     ],
   },
   {

@@ -77,6 +77,33 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
     e.preventDefault()
     setSaving(true)
     setErrors({})
+
+    // Client-side validation for constraints (min, max)
+    const newErrors: FieldErrors = {}
+    config.fields.forEach((field) => {
+      const val = formData[field.name]
+      if (field.type === 'number' && val !== null && val !== undefined && val !== '') {
+        const num = Number(val)
+        if (Number.isNaN(num)) {
+          newErrors[field.name] = 'Informe um valor numérico válido.'
+        } else {
+          if (field.min !== undefined && num < field.min) {
+            newErrors[field.name] = `O valor mínimo permitido é ${field.min}.`
+          }
+          if (field.max !== undefined && num > field.max) {
+            newErrors[field.name] = `O valor máximo permitido é ${field.max}.`
+          }
+        }
+      }
+    })
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      setSaving(false)
+      toast.error('Corrija os erros no formulário antes de salvar')
+      return
+    }
+
     try {
       const hasFiles = Object.values(files).some((f) => f !== null)
       let data: any = { ...formData }

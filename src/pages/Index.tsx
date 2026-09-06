@@ -76,7 +76,13 @@ const Index = () => {
 
   return (
     <div className="flex flex-col w-full">
-      <Hero heroTitle={heroTitle} heroSubtitle={heroSubtitle} heroImageUrl={heroImageUrl} />
+      <Hero
+        heroTitle={heroTitle}
+        heroSubtitle={heroSubtitle}
+        heroImageUrl={heroImageUrl}
+        typewriterPauseSeconds={homeConfig?.typewriter_pause_seconds}
+        typewriterTypingSpeed={homeConfig?.typewriter_typing_speed}
+      />
       <Problems />
       <Benefits />
       <HowItWorks />

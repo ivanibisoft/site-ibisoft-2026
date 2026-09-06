@@ -10,6 +10,8 @@ interface HeroProps {
   heroTitle?: string
   heroSubtitle?: string
   heroImageUrl: string | null
+  typewriterPauseSeconds?: number
+  typewriterTypingSpeed?: number
 }
 
 const RESUME_DELAY = 1000
@@ -17,7 +19,12 @@ const RESUME_DELAY = 1000
 const MESSAGE_CLASS =
   'text-2xl md:text-3xl lg:text-4xl font-bold font-display leading-[1.2] text-white drop-shadow-lg'
 
-export function Hero({ heroImageUrl, heroTitle }: HeroProps) {
+export function Hero({
+  heroImageUrl,
+  heroTitle,
+  typewriterPauseSeconds,
+  typewriterTypingSpeed,
+}: HeroProps) {
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
   const [messages, setMessages] = useState<HeroMessage[]>([])
@@ -73,6 +80,26 @@ export function Hero({ heroImageUrl, heroTitle }: HeroProps) {
     setActivePhrase((prev) => (prev + 1) % phraseList.length)
   }, [phraseList.length])
 
+  // Validate and apply fallbacks for typewriter parameters:
+  // Pause: 1 to 15 seconds (default 3 seconds -> 3000 ms)
+  const resolvedPauseSeconds =
+    typeof typewriterPauseSeconds === 'number' &&
+    !Number.isNaN(typewriterPauseSeconds) &&
+    typewriterPauseSeconds >= 1 &&
+    typewriterPauseSeconds <= 15
+      ? typewriterPauseSeconds
+      : 3
+  const pauseAfterCompleteMs = Math.round(resolvedPauseSeconds * 1000)
+
+  // Speed: 10 to 120 cps (default 35 cps)
+  const resolvedTypingSpeed =
+    typeof typewriterTypingSpeed === 'number' &&
+    !Number.isNaN(typewriterTypingSpeed) &&
+    typewriterTypingSpeed >= 10 &&
+    typewriterTypingSpeed <= 120
+      ? typewriterTypingSpeed
+      : 35
+
   const showImage = heroImageUrl && !imageError
 
   return (
@@ -113,8 +140,8 @@ export function Hero({ heroImageUrl, heroTitle }: HeroProps) {
               currentIndex={activePhrase}
               isPaused={isPaused}
               onAdvance={handleAdvance}
-              charactersPerSecond={35}
-              pauseAfterComplete={3000}
+              charactersPerSecond={resolvedTypingSpeed}
+              pauseAfterComplete={pauseAfterCompleteMs}
               className={MESSAGE_CLASS}
             />
           </div>

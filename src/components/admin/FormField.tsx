@@ -40,6 +40,10 @@ export function FormField({
         return (
           <Input
             type="number"
+            min={field.min}
+            max={field.max}
+            step={field.step}
+            placeholder={field.placeholder}
             value={value ?? ''}
             onChange={(e) => onChange(e.target.value === '' ? null : Number(e.target.value))}
           />
@@ -122,6 +126,7 @@ export function FormField({
         {field.required && <span className="text-red-500"> *</span>}
       </Label>
       {renderInput()}
+      {field.helpText && <p className="text-xs text-muted-foreground">{field.helpText}</p>}
       {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
   )

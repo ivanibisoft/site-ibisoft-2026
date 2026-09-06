@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T14:18:20.487Z",
+  "generatedAt": "2026-09-06T14:29:39.563Z",
   "collections": [
     {
       "name": "users",
@@ -530,6 +530,18 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "typewriter_pause_seconds",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "typewriter_typing_speed",
+          "type": "number",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": []

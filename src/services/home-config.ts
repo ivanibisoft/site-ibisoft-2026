@@ -5,6 +5,8 @@ export interface HomeConfig {
   hero_image: string
   hero_title: string
   hero_subtitle: string
+  typewriter_pause_seconds?: number
+  typewriter_typing_speed?: number
   created: string
   updated: string
 }
