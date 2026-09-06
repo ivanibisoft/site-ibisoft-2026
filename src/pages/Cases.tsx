@@ -108,16 +108,24 @@ export default function Cases() {
             para impulsionar a sua operação com o ERP ibisoft.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/quero-conhecer">
-              <Button size="lg" className="w-full sm:w-auto font-semibold">
-                Quero ser um case de sucesso <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-            <Link to="/sobre-erp">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto font-semibold">
-                Entenda mais sobre o ERP
-              </Button>
-            </Link>
+            <Button
+              asChild
+              size="lg"
+              className="w-full sm:w-auto h-14 px-10 text-base font-semibold group"
+            >
+              <Link to="/quero-conhecer" className="inline-flex items-center justify-center gap-2">
+                <span>Quero ser um case de sucesso</span>
+                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="w-full sm:w-auto h-14 px-10 text-base font-semibold"
+            >
+              <Link to="/sobre-erp">Entenda mais sobre o ERP</Link>
+            </Button>
           </div>
         </div>
       </section>

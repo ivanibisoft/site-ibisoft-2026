@@ -1,14 +1,17 @@
-import { useRef, useEffect, useState, useMemo } from 'react'
+import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import Autoplay from 'embla-carousel-autoplay'
-import { ThumbsUp, CheckCircle2, Building2 } from 'lucide-react'
+import { ThumbsUp, CheckCircle2, Building2, ArrowRight } from 'lucide-react'
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { Button } from '@/components/ui/button'
 import {
   getActivePartnerLogos,
   getLogoUrl,
   type PartnerLogoWithExpand,
 } from '@/services/partner-logos'
 import { getSegments, type Segment } from '@/services/segments'
+import { useRealtime } from '@/hooks/use-realtime'
 
 const FALLBACK_LOGOS = [
   'google',
@@ -38,10 +41,21 @@ export function Logos() {
   const [segments, setSegments] = useState<Segment[]>([])
   const [selectedSegment, setSelectedSegment] = useState<string>('all')
 
-  useEffect(() => {
-    getActivePartnerLogos().then(setLogos)
-    getSegments().then(setSegments)
+  const fetchLogos = useCallback(() => {
+    getActivePartnerLogos().then(setLogos).catch(console.error)
   }, [])
+
+  const fetchSegments = useCallback(() => {
+    getSegments().then(setSegments).catch(console.error)
+  }, [])
+
+  useEffect(() => {
+    fetchLogos()
+    fetchSegments()
+  }, [fetchLogos, fetchSegments])
+
+  useRealtime('partner_logos', fetchLogos)
+  useRealtime('segments', fetchSegments)
 
   const useFallback = logos.length === 0
 
@@ -66,8 +80,14 @@ export function Logos() {
   const showFilter = !useFallback && segmentsWithLogos.length > 0
   const showEmptyState = !useFallback && filteredLogos.length === 0
 
+  // Se não houver itens para exibir no total (nem fallback nem logos), o bloco se oculta
+  if (items.length === 0) return null
+
   return (
-    <section className="py-20 bg-background overflow-hidden border-t border-border/40">
+    <section
+      id="empresas-que-aprovaram"
+      className="py-20 bg-background overflow-hidden border-t border-border/40 scroll-mt-20"
+    >
       <div className="container px-4 md:px-6 mx-auto">
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-12">
           <h2 className="text-2xl md:text-3xl font-display font-bold text-center text-primary">
@@ -161,6 +181,19 @@ export function Logos() {
             </Carousel>
           </div>
         )}
+
+        <div className="mt-12 flex justify-center">
+          <Button
+            asChild
+            size="lg"
+            className="w-full sm:w-auto h-14 px-10 text-base font-semibold group"
+          >
+            <Link to="/quero-conhecer" className="inline-flex items-center justify-center gap-2">
+              <span>Quero usar na minha empresa</span>
+              <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </Button>
+        </div>
       </div>
     </section>
   )
