@@ -146,6 +146,8 @@ export function Footer() {
               reservados.
             </p>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 text-xs text-slate-500 pt-2">
+              <CnpjLink variant="badge" />
+
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
@@ -205,8 +207,6 @@ export function Footer() {
                   </p>
                 </TooltipContent>
               </Tooltip>
-
-              <CnpjLink variant="badge" />
 
               <span className="text-slate-300 hidden sm:inline">•</span>
 
