@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Layers } from 'lucide-react'
+import * as Icons from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getModules, type Module } from '@/services/modules'
@@ -46,37 +47,37 @@ export function ModulesSection() {
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {modules.map((module, index) => (
-              <Link key={module.id} to={`/funcionalidades/${module.slug}`}>
-                <Card className="relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/30 hover:-translate-y-1 group h-full">
-                  <div className="absolute -top-3 -right-3 text-8xl font-bold text-primary/5 select-none pointer-events-none leading-none">
-                    {index + 1}
-                  </div>
-                  <CardHeader className="relative z-10">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary text-primary-foreground font-bold text-lg shrink-0">
-                        {index + 1}
-                      </span>
-                      <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
-                        <Layers className="h-4 w-4 text-accent" />
+            {modules.map((module, index) => {
+              const IconComponent =
+                module.icon && (Icons as any)[module.icon] ? (Icons as any)[module.icon] : Icons.Box
+
+              return (
+                <Link key={module.id} to={`/funcionalidades/${module.slug}`}>
+                  <Card className="relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/30 hover:-translate-y-1 group h-full flex flex-col justify-between">
+                    <div className="absolute -top-3 -right-3 text-8xl font-bold text-primary/5 select-none pointer-events-none leading-none">
+                      {index + 1}
+                    </div>
+                    <CardHeader className="relative z-10 pb-2">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-accent/10 transition-colors">
+                        <IconComponent className="h-6 w-6 text-primary group-hover:text-accent transition-colors" />
                       </div>
-                    </div>
-                    <CardTitle className="text-lg group-hover:text-primary transition-colors leading-tight">
-                      {module.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="relative z-10">
-                    <p className="text-sm text-muted-foreground line-clamp-3">
-                      {module.description}
-                    </p>
-                    <div className="flex items-center text-sm font-medium text-accent mt-4">
-                      Saiba mais{' '}
-                      <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                      <CardTitle className="text-lg group-hover:text-primary transition-colors leading-tight">
+                        {module.name}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="relative z-10 pt-0">
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        {module.description}
+                      </p>
+                      <div className="flex items-center text-sm font-medium text-accent mt-4">
+                        Saiba mais{' '}
+                        <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              )
+            })}
           </div>
         )}
       </div>
