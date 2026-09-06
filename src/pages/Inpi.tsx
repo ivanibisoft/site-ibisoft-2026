@@ -155,58 +155,6 @@ export default function Inpi() {
           </div>
 
           {/* Grid de dados oficiais do registro */}
-          <div className="mt-6 pt-6 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs md:text-sm">
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-              <span className="text-slate-500 block text-xs uppercase tracking-wider font-semibold">
-                Titular
-              </span>
-              <span className="text-slate-800 font-medium mt-1 block">
-                IBISOFT SERVIÇOS DE INFORMÁTICA LTDA - EPP
-              </span>
-            </div>
-
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-              <span className="text-slate-500 block text-xs uppercase tracking-wider font-semibold">
-                Natureza / Apresentação
-              </span>
-              <span className="text-slate-800 font-medium mt-1 block">
-                Marca de Serviço (apresentação Mista)
-              </span>
-            </div>
-
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-              <span className="text-slate-500 block text-xs uppercase tracking-wider font-semibold">
-                Classificação Nice
-              </span>
-              <span className="text-slate-800 font-medium mt-1 block">
-                Classe NCL 42 (análise e projeto de sistemas, consultoria de TI, programação, web
-                sites)
-              </span>
-            </div>
-
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-              <span className="text-slate-500 block text-xs uppercase tracking-wider font-semibold">
-                Data do Depósito
-              </span>
-              <span className="text-slate-800 font-medium mt-1 block">24/05/2006</span>
-            </div>
-
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-              <span className="text-slate-500 block text-xs uppercase tracking-wider font-semibold">
-                Data da Concessão
-              </span>
-              <span className="text-slate-800 font-medium mt-1 block">08/11/2011</span>
-            </div>
-
-            <div className="p-3 rounded-lg bg-emerald-50/70 border border-emerald-100">
-              <span className="text-emerald-700 block text-xs uppercase tracking-wider font-semibold">
-                Vigência Atual
-              </span>
-              <span className="text-emerald-900 font-bold mt-1 block">
-                Até 08/11/2031 (Prorrogado)
-              </span>
-            </div>
-          </div>
         </div>
 
         {/* Visualizador de PDF */}
