@@ -12,6 +12,7 @@ import About from './pages/About'
 import Cases from './pages/Cases'
 import Blog from './pages/Blog'
 import BlogPostPage from './pages/BlogPostPage'
+import Duns from './pages/Duns'
 import NotFound from './pages/NotFound'
 import { ScrollToTop } from './components/ScrollToTop'
 import { SiteAssetsProvider } from '@/hooks/use-site-assets'
@@ -47,6 +48,7 @@ const App = () => (
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/blog/:slug" element={<BlogPostPage />} />
                   <Route path="/contato" element={<QueroConhecer />} />
+                  <Route path="/duns" element={<Duns />} />
                 </Route>
 
                 <Route path="/admin/login" element={<AdminLogin />} />
