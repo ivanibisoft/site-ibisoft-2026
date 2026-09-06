@@ -1,7 +1,4 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { BookOpen, ArrowRight, Rss, Calendar, Clock } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { BookOpen, ArrowRight } from 'lucide-react'
 import { CtaButton } from '@/components/CtaButton'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -14,39 +11,8 @@ import {
 } from '@/components/ui/dialog'
 import { FUNNEL_STAGES } from '@/lib/erp-content'
 import { ModulesSection } from '@/components/ModulesSection'
-import { useHasBlogPosts } from '@/hooks/use-has-blog-posts'
-import { getActiveBlogPosts, getBlogPostImageUrl, type BlogPost } from '@/services/blog'
-import { BlogPostShareButtons } from '@/components/blog/BlogPostShareButtons'
-import useRealtime from '@/hooks/use-realtime'
 
 export default function SobreErp() {
-  const { hasBlogPosts } = useHasBlogPosts()
-  const [posts, setPosts] = useState<BlogPost[]>([])
-
-  const loadPosts = async () => {
-    try {
-      const data = await getActiveBlogPosts()
-      setPosts(data)
-    } catch (err) {
-      console.error('Failed to load blog posts in SobreErp:', err)
-    }
-  }
-
-  useEffect(() => {
-    if (hasBlogPosts) {
-      loadPosts()
-    } else {
-      setPosts([])
-    }
-  }, [hasBlogPosts])
-
-  useRealtime('posts', () => {
-    loadPosts()
-  })
-
-  // Exibir no máximo as 3 últimas publicações ativas no bloco da página Sobre ERP
-  const latestPosts = posts.slice(0, 3)
-
   return (
     <div className="animate-fade-in">
       <section className="bg-primary text-primary-foreground py-20 relative overflow-hidden">
@@ -134,139 +100,6 @@ export default function SobreErp() {
       </section>
 
       <ModulesSection />
-
-      {hasBlogPosts && latestPosts.length > 0 && (
-        <section className="py-24">
-          <div className="container max-w-6xl mx-auto px-4">
-            <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary font-medium text-sm mb-4">
-                  <Rss className="h-4 w-4" /> Nosso Blog
-                </div>
-                <h2 className="text-3xl font-bold">Últimas sobre Gestão e Tecnologia</h2>
-              </div>
-              <Button variant="outline" className="hidden md:flex" asChild>
-                <Link to="/blog">
-                  Ver todos os artigos <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {latestPosts.map((post) => {
-                const imageUrl =
-                  getBlogPostImageUrl(post) ||
-                  'https://img.usecurling.com/p/600/400?q=software&color=blue'
-                const formattedDate =
-                  post.published_at ||
-                  (post.created ? new Date(post.created).toLocaleDateString('pt-BR') : '')
-
-                const cardContent = (
-                  <Card className="h-full overflow-hidden group flex flex-col hover:shadow-md hover:border-primary/40 transition-all">
-                    <div className="relative h-48 overflow-hidden bg-muted">
-                      <img
-                        src={imageUrl}
-                        alt={post.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      {post.category && (
-                        <div className="absolute top-4 left-4">
-                          <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-primary text-xs font-bold rounded-full">
-                            {post.category}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <CardHeader>
-                      <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
-                        {post.title}
-                      </CardTitle>
-                      {post.summary && (
-                        <p className="text-sm text-muted-foreground line-clamp-3 mt-2">
-                          {post.summary}
-                        </p>
-                      )}
-                    </CardHeader>
-                    <CardContent className="mt-auto flex flex-col gap-3 pt-4 border-t text-xs text-muted-foreground">
-                      <div className="flex items-center justify-between">
-                        {formattedDate ? (
-                          <div className="flex items-center gap-1.5">
-                            <Calendar className="h-3.5 w-3.5" /> {formattedDate}
-                          </div>
-                        ) : (
-                          <span />
-                        )}
-                        {post.read_time && (
-                          <div className="flex items-center gap-1.5">
-                            <Clock className="h-3.5 w-3.5" /> {post.read_time}
-                          </div>
-                        )}
-                      </div>
-                      <div className="pt-2 border-t border-border/40 flex items-center justify-between">
-                        <span className="text-[11px] text-muted-foreground font-medium">
-                          Compartilhar:
-                        </span>
-                        <BlogPostShareButtons title={post.title} slug={post.slug} compact />
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-
-                // Se tem slug definido, navega para a página individual do artigo
-                if (post.slug && post.slug.trim()) {
-                  return (
-                    <Link
-                      key={post.id}
-                      to={`/blog/${encodeURIComponent(post.slug.trim())}`}
-                      className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
-                    >
-                      {cardContent}
-                    </Link>
-                  )
-                }
-
-                // Fallback para modal se não tiver slug
-                return (
-                  <Dialog key={post.id}>
-                    <DialogTrigger asChild>
-                      <div className="cursor-pointer">{cardContent}</div>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[700px] max-h-[85vh] overflow-y-auto">
-                      <DialogHeader>
-                        {post.category && (
-                          <span className="inline-block text-xs font-semibold text-accent uppercase tracking-wider mb-2">
-                            {post.category}
-                          </span>
-                        )}
-                        <DialogTitle className="text-2xl leading-tight">{post.title}</DialogTitle>
-                        {formattedDate && (
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2">
-                            <Calendar className="h-3.5 w-3.5" /> Publicado em {formattedDate}
-                            {post.read_time && (
-                              <>
-                                <span>•</span>
-                                <Clock className="h-3.5 w-3.5" /> {post.read_time}
-                              </>
-                            )}
-                          </div>
-                        )}
-                        <div className="text-base pt-6 space-y-4 text-foreground/90 text-left whitespace-pre-line leading-relaxed">
-                          {post.content || post.summary}
-                        </div>
-                      </DialogHeader>
-                    </DialogContent>
-                  </Dialog>
-                )
-              })}
-            </div>
-            <Button variant="outline" className="w-full mt-8 md:hidden" asChild>
-              <Link to="/blog">
-                Ver todos os artigos <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </section>
-      )}
 
       <section className="bg-primary text-primary-foreground py-20">
         <div className="container text-center max-w-3xl mx-auto">
