@@ -6,8 +6,7 @@ import {
   Building2,
   ArrowLeft,
   CheckCircle2,
-  AlertCircle,
-  FileText,
+  RefreshCw,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -15,11 +14,9 @@ import { useSiteAssets } from '@/hooks/use-site-assets'
 import { CNPJ_NUMBER, COMPANY_RAZAO_SOCIAL } from '@/lib/constants'
 
 export default function Cnpj() {
-  const { getAssetUrl, loading } = useSiteAssets()
+  const { getAssetUrl } = useSiteAssets()
   const [isDownloading, setIsDownloading] = useState(false)
-
-  // URL do PDF cadastrado no Admin (site_assets -> slug: "cartao-cnpj")
-  const cnpjPdfUrl = getAssetUrl('cartao-cnpj')
+  const [useFallbackLocal, setUseFallbackLocal] = useState(false)
 
   // SEO dinâmico de título e descrição
   useEffect(() => {
@@ -46,13 +43,18 @@ export default function Cnpj() {
     }
   }, [])
 
+  // Asset do PDF: local embutido como fonte prioritária garantida (mesmo padrão de Duns e Inpi),
+  // com alternância para a versão remota do Admin se disponível
+  const remoteCnpjUrl = getAssetUrl('cartao-cnpj')
+  const localPdfUrl = '/cartao-cnpj-78761285000170.pdf'
+  const pdfSource = useFallbackLocal && remoteCnpjUrl ? remoteCnpjUrl : localPdfUrl
+
   const handleDownload = async () => {
-    if (!cnpjPdfUrl) return
     setIsDownloading(true)
     const fileName = 'cartao-cnpj-ibisoft-78761285000170.pdf'
 
     try {
-      const response = await fetch(cnpjPdfUrl)
+      const response = await fetch(pdfSource)
       if (!response.ok) throw new Error('Falha no download direto')
       const blob = await response.blob()
       const blobUrl = window.URL.createObjectURL(blob)
@@ -66,7 +68,7 @@ export default function Cnpj() {
     } catch {
       // Fallback para download via link padrão
       const fallbackLink = document.createElement('a')
-      fallbackLink.href = cnpjPdfUrl
+      fallbackLink.href = pdfSource
       fallbackLink.download = fileName
       fallbackLink.target = '_blank'
       fallbackLink.rel = 'noopener noreferrer'
@@ -127,49 +129,113 @@ export default function Cnpj() {
 
             {/* Ações / Botões */}
             <div className="flex flex-wrap items-center gap-3 shrink-0">
-              {cnpjPdfUrl ? (
-                <>
-                  <Button
-                    onClick={handleDownload}
-                    disabled={isDownloading}
-                    className="gap-2 shadow-sm"
-                    size="lg"
-                    aria-label="Baixar cartão CNPJ em PDF"
-                  >
-                    <Download className="h-4 w-4" />
-                    {isDownloading ? 'Baixando...' : 'Baixar PDF'}
-                  </Button>
+              <Button
+                onClick={handleDownload}
+                disabled={isDownloading}
+                className="gap-2 shadow-sm"
+                size="lg"
+                aria-label="Baixar cartão CNPJ em PDF"
+              >
+                <Download className="h-4 w-4" />
+                {isDownloading ? 'Baixando...' : 'Baixar PDF'}
+              </Button>
 
-                  <Button variant="outline" size="lg" asChild className="gap-2">
-                    <a
-                      href={cnpjPdfUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="Abrir PDF em nova aba"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                      Abrir em nova aba
-                    </a>
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  disabled
-                  variant="outline"
-                  size="lg"
-                  className="gap-2 border-dashed text-slate-500 bg-slate-50 cursor-not-allowed"
-                  title="O arquivo PDF do cartão CNPJ será disponibilizado em breve através do painel de administração."
-                  aria-label="Cartão CNPJ em PDF disponível em breve"
+              <Button variant="outline" size="lg" asChild className="gap-2">
+                <a
+                  href={pdfSource}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Abrir Cartão CNPJ em PDF em nova aba"
                 >
-                  <FileText className="h-4 w-4 text-slate-400" />
-                  Cartão CNPJ disponível em breve
-                </Button>
-              )}
+                  <ExternalLink className="h-4 w-4" />
+                  Abrir em nova aba
+                </a>
+              </Button>
             </div>
           </div>
         </div>
 
         {/* Card com os dados cadastrais oficiais completos */}
+        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 mb-8">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-6">
+            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-primary" /> Dados Cadastrais Oficiais da Receita
+              Federal
+            </h2>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> Situação Cadastral ATIVA
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-sm">
+            <div className="space-y-1">
+              <span className="text-xs uppercase tracking-wider text-slate-400 font-medium">
+                Número do CNPJ
+              </span>
+              <p className="font-semibold text-slate-900">{CNPJ_NUMBER} (Matriz)</p>
+            </div>
+            <div className="space-y-1">
+              <span className="text-xs uppercase tracking-wider text-slate-400 font-medium">
+                Razão Social
+              </span>
+              <p className="font-semibold text-slate-900">{COMPANY_RAZAO_SOCIAL}</p>
+            </div>
+            <div className="space-y-1">
+              <span className="text-xs uppercase tracking-wider text-slate-400 font-medium">
+                Data de Abertura
+              </span>
+              <p className="font-semibold text-slate-900">
+                09/05/1985 (Mais de 39 anos de atuação)
+              </p>
+            </div>
+            <div className="space-y-1">
+              <span className="text-xs uppercase tracking-wider text-slate-400 font-medium">
+                Porte da Empresa
+              </span>
+              <p className="font-semibold text-slate-900">Microempresa (ME)</p>
+            </div>
+            <div className="space-y-1">
+              <span className="text-xs uppercase tracking-wider text-slate-400 font-medium">
+                Natureza Jurídica
+              </span>
+              <p className="font-semibold text-slate-900">206-2 - Sociedade Empresária Limitada</p>
+            </div>
+            <div className="space-y-1">
+              <span className="text-xs uppercase tracking-wider text-slate-400 font-medium">
+                Sócio-Administrador
+              </span>
+              <p className="font-semibold text-slate-900">Ivan Christofolli</p>
+            </div>
+            <div className="space-y-1 md:col-span-2 lg:col-span-3">
+              <span className="text-xs uppercase tracking-wider text-slate-400 font-medium">
+                Atividade Principal (CNAE)
+              </span>
+              <p className="font-semibold text-slate-900">
+                18.30-0-03 - Reprodução de software em qualquer suporte
+              </p>
+            </div>
+            <div className="space-y-1 md:col-span-2 lg:col-span-3">
+              <span className="text-xs uppercase tracking-wider text-slate-400 font-medium">
+                Atividades Econômicas Secundárias
+              </span>
+              <p className="text-slate-700">
+                46.51-6-01 - Comércio atacadista de equipamentos de informática • 62.09-1-00 -
+                Suporte técnico, manutenção e outros serviços em tecnologia da informação •
+                47.51-2-01 - Comércio varejista especializado de equipamentos e suprimentos de
+                informática
+              </p>
+            </div>
+            <div className="space-y-1 md:col-span-2 lg:col-span-3">
+              <span className="text-xs uppercase tracking-wider text-slate-400 font-medium">
+                Endereço Sede
+              </span>
+              <p className="font-semibold text-slate-900">
+                Rua Doutor Manoel Pedro, 365, Conjunto 401, Andar 04, Edifício Condomínio Opus One,
+                Bairro Cabral, Curitiba - PR, CEP 80.035-030
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Visualizador de PDF do Cartão CNPJ */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
@@ -178,70 +244,51 @@ export default function Cnpj() {
               <FileCheck className="h-4 w-4 text-primary" /> Visualização do Documento Oficial
               (Cartão CNPJ)
             </span>
-            {cnpjPdfUrl && (
-              <span className="inline-flex items-center gap-1 text-emerald-700 font-medium">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                Documento disponível
-              </span>
+            {remoteCnpjUrl && (
+              <button
+                type="button"
+                onClick={() => setUseFallbackLocal((prev) => !prev)}
+                className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+                title={
+                  useFallbackLocal
+                    ? 'Alternar para o PDF local embutido'
+                    : 'Alternar para a versão remota do Admin'
+                }
+              >
+                <RefreshCw className="h-3 w-3" />
+                {useFallbackLocal ? 'Usar PDF local embutido' : 'Ver versão remota'}
+              </button>
             )}
           </div>
 
-          {loading ? (
-            <div className="min-h-[400px] flex items-center justify-center bg-slate-50 text-slate-500 text-sm">
-              Carregando documento...
-            </div>
-          ) : cnpjPdfUrl ? (
-            <>
-              <div className="relative w-full bg-slate-200/50 min-h-[600px] md:min-h-[820px] flex items-stretch">
-                <iframe
-                  src={`${cnpjPdfUrl}#toolbar=1&navpanes=0`}
-                  title={`Cartão CNPJ - ${CNPJ_NUMBER} - ${COMPANY_RAZAO_SOCIAL}`}
-                  className="w-full h-[600px] md:h-[820px] border-0"
-                />
-              </div>
+          <div className="relative w-full bg-slate-200/50 min-h-[600px] md:min-h-[820px] flex items-stretch">
+            <iframe
+              src={`${pdfSource}#toolbar=1&navpanes=0`}
+              title={`Cartão CNPJ - ${CNPJ_NUMBER} - ${COMPANY_RAZAO_SOCIAL}`}
+              className="w-full h-[600px] md:h-[820px] border-0"
+            />
+          </div>
 
-              <div className="p-4 bg-slate-50 border-t border-slate-200 text-center text-xs text-slate-500">
-                Não conseguiu visualizar o cartão CNPJ?{' '}
-                <button
-                  type="button"
-                  onClick={handleDownload}
-                  className="text-primary hover:underline font-medium focus:outline-none"
-                >
-                  Clique aqui para baixar o PDF diretamente
-                </button>
-                {' ou '}
-                <a
-                  href={cnpjPdfUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline font-medium"
-                >
-                  abra em uma nova aba
-                </a>
-                .
-              </div>
-            </>
-          ) : (
-            <div className="p-12 text-center bg-slate-50/50 flex flex-col items-center justify-center min-h-[360px]">
-              <div className="w-14 h-14 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mb-4 border border-amber-200">
-                <AlertCircle className="h-7 w-7" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">
-                Cartão CNPJ em PDF disponível em breve
-              </h3>
-              <p className="text-sm text-slate-600 max-w-md mx-auto mb-6 leading-relaxed">
-                O arquivo oficial em PDF do Cartão CNPJ está sendo preparado e poderá ser incluído
-                através da área de administração do site. Os dados cadastrais acima foram
-                confirmados e estão ativos perante a Receita Federal do Brasil.
-              </p>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-xs border border-slate-200">
-                <Building2 className="h-4 w-4 text-primary" />
-                <span>
-                  CNPJ Matriz: <strong>{CNPJ_NUMBER}</strong>
-                </span>
-              </div>
-            </div>
-          )}
+          <div className="p-4 bg-slate-50 border-t border-slate-200 text-center text-xs text-slate-500">
+            Não conseguiu visualizar o cartão CNPJ?{' '}
+            <button
+              type="button"
+              onClick={handleDownload}
+              className="text-primary hover:underline font-medium focus:outline-none"
+            >
+              Clique aqui para baixar o PDF diretamente
+            </button>
+            {' ou '}
+            <a
+              href={pdfSource}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline font-medium"
+            >
+              abra em uma nova aba
+            </a>
+            .
+          </div>
         </div>
       </div>
     </div>
