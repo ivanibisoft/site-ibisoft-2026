@@ -1,7 +1,6 @@
-import { Link } from 'react-router-dom'
 import { XCircle, CheckCircle2 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { CtaButton } from '@/components/CtaButton'
 
 const PROBLEMS = [
   'Controles usando planilhas',
@@ -40,9 +39,13 @@ export function Problems() {
             <span>Nosso ERP resolve tudo isso</span>
           </div>
 
-          <Button asChild size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-semibold">
-            <Link to="/quero-conhecer">Eliminar erros e retrabalho</Link>
-          </Button>
+          <CtaButton
+            to="/quero-conhecer"
+            size="lg"
+            className="w-full sm:w-auto h-14 px-8 text-base font-semibold"
+          >
+            Eliminar erros e retrabalho
+          </CtaButton>
         </div>
       </div>
     </section>

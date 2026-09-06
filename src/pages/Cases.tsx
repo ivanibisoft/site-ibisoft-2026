@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Link } from 'react-router-dom'
-import { Trophy, ArrowRight, Building2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Trophy, Building2 } from 'lucide-react'
+import { CtaButton } from '@/components/CtaButton'
 import { Card, CardContent } from '@/components/ui/card'
 import { getCases, getCaseImageUrl, type CaseItem } from '@/services/cases'
 import { useRealtime } from '@/hooks/use-realtime'
@@ -108,24 +107,21 @@ export default function Cases() {
             para impulsionar a sua operação com o ERP ibisoft.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              asChild
+            <CtaButton
+              to="/quero-conhecer"
               size="lg"
-              className="w-full sm:w-auto h-14 px-10 text-base font-semibold group"
+              className="w-full sm:w-auto h-14 px-10 text-base font-semibold"
             >
-              <Link to="/quero-conhecer" className="inline-flex items-center justify-center gap-2">
-                <span>Quero ser um case de sucesso</span>
-                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
-            </Button>
-            <Button
-              asChild
+              Quero ser um case de sucesso
+            </CtaButton>
+            <CtaButton
+              to="/sobre-erp"
               size="lg"
               variant="outline"
               className="w-full sm:w-auto h-14 px-10 text-base font-semibold"
             >
-              <Link to="/sobre-erp">Entenda mais sobre o ERP</Link>
-            </Button>
+              Entenda mais sobre o ERP
+            </CtaButton>
           </div>
         </div>
       </section>

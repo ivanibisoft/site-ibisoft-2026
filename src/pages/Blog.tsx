@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Rss, Calendar, Clock, ArrowRight, ArrowLeft, Tag, Layers } from 'lucide-react'
+import { Rss, Calendar, Clock, ArrowLeft, Tag, Layers } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { CtaButton } from '@/components/CtaButton'
 import {
   Dialog,
   DialogContent,
@@ -293,15 +294,13 @@ export default function Blog() {
             Converse com os especialistas da ibisoft e descubra como otimizar a gestão da sua
             empresa.
           </p>
-          <Button
-            asChild
+          <CtaButton
+            to="/quero-conhecer"
             size="lg"
             className="bg-accent hover:bg-accent/90 text-white font-semibold"
           >
-            <Link to="/quero-conhecer">
-              Falar com um Especialista <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+            Falar com um Especialista
+          </CtaButton>
         </div>
       </section>
     </div>

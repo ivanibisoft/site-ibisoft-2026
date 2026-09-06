@@ -1,6 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
-import { Link } from 'react-router-dom'
-import { Trophy, ArrowRight } from 'lucide-react'
+import { Trophy } from 'lucide-react'
 import Autoplay from 'embla-carousel-autoplay'
 import {
   Carousel,
@@ -10,7 +9,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { CtaButton } from '@/components/CtaButton'
 import { getCases, getCaseImageUrl, type CaseItem } from '@/services/cases'
 import { useRealtime } from '@/hooks/use-realtime'
 
@@ -88,16 +87,13 @@ export function SuccessCases() {
         </div>
 
         <div className="mt-12 flex justify-center">
-          <Button
-            asChild
+          <CtaButton
+            to="/quero-conhecer"
             size="lg"
-            className="w-full sm:w-auto h-14 px-10 text-base font-semibold group"
+            className="w-full sm:w-auto h-14 px-10 text-base font-semibold"
           >
-            <Link to="/quero-conhecer" className="inline-flex items-center justify-center gap-2">
-              <span>Quero ser um case de sucesso</span>
-              <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-            </Link>
-          </Button>
+            Quero ser um case de sucesso
+          </CtaButton>
         </div>
       </div>
     </section>

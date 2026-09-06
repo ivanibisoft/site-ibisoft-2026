@@ -1,7 +1,4 @@
-import { MapPin, Phone, Mail, ArrowRight } from 'lucide-react'
-import { Link } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
-import { WHATSAPP_URL } from '@/lib/constants'
+import { CtaButton } from '@/components/CtaButton'
 
 export function FinalCTA() {
   return (
@@ -20,11 +17,9 @@ export function FinalCTA() {
               processos, reduzir custos e impulsionar seus resultados.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Button size="lg" asChild className="text-base font-semibold">
-                <Link to="/contato">
-                  Falar com Especialista <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
+              <CtaButton to="/contato" size="lg" className="text-base font-semibold">
+                Falar com Especialista
+              </CtaButton>
             </div>
           </div>
         </div>

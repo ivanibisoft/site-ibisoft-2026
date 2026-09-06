@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { Calendar, Clock, ArrowLeft, ArrowRight, ChevronRight, Home, BookOpen } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { CtaButton } from '@/components/CtaButton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
@@ -281,18 +282,16 @@ export default function BlogPostPage() {
             descubra as soluções ideais para a sua empresa.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              asChild
+            <CtaButton
+              to="/quero-conhecer"
               size="lg"
               className="bg-accent hover:bg-accent/90 text-white font-semibold shadow-md"
             >
-              <Link to="/quero-conhecer">
-                Solicitar Demonstração <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link to="/sobre-erp">Conhecer o Guia ERP</Link>
-            </Button>
+              Solicitar Demonstração
+            </CtaButton>
+            <CtaButton to="/sobre-erp" size="lg" variant="outline">
+              Conhecer o Guia ERP
+            </CtaButton>
           </div>
         </div>
       </section>

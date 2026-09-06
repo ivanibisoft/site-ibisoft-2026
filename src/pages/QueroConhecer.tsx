@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { MapPin, Phone, Mail, Building, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { CtaButton } from '@/components/CtaButton'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -260,9 +261,9 @@ export default function QueroConhecer() {
                     )}
                   />
 
-                  <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+                  <CtaButton type="submit" className="w-full" size="lg" disabled={isSubmitting}>
                     {isSubmitting ? 'Enviando...' : 'Enviar Mensagem'}
-                  </Button>
+                  </CtaButton>
                 </form>
               </Form>
             )}

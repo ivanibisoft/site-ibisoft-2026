@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { CtaButton } from '@/components/CtaButton'
 import { Loader2 } from 'lucide-react'
 import * as Icons from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -111,9 +111,13 @@ export function Segments() {
         )}
 
         <div className="flex justify-center">
-          <Button asChild size="lg" className="w-full sm:w-auto h-14 px-10 text-base font-semibold">
-            <Link to="/quero-conhecer">Agendar Demonstração</Link>
-          </Button>
+          <CtaButton
+            to="/quero-conhecer"
+            size="lg"
+            className="w-full sm:w-auto h-14 px-10 text-base font-semibold"
+          >
+            Agendar Demonstração
+          </CtaButton>
         </div>
       </div>
     </section>

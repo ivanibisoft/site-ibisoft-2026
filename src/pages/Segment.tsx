@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, CheckCircle2, Loader2, HelpCircle } from 'lucide-react'
+import { CtaButton } from '@/components/CtaButton'
+import { CheckCircle2, Loader2, HelpCircle } from 'lucide-react'
 import * as Icons from 'lucide-react'
 import {
   getSegmentBySlug,
@@ -87,11 +88,13 @@ export default function Segment() {
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
               {segment.description}
             </p>
-            <Link to={`/quero-conhecer?segmento=${segment.slug}`}>
-              <Button size="lg" className="bg-accent hover:bg-accent/90 text-white">
-                Falar com Especialista do Setor <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+            <CtaButton
+              to={`/quero-conhecer?segmento=${segment.slug}`}
+              size="lg"
+              className="bg-accent hover:bg-accent/90 text-white"
+            >
+              Falar com Especialista do Setor
+            </CtaButton>
           </div>
           <div className="rounded-2xl overflow-hidden shadow-2xl aspect-[4/3] bg-gradient-to-br from-primary/10 to-secondary/10">
             <img

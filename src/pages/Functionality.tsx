@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, Link, NavLink } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { CtaButton } from '@/components/CtaButton'
 import { Menu } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import * as Icons from 'lucide-react'
@@ -210,14 +211,13 @@ export default function Functionality() {
               <div className="text-lg md:text-xl text-primary-foreground/80 mb-8 leading-relaxed max-w-2xl whitespace-pre-line">
                 {moduleData.description}
               </div>
-              <Link to="/quero-conhecer">
-                <Button
-                  size="lg"
-                  className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold shadow-lg"
-                >
-                  Agendar Demonstração do Módulo
-                </Button>
-              </Link>
+              <CtaButton
+                to="/quero-conhecer"
+                size="lg"
+                className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold shadow-lg"
+              >
+                Agendar Demonstração do Módulo
+              </CtaButton>
             </div>
           </section>
 

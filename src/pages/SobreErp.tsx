@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { BookOpen, ArrowRight, Rss, Calendar, Clock, CheckCircle2 } from 'lucide-react'
+import { BookOpen, ArrowRight, Rss, Calendar, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { CtaButton } from '@/components/CtaButton'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Dialog,
@@ -274,14 +275,15 @@ export default function SobreErp() {
             Agora que você já sabe como um ERP pode transformar o seu negócio, converse com um de
             nossos especialistas e descubra como a ibisoft se encaixa na sua realidade.
           </p>
-          <Link to="/quero-conhecer">
-            <Button
+          <div className="flex justify-center">
+            <CtaButton
+              to="/quero-conhecer"
               size="lg"
               className="bg-accent hover:bg-accent/90 text-white font-semibold shadow-lg shadow-accent/20"
             >
-              Agendar Diagnóstico Gratuito <CheckCircle2 className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+              Agendar Diagnóstico Gratuito
+            </CtaButton>
+          </div>
         </div>
       </section>
     </div>

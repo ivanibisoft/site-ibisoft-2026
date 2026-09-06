@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
 import { Navigation } from '@/components/Navigation'
+import { CtaButton } from '@/components/CtaButton'
 import { MobileNav } from '@/components/MobileNav'
 import logoImg from '../assets/botao_ibisoft_2_sem_fundo-74482.png'
 import { useSiteAssets } from '@/hooks/use-site-assets'
@@ -36,9 +36,13 @@ export function Header() {
 
         <div className="hidden flex-1 items-center justify-end space-x-6 md:flex">
           <Navigation />
-          <Button asChild className="hidden lg:flex font-semibold">
-            <Link to="/quero-conhecer">Quero conhecer</Link>
-          </Button>
+          <CtaButton
+            to="/quero-conhecer"
+            size="default"
+            className="hidden lg:inline-flex font-semibold"
+          >
+            Quero conhecer
+          </CtaButton>
         </div>
 
         <div className="flex md:hidden">

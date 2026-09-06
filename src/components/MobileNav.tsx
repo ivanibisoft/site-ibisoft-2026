@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Menu, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { CtaButton } from '@/components/CtaButton'
 import {
   Sheet,
   SheetContent,
@@ -202,20 +203,26 @@ export function MobileNav() {
             </Link>
 
             <div className="pt-4 flex flex-col gap-3">
-              <Button asChild className="w-full font-semibold" size="lg" onClick={handleLinkClick}>
-                <Link to="/quero-conhecer">Quero conhecer</Link>
-              </Button>
+              <CtaButton
+                to="/quero-conhecer"
+                className="w-full font-semibold"
+                size="lg"
+                onClick={handleLinkClick}
+              >
+                Quero conhecer
+              </CtaButton>
 
-              <a
-                href={WHATSAPP_URL}
+              <CtaButton
+                to={WHATSAPP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={handleLinkClick}
-                className="flex items-center justify-center gap-2 rounded-md bg-[#25D366] text-white hover:bg-[#20bd5c] transition-colors h-11 px-8 font-medium shadow-sm"
+                className="w-full bg-[#25D366] text-white hover:bg-[#20bd5c] h-11 px-8 font-medium shadow-sm"
+                size="lg"
               >
                 <MessageCircle className="h-5 w-5 shrink-0" />
                 <span>Conversar pelo WhatsApp</span>
-              </a>
+              </CtaButton>
             </div>
           </div>
         </ScrollArea>

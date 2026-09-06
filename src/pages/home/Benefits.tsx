@@ -1,7 +1,6 @@
-import { Link } from 'react-router-dom'
 import { Eye, Settings, TrendingDown, Maximize } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { CtaButton } from '@/components/CtaButton'
 
 const BENEFITS = [
   {
@@ -50,9 +49,13 @@ export function Benefits() {
         </div>
 
         <div className="flex justify-center">
-          <Button asChild size="lg" className="w-full sm:w-auto h-14 px-10 text-base font-semibold">
-            <Link to="/quero-conhecer">Solicitar demonstração</Link>
-          </Button>
+          <CtaButton
+            to="/quero-conhecer"
+            size="lg"
+            className="w-full sm:w-auto h-14 px-10 text-base font-semibold"
+          >
+            Solicitar demonstração
+          </CtaButton>
         </div>
       </div>
     </section>

@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { CtaButton } from '@/components/CtaButton'
 import {
   getActiveHeroMessages,
   getHeroMessageImageUrl,
@@ -275,13 +274,13 @@ export function Hero({
           {phraseList.length <= 1 && <div className="py-6" />}
 
           <div className="flex flex-col sm:flex-row gap-4 pt-2">
-            <Button
-              asChild
+            <CtaButton
+              to="/quero-conhecer"
               size="lg"
-              className="w-full sm:w-auto h-14 px-8 text-base font-semibold bg-accent hover:bg-accent/90 text-white shadow-lg group"
+              className="w-full sm:w-auto h-14 px-8 text-base font-semibold bg-accent hover:bg-accent/90 text-white shadow-lg"
             >
-              <Link to="/quero-conhecer">Solicitar demonstração</Link>
-            </Button>
+              Solicitar demonstração
+            </CtaButton>
           </div>
         </div>
       </div>

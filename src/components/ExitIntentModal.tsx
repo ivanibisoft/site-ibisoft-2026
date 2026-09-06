@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { CtaButton } from '@/components/CtaButton'
 import { Input } from '@/components/ui/input'
 import { Gift, CheckCircle2, Loader2 } from 'lucide-react'
 import pb from '@/lib/pocketbase/client'
@@ -154,11 +155,12 @@ export function ExitIntentModal() {
                 />
                 {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
               </div>
-              <Button
+              <CtaButton
                 size="lg"
                 className="w-full font-semibold"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
+                showArrow={!isSubmitting}
               >
                 {isSubmitting ? (
                   <>
@@ -168,7 +170,7 @@ export function ExitIntentModal() {
                 ) : (
                   'Resgatar Agora'
                 )}
-              </Button>
+              </CtaButton>
             </div>
             <p className="text-xs text-muted-foreground">
               Não enviamos spam. Cancele quando quiser.

@@ -1,5 +1,4 @@
-import { Link } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
+import { CtaButton } from '@/components/CtaButton'
 
 const STEPS = [
   {
@@ -42,9 +41,13 @@ export function HowItWorks() {
         </div>
 
         <div className="flex justify-center mt-16">
-          <Button asChild size="lg" className="w-full sm:w-auto h-14 px-10 text-base font-semibold">
-            <Link to="/quero-conhecer">Começar agora mesmo</Link>
-          </Button>
+          <CtaButton
+            to="/quero-conhecer"
+            size="lg"
+            className="w-full sm:w-auto h-14 px-10 text-base font-semibold"
+          >
+            Começar agora mesmo
+          </CtaButton>
         </div>
       </div>
     </section>

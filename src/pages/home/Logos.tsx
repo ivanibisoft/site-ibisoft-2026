@@ -1,10 +1,9 @@
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
-import { Link } from 'react-router-dom'
 import Autoplay from 'embla-carousel-autoplay'
-import { ThumbsUp, CheckCircle2, Building2, ArrowRight } from 'lucide-react'
+import { ThumbsUp, CheckCircle2, Building2 } from 'lucide-react'
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { Button } from '@/components/ui/button'
+import { CtaButton } from '@/components/CtaButton'
 import {
   getActivePartnerLogos,
   getLogoUrl,
@@ -183,16 +182,13 @@ export function Logos() {
         )}
 
         <div className="mt-12 flex justify-center">
-          <Button
-            asChild
+          <CtaButton
+            to="/quero-conhecer"
             size="lg"
-            className="w-full sm:w-auto h-14 px-10 text-base font-semibold group"
+            className="w-full sm:w-auto h-14 px-10 text-base font-semibold"
           >
-            <Link to="/quero-conhecer" className="inline-flex items-center justify-center gap-2">
-              <span>Quero usar na minha empresa</span>
-              <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-            </Link>
-          </Button>
+            Quero usar na minha empresa
+          </CtaButton>
         </div>
       </div>
     </section>
