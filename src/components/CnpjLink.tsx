@@ -1,7 +1,7 @@
 import { ExternalLink, Building2 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
-import { CNPJ_NUMBER, CNPJ_RECEITA_FEDERAL_URL, CNPJ_TOOLTIP_TEXT } from '@/lib/constants'
+import { CNPJ_NUMBER, CNPJ_MINHA_RECEITA_URL, CNPJ_TOOLTIP_TEXT } from '@/lib/constants'
 
 export interface CnpjLinkProps {
   /**
@@ -48,7 +48,7 @@ export function CnpjLink({
               </div>
             </div>
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline shrink-0 group">
-              Consultar Cartão CNPJ
+              Consultar CNPJ no Minha Receita
               <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </span>
           </div>
@@ -100,11 +100,11 @@ export function CnpjLink({
 
   const linkElement = (
     <a
-      href={CNPJ_RECEITA_FEDERAL_URL}
+      href={CNPJ_MINHA_RECEITA_URL}
       target="_blank"
       rel="noopener noreferrer"
       className="inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm transition-transform active:scale-[0.99]"
-      aria-label={`Consultar Cartão CNPJ ${CNPJ_NUMBER} na Receita Federal do Brasil (abre em nova aba)`}
+      aria-label={`Consultar CNPJ ${CNPJ_NUMBER} no Minha Receita (dados públicos da Receita Federal, abre em nova aba)`}
     >
       {content}
     </a>
@@ -123,7 +123,7 @@ export function CnpjLink({
         className="max-w-xs text-xs font-normal text-center p-2.5 shadow-lg border-primary/20"
       >
         <p className="font-semibold mb-1 text-primary flex items-center justify-center gap-1">
-          <Building2 className="h-3.5 w-3.5" /> Cartão CNPJ • Receita Federal
+          <Building2 className="h-3.5 w-3.5" /> Consulta CNPJ • Minha Receita
         </p>
         <p className="text-slate-200">{CNPJ_TOOLTIP_TEXT}</p>
       </TooltipContent>
