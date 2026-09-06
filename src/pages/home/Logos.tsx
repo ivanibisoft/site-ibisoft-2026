@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/carousel'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { CtaButton } from '@/components/CtaButton'
+import { cn } from '@/lib/utils'
 import {
   getActivePartnerLogos,
   getLogoUrl,
@@ -54,6 +55,7 @@ export function Logos() {
   )
   const resumeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [api, setApi] = useState<CarouselApi>()
+  const [activeIndex, setActiveIndex] = useState<number>(0)
   const [logos, setLogos] = useState<PartnerLogoWithExpand[]>([])
   const [segments, setSegments] = useState<Segment[]>([])
   const [selectedSegment, setSelectedSegment] = useState<string>('all')
@@ -114,6 +116,26 @@ export function Logos() {
       }
     }, 2500)
   }, [api, prefersReducedMotion])
+
+  // Rastrear slide ativo/selecionado (o slide central alinhado) e garantir estado inicial
+  useEffect(() => {
+    if (!api) return
+
+    const updateActiveIndex = () => {
+      setActiveIndex(api.selectedScrollSnap())
+    }
+
+    // Definir imediatamente no mount/troca de api
+    updateActiveIndex()
+
+    api.on('select', updateActiveIndex)
+    api.on('reInit', updateActiveIndex)
+
+    return () => {
+      api.off('select', updateActiveIndex)
+      api.off('reInit', updateActiveIndex)
+    }
+  }, [api])
 
   // Ouvir pointerUp e pointerCancel no embla para garantir retomada pós arrasto touch/mouse
   useEffect(() => {
@@ -219,7 +241,7 @@ export function Logos() {
               key={selectedSegment}
               setApi={setApi}
               opts={{
-                align: 'start',
+                align: 'center',
                 loop: true,
               }}
               plugins={[plugin.current]}
@@ -232,21 +254,47 @@ export function Logos() {
                 scheduleAutoplayResume()
               }}
             >
-              <CarouselContent className="flex items-center -ml-16 md:-ml-24 lg:-ml-32">
-                {items.map((item) => (
-                  <CarouselItem
-                    key={item.id}
-                    className="pl-16 md:pl-24 lg:pl-32 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 shrink-0"
-                  >
-                    <div className="flex items-center justify-center p-6 md:p-10 lg:p-14 group">
-                      <img
-                        src={item.url}
-                        alt={`Logo ${item.name}`}
-                        className="h-16 md:h-20 lg:h-24 w-auto object-contain max-w-[180px] md:max-w-[220px] opacity-60 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300 animate-fade-in"
-                      />
-                    </div>
-                  </CarouselItem>
-                ))}
+              <CarouselContent className="flex items-center py-6 -ml-16 md:-ml-24 lg:-ml-32">
+                {items.map((item, index) => {
+                  const isActive = index === activeIndex
+
+                  return (
+                    <CarouselItem
+                      key={item.id}
+                      className="pl-16 md:pl-24 lg:pl-32 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 shrink-0"
+                    >
+                      <div
+                        className={cn(
+                          'flex items-center justify-center p-4 sm:p-6 md:p-8 rounded-2xl group cursor-pointer select-none',
+                          prefersReducedMotion
+                            ? 'transition-none'
+                            : 'transition-all duration-500 ease-out',
+                          isActive
+                            ? 'scale-[1.18] z-20'
+                            : 'scale-95 sm:scale-100 z-10 hover:opacity-80',
+                        )}
+                        onClick={() => {
+                          api?.scrollTo(index)
+                          scheduleAutoplayResume()
+                        }}
+                      >
+                        <img
+                          src={item.url}
+                          alt={`Logo ${item.name}`}
+                          className={cn(
+                            'h-16 md:h-20 lg:h-24 w-auto object-contain max-w-[180px] md:max-w-[220px] animate-fade-in',
+                            prefersReducedMotion
+                              ? 'transition-none'
+                              : 'transition-all duration-500 ease-out',
+                            isActive
+                              ? 'opacity-100 grayscale-0 drop-shadow-md'
+                              : 'opacity-50 grayscale group-hover:opacity-80 group-hover:grayscale-0',
+                          )}
+                        />
+                      </div>
+                    </CarouselItem>
+                  )
+                })}
               </CarouselContent>
 
               {items.length > 1 && (
