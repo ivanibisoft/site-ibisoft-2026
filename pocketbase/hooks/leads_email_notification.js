@@ -10,27 +10,7 @@
  * nos logs do backend sem lançar erro nem interromper o cadastro do lead.
  */
 
-function replacePlaceholders(template, data) {
-  if (!template) return ''
-  return template
-    .replace(/\{name\}/g, data.name || '')
-    .replace(/\{email\}/g, data.email || '')
-    .replace(/\{phone\}/g, data.phone || '')
-    .replace(/\{message\}/g, data.message || '')
-    .replace(/\{source_page\}/g, data.source_page || '')
-}
-
-function escapeHtml(str) {
-  if (!str) return ''
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
-}
-
-function syncSmtpSettings(app, config) {
+var syncSmtpSettings = function (app, config) {
   try {
     const host = (config.getString('smtp_host') || '').trim()
     const port = config.getInt('smtp_port') || 587
@@ -107,6 +87,26 @@ function syncSmtpSettings(app, config) {
   } catch (err) {
     console.warn('[email-hooks] Falha ao sincronizar configurações SMTP:', err)
   }
+}
+
+var replacePlaceholders = function (template, data) {
+  if (!template) return ''
+  return template
+    .replace(/\{name\}/g, data.name || '')
+    .replace(/\{email\}/g, data.email || '')
+    .replace(/\{phone\}/g, data.phone || '')
+    .replace(/\{message\}/g, data.message || '')
+    .replace(/\{source_page\}/g, data.source_page || '')
+}
+
+var escapeHtml = function (str) {
+  if (!str) return ''
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
 }
 
 // Quando o admin salva/atualiza as configurações de e-mail na coleção "email_config",
