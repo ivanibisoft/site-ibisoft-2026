@@ -42,23 +42,36 @@ function applySmtpSettings(app, config) {
     const senderName = (config.getString('sender_name') || '').trim() || 'ibisoft Tecnologia'
 
     const settings = app.settings()
+    console.log(
+      '[email-hooks] applySmtpSettings iniciando. host:',
+      host,
+      'port:',
+      port,
+      'user:',
+      user,
+      'hasPass:',
+      !!pass,
+    )
     let changed = false
 
-    if (settings.meta.senderAddress !== senderAddress) {
+    if (senderAddress && settings.meta.senderAddress !== senderAddress) {
       settings.meta.senderAddress = senderAddress
       changed = true
     }
-    if (settings.meta.senderName !== senderName) {
+    if (senderName && settings.meta.senderName !== senderName) {
       settings.meta.senderName = senderName
       changed = true
     }
 
     if (host) {
+      // Se não há senha fornecida agora, preservamos a senha existente do settings.smtp
+      const effectivePass = pass || settings.smtp.password || ''
       const isConfigured =
         settings.smtp.enabled &&
         settings.smtp.host === host &&
         settings.smtp.port === port &&
         settings.smtp.username === user &&
+        settings.smtp.password === effectivePass &&
         settings.smtp.tls === tls
 
       if (!isConfigured) {
@@ -66,32 +79,43 @@ function applySmtpSettings(app, config) {
         settings.smtp.host = host
         settings.smtp.port = port
         settings.smtp.username = user
-        if (pass) {
-          settings.smtp.password = pass
-        }
+        settings.smtp.password = effectivePass
         settings.smtp.tls = tls
+        changed = true
+      }
+    } else {
+      if (settings.smtp.enabled) {
+        settings.smtp.enabled = false
         changed = true
       }
     }
 
     if (changed) {
-      app.save(settings)
+      console.log('[email-hooks] Salvando novas configurações SMTP...')
+      try {
+        app.save(settings)
+        console.log('[email-hooks] Configurações SMTP salvas com sucesso!')
+      } catch (saveErr) {
+        console.error('[email-hooks] Erro ao salvar settings do PocketBase:', saveErr)
+        throw saveErr
+      }
     }
   } catch (err) {
     console.warn('[email-hooks] Falha ao sincronizar configurações SMTP:', err)
+    throw err
   }
 }
 
 // Quando o admin salva/atualiza as configurações de e-mail na coleção "email_config",
-// sincronizamos imediatamente o app.settings() do PocketBase
+// sincronizamos o app.settings() do PocketBase de forma segura
 onRecordAfterCreateSuccess((e) => {
-  applySmtpSettings(e.app, e.record)
   e.next()
+  applySmtpSettings(e.app, e.record)
 }, 'email_config')
 
 onRecordAfterUpdateSuccess((e) => {
-  applySmtpSettings(e.app, e.record)
   e.next()
+  applySmtpSettings(e.app, e.record)
 }, 'email_config')
 
 // Gatilho principal para novos leads
@@ -251,3 +275,117 @@ onRecordAfterCreateSuccess((e) => {
     }
   }
 }, 'leads')
+
+// Endpoint para testar o envio de e-mail SMTP diretamente pelo painel Admin
+routerAdd(
+  'POST',
+  '/api/ibisoft/test-email',
+  (e) => {
+    try {
+      // 1. Buscar a configuração de e-mail salva
+      let config = null
+      try {
+        const records = e.app.findRecordsByFilter('email_config', '', '-created', 1, 0)
+        if (records && records.length > 0) {
+          config = records[0]
+        }
+      } catch (findErr) {
+        return e.json(500, {
+          success: false,
+          message:
+            'Erro ao consultar configurações de e-mail no banco de dados: ' + String(findErr),
+        })
+      }
+
+      if (!config) {
+        return e.json(400, {
+          success: false,
+          message:
+            'Nenhuma configuração de e-mail encontrada. Salve as configurações antes de testar.',
+        })
+      }
+
+      const smtpHost = (config.getString('smtp_host') || '').trim()
+      const smtpPort = config.getInt('smtp_port') || 587
+      const smtpUser = (config.getString('smtp_user') || '').trim()
+      const adminEmail = (config.getString('admin_email') || '').trim()
+      const senderAddress =
+        (config.getString('sender_address') || '').trim() || 'contato@ibisoft.com.br'
+      const senderName = (config.getString('sender_name') || '').trim() || 'ibisoft Tecnologia'
+
+      if (!smtpHost) {
+        return e.json(400, {
+          success: false,
+          message: 'Host SMTP não configurado. Preencha e salve o Servidor SMTP antes do teste.',
+        })
+      }
+
+      if (!adminEmail) {
+        return e.json(400, {
+          success: false,
+          message: 'E-mail do Administrador não configurado para receber o teste.',
+        })
+      }
+
+      // Sincronizar configurações SMTP para o app.settings()
+      applySmtpSettings(e.app, config)
+
+      // Instanciar cliente de e-mail
+      const mailClient = e.app.newMailClient()
+
+      const now = new Date()
+      const formattedDate = now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+
+      const testMsg = new MailerMessage({
+        from: {
+          address: senderAddress,
+          name: senderName,
+        },
+        to: [{ address: adminEmail, name: 'Administrador ibisoft' }],
+        subject: `[ibisoft] Teste de Envio SMTP - ${formattedDate}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+            <div style="border-bottom: 2px solid #0066cc; padding-bottom: 12px; margin-bottom: 20px;">
+              <h2 style="color: #0066cc; margin: 0;">ibisoft Tecnologia</h2>
+              <p style="margin: 4px 0 0 0; font-size: 14px; color: #666;">Validação de Configuração SMTP</p>
+            </div>
+            <p>Olá,</p>
+            <p>Este é um e-mail de teste disparado pelo painel administrativo do site <strong>ibisoft Tecnologia</strong>.</p>
+            <div style="background-color: #f4f6f8; padding: 15px; border-radius: 6px; margin: 20px 0; font-size: 13px;">
+              <p style="margin: 0 0 8px 0; font-weight: bold; color: #222;">Detalhes da conexão utilizada:</p>
+              <ul style="margin: 0; padding-left: 20px;">
+                <li><strong>Servidor Host:</strong> ${escapeHtml(smtpHost)}</li>
+                <li><strong>Porta:</strong> ${smtpPort}</li>
+                <li><strong>Usuário:</strong> ${escapeHtml(smtpUser || '(não informado)')}</li>
+                <li><strong>Remetente (From):</strong> ${escapeHtml(senderName)} &lt;${escapeHtml(senderAddress)}&gt;</li>
+                <li><strong>Destinatário (To):</strong> ${escapeHtml(adminEmail)}</li>
+                <li><strong>Data/Hora do Teste:</strong> ${escapeHtml(formattedDate)}</li>
+              </ul>
+            </div>
+            <p style="color: #28a745; font-weight: bold;">Se você está lendo esta mensagem, o envio de e-mails via SMTP está operando perfeitamente!</p>
+            <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 25px 0 15px 0;" />
+            <p style="font-size: 12px; color: #999; margin: 0;">ibisoft Tecnologia da Informação — Sistema de Notificações</p>
+          </div>
+        `,
+      })
+
+      mailClient.send(testMsg)
+
+      console.log(`[email-hooks] E-mail de teste SMTP enviado com sucesso para: ${adminEmail}`)
+
+      return e.json(200, {
+        success: true,
+        message: `E-mail de teste enviado com sucesso para ${adminEmail}!`,
+        recipient: adminEmail,
+      })
+    } catch (sendErr) {
+      const errStr = String(sendErr && sendErr.message ? sendErr.message : sendErr)
+      console.error('[email-hooks] Falha no teste de envio SMTP:', errStr)
+      return e.json(500, {
+        success: false,
+        message: `Falha no envio de e-mail SMTP: ${errStr}`,
+      })
+    }
+  },
+  $apis.requireAuth(),
+)

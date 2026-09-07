@@ -18,3 +18,15 @@ export const deleteRecord = (collection: string, id: string) => pb.collection(co
 
 export const getFileUrl = (collection: string, recordId: string, filename: string) =>
   `${pb.baseURL}/api/files/${collection}/${recordId}/${filename}`
+
+export interface TestEmailResponse {
+  success: boolean
+  message: string
+  recipient?: string
+}
+
+export const sendTestEmail = async (): Promise<TestEmailResponse> => {
+  return pb.send<TestEmailResponse>('/api/ibisoft/test-email', {
+    method: 'POST',
+  })
+}

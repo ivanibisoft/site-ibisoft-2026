@@ -4,9 +4,16 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { FormField } from './FormField'
 import { COLLECTIONS } from '@/config/admin-collections'
-import { getList, getOne, createRecord, updateRecord, getFileUrl } from '@/services/admin'
+import {
+  getList,
+  getOne,
+  createRecord,
+  updateRecord,
+  getFileUrl,
+  sendTestEmail,
+} from '@/services/admin'
 import { extractFieldErrors, type FieldErrors } from '@/lib/pocketbase/errors'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft, Save, Send, Loader2 } from 'lucide-react'
 
 interface AdminFormProps {
   collectionName: string
@@ -23,6 +30,7 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
   const [errors, setErrors] = useState<FieldErrors>({})
   const [loading, setLoading] = useState(!!recordId)
   const [saving, setSaving] = useState(false)
+  const [testingEmail, setTestingEmail] = useState(false)
 
   useEffect(() => {
     if (!recordId) return
@@ -80,6 +88,35 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
     setErrors((p) => ({ ...p, [name]: '' }))
   }
 
+  const handleTestEmail = async () => {
+    setTestingEmail(true)
+    const toastId = toast.loading('Enviando e-mail de teste...')
+    try {
+      const res = await sendTestEmail()
+      if (res.success) {
+        toast.success(res.message || 'E-mail de teste enviado com sucesso!', {
+          id: toastId,
+          duration: 6000,
+        })
+      } else {
+        toast.error(res.message || 'Falha ao enviar e-mail de teste.', {
+          id: toastId,
+          duration: 7000,
+        })
+      }
+    } catch (err: any) {
+      console.error('Erro ao testar envio de e-mail:', err)
+      const detail =
+        err?.response?.message || err?.message || 'Falha na conexão ao enviar e-mail de teste.'
+      toast.error(`Falha no teste: ${detail}`, {
+        id: toastId,
+        duration: 8000,
+      })
+    } finally {
+      setTestingEmail(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
@@ -113,13 +150,26 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
 
     try {
       const hasFiles = Object.values(files).some((f) => f !== null)
-      let data: any = { ...formData }
+      // Construir payload limpo contendo apenas os campos configurados na coleção
+      // evitando enviar campos de sistema (ex: id, created, updated, expand, etc.)
+      const allowedFieldNames = new Set(config.fields.map((f) => f.name))
+      let data: any = {}
+
+      for (const fieldName of allowedFieldNames) {
+        if (fieldName in formData) {
+          data[fieldName] = formData[fieldName]
+        }
+      }
 
       // Se for edição e campo de senha estiver vazio, removemos para não sobrescrever com string vazia
+      // Nem tentar atualizar com string em branco se a coleção esperar uma senha mantida
       if (recordId) {
         config.fields.forEach((f) => {
-          if (f.type === 'password' && (!data[f.name] || String(data[f.name]).trim() === '')) {
-            delete data[f.name]
+          if (f.type === 'password') {
+            const rawVal = data[f.name]
+            if (rawVal === undefined || rawVal === null || String(rawVal).trim() === '') {
+              delete data[f.name]
+            }
           }
         })
       }
@@ -202,14 +252,38 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
             }
           />
         ))}
-        <div className="flex gap-2 pt-4">
-          <Button type="submit" disabled={saving}>
-            <Save className="w-4 h-4 mr-2" />
-            {saving ? 'Salvando...' : 'Salvar'}
-          </Button>
-          <Button type="button" variant="outline" asChild>
-            <Link to={`/admin/${collectionName}`}>Cancelar</Link>
-          </Button>
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-4">
+          <div className="flex gap-2">
+            <Button type="submit" disabled={saving}>
+              <Save className="w-4 h-4 mr-2" />
+              {saving ? 'Salvando...' : 'Salvar'}
+            </Button>
+            <Button type="button" variant="outline" asChild>
+              <Link to={`/admin/${collectionName}`}>Cancelar</Link>
+            </Button>
+          </div>
+
+          {collectionName === 'email_config' && recordId && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleTestEmail}
+              disabled={testingEmail || saving}
+              title="Envia um e-mail de teste para o e-mail do administrador configurado"
+            >
+              {testingEmail ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin text-primary" />
+                  Testando envio...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4 mr-2 text-primary" />
+                  Testar Envio de E-mail
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </form>
     </div>

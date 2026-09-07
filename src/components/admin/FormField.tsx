@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { Button } from '@/components/ui/button'
+import { Eye, EyeOff } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -32,17 +35,33 @@ export function FormField({
   error,
   fileUrl,
 }: FormFieldProps) {
+  const [showPassword, setShowPassword] = useState(false)
+
   const renderInput = () => {
     switch (field.type) {
       case 'password':
         return (
-          <Input
-            type="password"
-            placeholder={field.placeholder}
-            value={value || ''}
-            onChange={(e) => onChange(e.target.value)}
-            autoComplete="new-password"
-          />
+          <div className="relative">
+            <Input
+              type={showPassword ? 'text' : 'password'}
+              placeholder={field.placeholder}
+              value={value || ''}
+              onChange={(e) => onChange(e.target.value)}
+              autoComplete="new-password"
+              className="pr-10"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              tabIndex={-1}
+              onClick={() => setShowPassword((prev) => !prev)}
+              aria-label={showPassword ? 'Ocultar senha' : 'Exibir senha'}
+              className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:text-foreground"
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </Button>
+          </div>
         )
       case 'textarea':
         return (
