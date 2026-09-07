@@ -2,9 +2,6 @@ import pb from '@/lib/pocketbase/client'
 
 export interface HomeConfig {
   id: string
-  hero_image: string
-  hero_title: string
-  hero_subtitle: string
   typewriter_pause_seconds?: number
   typewriter_typing_speed?: number
   created: string
@@ -21,10 +18,4 @@ export const getHomeConfig = async (): Promise<HomeConfig | null> => {
     console.error('Error fetching home config:', error)
     return null
   }
-}
-
-export const getHeroImageUrl = (config: HomeConfig, thumb?: string): string | null => {
-  if (!config.hero_image) return null
-  const thumbParam = thumb ? `?thumb=${thumb}` : ''
-  return `${pb.baseURL}/api/files/home_config/${config.id}/${config.hero_image}${thumbParam}`
 }

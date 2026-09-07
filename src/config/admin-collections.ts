@@ -195,9 +195,6 @@ export const COLLECTIONS: CollectionConfig[] = [
     singularLabel: 'Configuração',
     icon: Home,
     fields: [
-      { name: 'hero_image', label: 'Imagem Hero', type: 'file' },
-      { name: 'hero_title', label: 'Título Hero', type: 'text', listDisplay: true },
-      { name: 'hero_subtitle', label: 'Subtítulo Hero', type: 'text', listDisplay: true },
       {
         name: 'typewriter_pause_seconds',
         label: 'Pausa após cada mensagem do carrossel (segundos)',

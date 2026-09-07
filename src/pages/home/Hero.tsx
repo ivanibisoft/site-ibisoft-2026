@@ -10,9 +10,6 @@ import { useRealtime } from '@/hooks/use-realtime'
 import { TypewriterHero } from '@/components/home/TypewriterHero'
 
 interface HeroProps {
-  heroTitle?: string
-  heroSubtitle?: string
-  heroImageUrl: string | null
   typewriterPauseSeconds?: number
   typewriterTypingSpeed?: number
 }
@@ -22,12 +19,10 @@ const RESUME_DELAY = 1000
 const MESSAGE_CLASS =
   'text-2xl md:text-3xl lg:text-4xl font-bold font-display leading-[1.2] text-white drop-shadow-lg'
 
-export function Hero({
-  heroImageUrl: _heroImageUrl,
-  heroTitle,
-  typewriterPauseSeconds,
-  typewriterTypingSpeed,
-}: HeroProps) {
+const FALLBACK_HERO_TITLE =
+  'Gestão completa da sua empresa com um ERP simples, integrado e escalável'
+
+export function Hero({ typewriterPauseSeconds, typewriterTypingSpeed }: HeroProps) {
   const [messages, setMessages] = useState<HeroMessage[]>([])
   const [activePhrase, setActivePhrase] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
@@ -86,11 +81,8 @@ export function Hero({
     if (messages.length > 0) {
       return messages.map((m) => m.text)
     }
-    if (heroTitle) {
-      return [heroTitle]
-    }
-    return ['Gestão completa da sua empresa com um ERP simples, integrado e escalável']
-  }, [messages, heroTitle])
+    return [FALLBACK_HERO_TITLE]
+  }, [messages])
 
   // Helper to extract valid image URL for a given message index
   const getImageUrlForIndex = useCallback(
@@ -117,9 +109,9 @@ export function Hero({
           return msg.text
         }
       }
-      return heroTitle || 'Gestão empresarial com ERP ibisoft'
+      return 'Gestão empresarial com ERP ibisoft'
     },
-    [messages, heroTitle],
+    [messages],
   )
 
   // Trigger continuous cross-fade whenever active phrase/message changes

@@ -12,7 +12,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { useRealtime } from '@/hooks/use-realtime'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useEffect, useState, useCallback } from 'react'
-import { getHomeConfig, getHeroImageUrl, type HomeConfig } from '@/services/home-config'
+import { getHomeConfig, type HomeConfig } from '@/services/home-config'
 import { getActivePartnerLogos, type PartnerLogo } from '@/services/partner-logos'
 
 const IndexLoader = () => (
@@ -66,20 +66,9 @@ const Index = () => {
     return <IndexLoader />
   }
 
-  const heroImageUrl = homeConfig ? getHeroImageUrl(homeConfig) : null
-  const heroTitle =
-    homeConfig?.hero_title ||
-    'Gestão completa da sua empresa com um ERP simples, integrado e escalável'
-  const heroSubtitle =
-    homeConfig?.hero_subtitle ||
-    'Controle financeiro, estoque, vendas, fiscal e muito mais em um único sistema'
-
   return (
     <div className="flex flex-col w-full">
       <Hero
-        heroTitle={heroTitle}
-        heroSubtitle={heroSubtitle}
-        heroImageUrl={heroImageUrl}
         typewriterPauseSeconds={homeConfig?.typewriter_pause_seconds}
         typewriterTypingSpeed={homeConfig?.typewriter_typing_speed}
       />
