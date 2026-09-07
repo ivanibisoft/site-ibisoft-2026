@@ -80,7 +80,7 @@ export function Hero({
     return ['Gestão completa da sua empresa com um ERP simples, integrado e escalável']
   }, [messages, heroTitle])
 
-  // Determine current target image URL for the active phrase, with safe fallback to heroImageUrl
+  // Determine current target image URL for the active message: only use image attached in the database, without default/fallback image
   const currentTargetImageUrl = useMemo(() => {
     if (messages.length > 0 && activePhrase < messages.length) {
       const activeMsg = messages[activePhrase]
@@ -91,11 +91,8 @@ export function Hero({
         }
       }
     }
-    if (heroImageUrl && !failedImageUrls[heroImageUrl]) {
-      return heroImageUrl
-    }
     return null
-  }, [messages, activePhrase, heroImageUrl, failedImageUrls])
+  }, [messages, activePhrase, failedImageUrls])
 
   const currentTargetAlt = useMemo(() => {
     if (messages.length > 0 && activePhrase < messages.length) {

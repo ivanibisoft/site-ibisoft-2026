@@ -269,7 +269,7 @@ export const COLLECTIONS: CollectionConfig[] = [
         label: 'Imagem (opcional)',
         type: 'file',
         helpText:
-          'Substitui a imagem padrão do hero enquanto esta frase for exibida no carrossel. Se não enviada, a imagem padrão será mantida.',
+          'Imagem de fundo exibida no hero durante esta mensagem do carrossel. Se não enviada, nenhuma imagem de fundo será exibida para esta mensagem.',
         listDisplay: true,
       },
       { name: 'order', label: 'Ordem', type: 'number', listDisplay: true },
