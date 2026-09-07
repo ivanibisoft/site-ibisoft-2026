@@ -33,13 +33,19 @@ export function Hero({
   const [isPaused, setIsPaused] = useState(false)
   const [failedImageUrls, setFailedImageUrls] = useState<Record<string, boolean>>({})
 
-  // Two-tempo transition state for message content and image:
-  // Phase 'visible': current message and image are 100% visible
-  // Phase 'fading-out': current message and image fade out to 0% opacity
-  // Phase 'empty': gap interval (~200ms) where nothing is visible
-  const [transitionPhase, setTransitionPhase] = useState<'visible' | 'fading-out' | 'empty'>(
-    'visible',
-  )
+  // Two-tempo transition state for message content:
+  // Phase 'visible': current message is visible / typing
+  // Phase 'fading-out': current message fades out to 0% opacity
+  // Phase 'empty': gap interval (~200ms) where no text is visible
+  const [_textPhase, setTextPhase] = useState<'visible' | 'fading-out' | 'empty'>('visible')
+
+  // Continuous cross-fade image transition state:
+  // Maintain outgoing image (fading out) and incoming/current image (fading in)
+  // so that hero is never left without an image during transitions.
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [previousImageIndex, setPreviousImageIndex] = useState<number | null>(null)
+  const [isCrossFading, setIsCrossFading] = useState(false)
+  const crossFadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -54,6 +60,7 @@ export function Hero({
     const data = await getActiveHeroMessages()
     setMessages(data)
     setActivePhrase((prev) => (data.length > 0 && prev >= data.length ? 0 : prev))
+    setCurrentImageIndex((prev) => (data.length > 0 && prev >= data.length ? 0 : prev))
   }, [])
 
   useEffect(() => {
@@ -67,6 +74,10 @@ export function Hero({
   useEffect(
     () => () => {
       clearResumeTimer()
+      if (crossFadeTimerRef.current) {
+        clearTimeout(crossFadeTimerRef.current)
+        crossFadeTimerRef.current = null
+      }
     },
     [clearResumeTimer],
   )
@@ -81,45 +92,126 @@ export function Hero({
     return ['Gestão completa da sua empresa com um ERP simples, integrado e escalável']
   }, [messages, heroTitle])
 
-  // Determine image for the currently active message:
-  // Only use image attached in the database, without default/fallback image.
-  // Message without image = only gradient background.
-  const activeImageUrl = useMemo(() => {
-    if (messages.length > 0 && activePhrase < messages.length) {
-      const activeMsg = messages[activePhrase]
-      if (activeMsg?.image) {
-        const msgImageUrl = getHeroMessageImageUrl(activeMsg)
-        if (msgImageUrl && !failedImageUrls[msgImageUrl]) {
-          return msgImageUrl
+  // Helper to extract valid image URL for a given message index
+  const getImageUrlForIndex = useCallback(
+    (index: number) => {
+      if (messages.length > 0 && index >= 0 && index < messages.length) {
+        const msg = messages[index]
+        if (msg?.image) {
+          const url = getHeroMessageImageUrl(msg)
+          if (url && !failedImageUrls[url]) {
+            return url
+          }
         }
       }
-    }
-    return null
-  }, [messages, activePhrase, failedImageUrls])
+      return null
+    },
+    [messages, failedImageUrls],
+  )
 
-  const activeAlt = useMemo(() => {
-    if (messages.length > 0 && activePhrase < messages.length) {
-      const activeMsg = messages[activePhrase]
-      if (activeMsg?.text) {
-        return activeMsg.text
+  const getImageAltForIndex = useCallback(
+    (index: number) => {
+      if (messages.length > 0 && index >= 0 && index < messages.length) {
+        const msg = messages[index]
+        if (msg?.text) {
+          return msg.text
+        }
       }
-    }
-    return heroTitle || 'Gestão empresarial com ERP ibisoft'
-  }, [messages, activePhrase, heroTitle])
+      return heroTitle || 'Gestão empresarial com ERP ibisoft'
+    },
+    [messages, heroTitle],
+  )
 
-  // Preload next image if available
+  // Trigger continuous cross-fade whenever active phrase/message changes
+  const startCrossFadeTo = useCallback(
+    (targetIndex: number) => {
+      if (crossFadeTimerRef.current) {
+        clearTimeout(crossFadeTimerRef.current)
+        crossFadeTimerRef.current = null
+      }
+
+      const prevUrl = getImageUrlForIndex(currentImageIndex)
+      const targetUrl = getImageUrlForIndex(targetIndex)
+
+      // If target is same as current index and not currently cross-fading, nothing to do
+      if (targetIndex === currentImageIndex && !isCrossFading) {
+        return
+      }
+
+      // If neither has an image, or both resolve to the exact same image URL:
+      if (prevUrl === targetUrl) {
+        setCurrentImageIndex(targetIndex)
+        setPreviousImageIndex(null)
+        setIsCrossFading(false)
+        return
+      }
+
+      // When transitioning from an existing image to another (or to/from null):
+      // Keep old image visible underneath while the new image is shown.
+      // previousImageIndex gets the outgoing image index.
+      // currentImageIndex gets the incoming image index.
+      setPreviousImageIndex(currentImageIndex)
+      setCurrentImageIndex(targetIndex)
+      setIsCrossFading(true)
+
+      // Give browser a frame to commit initial opacity before triggering the cross-fade animation,
+      // or rely on CSS transition duration (500ms).
+      crossFadeTimerRef.current = setTimeout(() => {
+        setPreviousImageIndex(null)
+        setIsCrossFading(false)
+        crossFadeTimerRef.current = null
+      }, 600)
+    },
+    [currentImageIndex, isCrossFading, getImageUrlForIndex],
+  )
+
+  // Coordinate image transition when text starts fading out or when activePhrase changes
+  const handleTransitionPhaseChange = useCallback(
+    (phase: 'visible' | 'fading-out' | 'empty') => {
+      setTextPhase(phase)
+
+      // When text starts fading out, initiate image cross-fade immediately
+      // so the next image starts appearing smoothly while the old is still present,
+      // completely eliminating any image blackout during the text gap (~200ms).
+      if (phase === 'fading-out' && messages.length > 1) {
+        const nextIdx = (activePhrase + 1) % messages.length
+        startCrossFadeTo(nextIdx)
+      }
+    },
+    [activePhrase, messages.length, startCrossFadeTo],
+  )
+
+  // Also handle direct activePhrase changes (e.g. pagination dots clicks)
+  useEffect(() => {
+    if (activePhrase !== currentImageIndex) {
+      startCrossFadeTo(activePhrase)
+    }
+  }, [activePhrase, currentImageIndex, startCrossFadeTo])
+
+  // Preload all upcoming message images (especially the immediate next one)
+  // so cross-fade begins without network latency, including the first transition.
   useEffect(() => {
     if (messages.length <= 1) return
+
+    // Priority 1: Next immediate image
     const nextIndex = (activePhrase + 1) % messages.length
-    const nextMsg = messages[nextIndex]
-    if (nextMsg?.image) {
-      const nextUrl = getHeroMessageImageUrl(nextMsg)
-      if (nextUrl && !failedImageUrls[nextUrl]) {
-        const preloadImg = new Image()
-        preloadImg.src = nextUrl
-      }
+    const nextUrl = getImageUrlForIndex(nextIndex)
+    if (nextUrl) {
+      const preloadImg = new Image()
+      preloadImg.src = nextUrl
     }
-  }, [activePhrase, messages, failedImageUrls])
+
+    // Priority 2: Preload other messages' images in idle/background
+    messages.forEach((msg, idx) => {
+      if (idx !== activePhrase && idx !== nextIndex && msg.image) {
+        const url = getHeroMessageImageUrl(msg)
+        if (url && !failedImageUrls[url]) {
+          const img = new Image()
+          img.src = url
+        }
+      }
+    })
+  }, [activePhrase, messages, getImageUrlForIndex, failedImageUrls])
 
   const handleAdvance = useCallback(() => {
     setActivePhrase((prev) => (prev + 1) % phraseList.length)
@@ -145,11 +237,13 @@ export function Hero({
       ? typewriterTypingSpeed
       : 35
 
-  // Image visibility controlled strictly by transition phase:
-  // Visible only when phase is 'visible' and there is an active image URL.
-  // During 'fading-out', it animates to opacity-0.
-  // During 'empty', it has opacity-0.
-  const isImageVisible = transitionPhase === 'visible' && Boolean(activeImageUrl)
+  const currentImageUrl = getImageUrlForIndex(currentImageIndex)
+  const currentImageAlt = getImageAltForIndex(currentImageIndex)
+
+  const previousImageUrl =
+    previousImageIndex !== null ? getImageUrlForIndex(previousImageIndex) : null
+  const previousImageAlt =
+    previousImageIndex !== null ? getImageAltForIndex(previousImageIndex) : ''
 
   return (
     <section
@@ -166,21 +260,46 @@ export function Hero({
       {/* Background Gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/80" />
 
-      {/* Hero Image Layer: Single image element, NEVER overlapped with another */}
-      {activeImageUrl && (
-        <img
-          key={activeImageUrl}
-          src={activeImageUrl}
-          alt={activeAlt}
-          className={cn(
-            'absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-300 ease-in-out pointer-events-none',
-            isImageVisible ? 'opacity-100' : 'opacity-0',
-          )}
-          onError={() => {
-            setFailedImageUrls((prev) => ({ ...prev, [activeImageUrl]: true }))
-          }}
-        />
-      )}
+      {/* Hero Image Layers: Dual-layer continuous cross-fade
+          - Previous image remains underneath and fades out smoothly.
+          - Current/incoming image sits on top and fades in smoothly.
+          - Guarantees there is NEVER a visual blackout/gap without an image during slide change.
+          - No fallback images: messages without an image render only the gradient background.
+      */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+        {/* Layer 1: Previous image (outgoing) remaining visible while new image enters */}
+        {previousImageUrl && (
+          <img
+            key={`prev-${previousImageUrl}`}
+            src={previousImageUrl}
+            alt={previousImageAlt}
+            className={cn(
+              'absolute inset-0 h-full w-full object-contain object-center pointer-events-none transition-opacity duration-500 ease-in-out',
+              // When an incoming image is fading in over it, the outgoing image fades out
+              currentImageUrl && isCrossFading ? 'opacity-0' : 'opacity-100',
+            )}
+            onError={() => {
+              setFailedImageUrls((prev) => ({ ...prev, [previousImageUrl]: true }))
+            }}
+          />
+        )}
+
+        {/* Layer 2: Current/incoming image fading in */}
+        {currentImageUrl && (
+          <img
+            key={`curr-${currentImageUrl}`}
+            src={currentImageUrl}
+            alt={currentImageAlt}
+            className={cn(
+              'absolute inset-0 h-full w-full object-contain object-center pointer-events-none transition-opacity duration-500 ease-in-out',
+              'opacity-100',
+            )}
+            onError={() => {
+              setFailedImageUrls((prev) => ({ ...prev, [currentImageUrl]: true }))
+            }}
+          />
+        )}
+      </div>
 
       {/* Decorative overlays */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30 pointer-events-none" />
@@ -199,7 +318,7 @@ export function Hero({
               pauseAfterComplete={pauseAfterCompleteMs}
               fadeOutDuration={300}
               emptyDuration={200}
-              onTransitionPhaseChange={setTransitionPhase}
+              onTransitionPhaseChange={handleTransitionPhaseChange}
               className={MESSAGE_CLASS}
             />
           </div>
