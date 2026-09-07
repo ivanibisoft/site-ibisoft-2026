@@ -93,29 +93,48 @@ function applySmtpSettings(app, config) {
     if (changed) {
       console.log('[email-hooks] Salvando novas configurações SMTP...')
       try {
-        app.save(settings)
+        app.saveNoValidate(settings)
         console.log('[email-hooks] Configurações SMTP salvas com sucesso!')
       } catch (saveErr) {
-        console.error('[email-hooks] Erro ao salvar settings do PocketBase:', saveErr)
-        throw saveErr
+        console.warn('[email-hooks] saveNoValidate falhou, tentando app.save:', saveErr)
+        try {
+          app.save(settings)
+        } catch (saveErr2) {
+          console.error('[email-hooks] Erro ao salvar settings do PocketBase:', saveErr2)
+        }
       }
     }
   } catch (err) {
     console.warn('[email-hooks] Falha ao sincronizar configurações SMTP:', err)
-    throw err
   }
 }
 
 // Quando o admin salva/atualiza as configurações de e-mail na coleção "email_config",
-// sincronizamos o app.settings() do PocketBase de forma segura
+// sincronizamos o app.settings() do PocketBase de forma segura e não bloqueante.
+// IMPORTANTE: nunca relançar (throw) erros dentro do hook de sincronização de settings
+// para não abortar a persistência da requisição HTTP do Admin (evita erro 400 no PATCH).
 onRecordAfterCreateSuccess((e) => {
   e.next()
-  applySmtpSettings(e.app, e.record)
+  try {
+    applySmtpSettings(e.app, e.record)
+  } catch (err) {
+    console.error(
+      '[email-hooks] Falha ignorada ao sincronizar SMTP após create de email_config:',
+      err,
+    )
+  }
 }, 'email_config')
 
 onRecordAfterUpdateSuccess((e) => {
   e.next()
-  applySmtpSettings(e.app, e.record)
+  try {
+    applySmtpSettings(e.app, e.record)
+  } catch (err) {
+    console.error(
+      '[email-hooks] Falha ignorada ao sincronizar SMTP após update de email_config:',
+      err,
+    )
+  }
 }, 'email_config')
 
 // Gatilho principal para novos leads

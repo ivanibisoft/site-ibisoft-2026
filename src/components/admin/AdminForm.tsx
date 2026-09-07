@@ -12,7 +12,7 @@ import {
   getFileUrl,
   sendTestEmail,
 } from '@/services/admin'
-import { extractFieldErrors, type FieldErrors } from '@/lib/pocketbase/errors'
+import { extractFieldErrors, getErrorMessage, type FieldErrors } from '@/lib/pocketbase/errors'
 import { ArrowLeft, Save, Send, Loader2 } from 'lucide-react'
 
 interface AdminFormProps {
@@ -152,26 +152,32 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
       const hasFiles = Object.values(files).some((f) => f !== null)
       // Construir payload limpo contendo apenas os campos configurados na coleção
       // evitando enviar campos de sistema (ex: id, created, updated, expand, etc.)
-      const allowedFieldNames = new Set(config.fields.map((f) => f.name))
+      const allowedFieldMap = new Map(config.fields.map((f) => [f.name, f]))
       let data: any = {}
 
-      for (const fieldName of allowedFieldNames) {
+      for (const [fieldName, fieldDef] of allowedFieldMap.entries()) {
         if (fieldName in formData) {
-          data[fieldName] = formData[fieldName]
-        }
-      }
+          let val = formData[fieldName]
 
-      // Se for edição e campo de senha estiver vazio, removemos para não sobrescrever com string vazia
-      // Nem tentar atualizar com string em branco se a coleção esperar uma senha mantida
-      if (recordId) {
-        config.fields.forEach((f) => {
-          if (f.type === 'password') {
-            const rawVal = data[f.name]
-            if (rawVal === undefined || rawVal === null || String(rawVal).trim() === '') {
-              delete data[f.name]
+          // Sanitização por tipo de campo
+          if (fieldDef.type === 'number') {
+            if (val === '' || val === null || val === undefined) {
+              val = null
+            } else {
+              const parsed = Number(val)
+              val = Number.isNaN(parsed) ? null : parsed
+            }
+          } else if (fieldDef.type === 'bool') {
+            val = Boolean(val)
+          } else if (fieldDef.type === 'password') {
+            // Se for edição e o campo de senha estiver vazio, não envia para manter a senha existente
+            if (recordId && (val === undefined || val === null || String(val).trim() === '')) {
+              continue
             }
           }
-        })
+
+          data[fieldName] = val
+        }
       }
 
       // Se for criação em coleção reordenável e não há ordem definida, definir como última
@@ -211,8 +217,11 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
       toast.success('Registro salvo com sucesso')
       navigate(`/admin/${collectionName}`)
     } catch (err) {
-      setErrors(extractFieldErrors(err))
-      toast.error('Erro ao salvar registro')
+      console.error(`Erro ao salvar na coleção ${collectionName}:`, err)
+      const fieldErrors = extractFieldErrors(err)
+      setErrors(fieldErrors)
+      const detail = getErrorMessage(err)
+      toast.error(`Erro ao salvar: ${detail}`)
     } finally {
       setSaving(false)
     }
