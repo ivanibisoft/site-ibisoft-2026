@@ -10,6 +10,8 @@
  * nos logs do backend sem lançar erro nem interromper o cadastro do lead.
  */
 
+console.log('[email-hooks] Hook leads_email_notification.js v3.1 inicializado!')
+
 var syncSmtpSettings = function (app, config) {
   try {
     const host = (config.getString('smtp_host') || '').trim()
@@ -296,6 +298,7 @@ onRecordAfterCreateSuccess((e) => {
 }, 'leads')
 
 // Endpoint para testar o envio de e-mail SMTP diretamente pelo painel Admin
+console.log('[email-hooks] Registrando endpoint POST /api/ibisoft/test-email...')
 routerAdd(
   'POST',
   '/api/ibisoft/test-email',
