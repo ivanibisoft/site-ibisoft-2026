@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 
-interface TypewriterTextProps {
+export interface TypewriterHeroProps {
   phrases: string[]
   currentIndex: number
   isPaused?: boolean
@@ -16,6 +16,18 @@ interface TypewriterTextProps {
    * Pause time in milliseconds once full phrase is typed before advancing or pausing.
    */
   pauseAfterComplete?: number
+  /**
+   * Time in ms for the fade-out of the old phrase before switching to the next.
+   */
+  fadeOutDuration?: number
+  /**
+   * Blank gap duration in ms between old phrase fade-out and next phrase typing start.
+   */
+  emptyDuration?: number
+  /**
+   * Optional callback when an exit transition begins (e.g. to synchronize image fade-out).
+   */
+  onTransitionPhaseChange?: (phase: 'visible' | 'fading-out' | 'empty') => void
   className?: string
   cursorClassName?: string
 }
@@ -27,19 +39,22 @@ export function TypewriterHero({
   onAdvance,
   charactersPerSecond = 35,
   pauseAfterComplete = 3000,
+  fadeOutDuration = 300,
+  emptyDuration = 200,
+  onTransitionPhaseChange,
   className,
   cursorClassName,
-}: TypewriterTextProps) {
+}: TypewriterHeroProps) {
   const prefersReducedMotion = usePrefersReducedMotion()
 
   // Track displayed character count for current typing phrase
   const [charCount, setCharCount] = useState(0)
 
-  // State for the phrase that is currently animating / being typed
+  // State for the phrase that is currently being displayed/typed
   const [displayIndex, setDisplayIndex] = useState(currentIndex)
 
-  // State for the previous phrase to keep visible while the next is typing / transitioning
-  const [previousIndex, setPreviousIndex] = useState<number | null>(null)
+  // Transition phase: 'visible' (typing or typed), 'fading-out' (fading out), 'empty' (blank gap)
+  const [phase, setPhase] = useState<'visible' | 'fading-out' | 'empty'>('visible')
 
   // Whether the current phrase has completed typing
   const [isTypingComplete, setIsTypingComplete] = useState(false)
@@ -66,11 +81,24 @@ export function TypewriterHero({
 
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   const isPausedRef = useRef(isPaused)
   isPausedRef.current = isPaused
 
+  const onAdvanceRef = useRef(onAdvance)
+  onAdvanceRef.current = onAdvance
+
+  const onTransitionPhaseChangeRef = useRef(onTransitionPhaseChange)
+  onTransitionPhaseChangeRef.current = onTransitionPhaseChange
+
   const currentPhrase = phrases[displayIndex] || ''
-  const previousPhrase = previousIndex !== null ? phrases[previousIndex] : null
+
+  // Notify parent of phase change
+  const updatePhase = (newPhase: 'visible' | 'fading-out' | 'empty') => {
+    setPhase(newPhase)
+    onTransitionPhaseChangeRef.current?.(newPhase)
+  }
 
   // Clean up all timers helper
   const clearAllTimers = () => {
@@ -82,32 +110,99 @@ export function TypewriterHero({
       clearTimeout(advanceTimerRef.current)
       advanceTimerRef.current = null
     }
+    if (transitionTimerRef.current) {
+      clearTimeout(transitionTimerRef.current)
+      transitionTimerRef.current = null
+    }
   }
 
-  // Handle external change of currentIndex (e.g. user clicked pagination dot or parent rotated)
+  // Two-step advance routine:
+  // Step 1: Fade out current phrase completely (no ghost/old text underneath)
+  // Step 2: Empty gap with nothing visible
+  // Step 3: Trigger onAdvance (or switch index) and start typing next
+  const triggerTwoStepAdvance = () => {
+    clearAllTimers()
+
+    if (prefersReducedMotion) {
+      // In reduced motion, skip fade-out animation and advance directly
+      onAdvanceRef.current?.()
+      return
+    }
+
+    // 1. Fade out completely
+    updatePhase('fading-out')
+
+    transitionTimerRef.current = setTimeout(() => {
+      // 2. Empty interval (nothing visible)
+      updatePhase('empty')
+      setCharCount(0)
+      setIsTypingComplete(false)
+
+      transitionTimerRef.current = setTimeout(() => {
+        // 3. Inform parent to advance index
+        onAdvanceRef.current?.()
+      }, emptyDuration)
+    }, fadeOutDuration)
+  }
+
+  // Handle external change of currentIndex (e.g. user clicked pagination dot or onAdvance fired)
   useEffect(() => {
     if (currentIndex !== displayIndex) {
       clearAllTimers()
-      // Store current display as previous so it stays visible while new one begins typing
-      setPreviousIndex(displayIndex)
-      setDisplayIndex(currentIndex)
-      setCharCount(0)
-      setIsTypingComplete(false)
+
+      if (phase === 'empty') {
+        // Already cleared out! Just switch index and start typing visible
+        setDisplayIndex(currentIndex)
+        setCharCount(0)
+        setIsTypingComplete(false)
+        updatePhase('visible')
+      } else if (prefersReducedMotion) {
+        setDisplayIndex(currentIndex)
+        setCharCount(phrases[currentIndex]?.length || 0)
+        setIsTypingComplete(true)
+        updatePhase('visible')
+      } else {
+        // Direct manual jump (e.g. clicked pagination dot while visible):
+        // Run full two-step exit before showing new phrase!
+        updatePhase('fading-out')
+        transitionTimerRef.current = setTimeout(() => {
+          updatePhase('empty')
+          setCharCount(0)
+          setIsTypingComplete(false)
+          setDisplayIndex(currentIndex)
+
+          transitionTimerRef.current = setTimeout(() => {
+            updatePhase('visible')
+          }, emptyDuration)
+        }, fadeOutDuration)
+      }
     }
-  }, [currentIndex, displayIndex])
+  }, [
+    currentIndex,
+    displayIndex,
+    phase,
+    prefersReducedMotion,
+    phrases,
+    emptyDuration,
+    fadeOutDuration,
+  ])
 
   // Typing effect loop
   useEffect(() => {
+    // Only type if in visible phase
+    if (phase !== 'visible') {
+      return
+    }
+
     // If reduced motion is preferred, show full text immediately without typing animation
     if (prefersReducedMotion) {
       setCharCount(currentPhrase.length)
       setIsTypingComplete(true)
-      setPreviousIndex(null)
 
       if (phrases.length > 1 && onAdvance && !isPaused) {
         advanceTimerRef.current = setTimeout(() => {
           if (!isPausedRef.current) {
-            onAdvance()
+            triggerTwoStepAdvance()
           }
         }, safePauseMs + 2000)
       }
@@ -138,13 +233,12 @@ export function TypewriterHero({
     } else {
       // Completed typing full phrase
       setIsTypingComplete(true)
-      setPreviousIndex(null)
 
       // Only schedule auto-advance if we have more than 1 phrase, an onAdvance callback, and not hovered/paused
       if (phrases.length > 1 && onAdvance && !isPaused) {
         advanceTimerRef.current = setTimeout(() => {
           if (!isPausedRef.current) {
-            onAdvance()
+            triggerTwoStepAdvance()
           }
         }, safePauseMs)
       }
@@ -160,6 +254,7 @@ export function TypewriterHero({
     charCount,
     currentPhrase,
     charDelay,
+    phase,
     prefersReducedMotion,
     phrases.length,
     onAdvance,
@@ -171,15 +266,17 @@ export function TypewriterHero({
   useEffect(() => {
     if (
       !isPaused &&
+      phase === 'visible' &&
       isTypingComplete &&
       phrases.length > 1 &&
       onAdvance &&
-      !advanceTimerRef.current
+      !advanceTimerRef.current &&
+      !transitionTimerRef.current
     ) {
       const waitTime = prefersReducedMotion ? safePauseMs + 2000 : safePauseMs
       advanceTimerRef.current = setTimeout(() => {
         if (!isPausedRef.current) {
-          onAdvance()
+          triggerTwoStepAdvance()
         }
       }, waitTime)
     }
@@ -190,7 +287,15 @@ export function TypewriterHero({
         advanceTimerRef.current = null
       }
     }
-  }, [isPaused, isTypingComplete, phrases.length, onAdvance, safePauseMs, prefersReducedMotion])
+  }, [
+    isPaused,
+    phase,
+    isTypingComplete,
+    phrases.length,
+    onAdvance,
+    safePauseMs,
+    prefersReducedMotion,
+  ])
 
   // Clean up on unmount
   useEffect(() => {
@@ -200,12 +305,6 @@ export function TypewriterHero({
   }, [])
 
   const typedText = currentPhrase.slice(0, charCount)
-  // Determine if previous phrase should be visible (e.g. during initial typing phase)
-  const showPreviousPhrase =
-    previousPhrase !== null &&
-    previousPhrase !== currentPhrase &&
-    !prefersReducedMotion &&
-    charCount < Math.floor(currentPhrase.length * 0.6)
 
   return (
     <div className="relative w-full">
@@ -222,33 +321,22 @@ export function TypewriterHero({
         ))}
       </div>
 
-      {/* Previous phrase layer: stays softly visible as background while next phrase starts typing */}
-      {showPreviousPhrase && (
-        <p
-          className={cn(
-            'absolute inset-0 transition-opacity duration-700 ease-out pointer-events-none',
-            className,
-            // Fade out smoothly as charCount progresses
-            charCount === 0 ? 'opacity-80' : 'opacity-25',
-          )}
-          aria-hidden="true"
-        >
-          {previousPhrase}
-        </p>
-      )}
-
-      {/* Active typing layer */}
+      {/* Active typing layer: smoothly fades out completely during exit, hidden during empty phase, visible during typing */}
       <p
-        className={cn('absolute inset-0 select-text', className)}
+        className={cn(
+          'absolute inset-0 select-text transition-opacity duration-300 ease-in-out',
+          phase === 'visible' ? 'opacity-100' : 'opacity-0 pointer-events-none',
+          className,
+        )}
         aria-live="polite"
         aria-atomic="true"
       >
-        <span>{typedText}</span>
+        <span>{phase === 'empty' ? '' : typedText}</span>
         {/* Blinking cursor */}
         <span
           className={cn(
             'inline-block align-baseline ml-0.5 w-[3px] h-[0.9em] bg-accent rounded-sm animate-typewriter-cursor select-none',
-            prefersReducedMotion ? 'hidden' : 'inline-block',
+            prefersReducedMotion || phase !== 'visible' ? 'hidden' : 'inline-block',
             cursorClassName,
           )}
           aria-hidden="true"

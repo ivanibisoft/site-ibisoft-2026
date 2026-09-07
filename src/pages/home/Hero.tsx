@@ -23,7 +23,7 @@ const MESSAGE_CLASS =
   'text-2xl md:text-3xl lg:text-4xl font-bold font-display leading-[1.2] text-white drop-shadow-lg'
 
 export function Hero({
-  heroImageUrl,
+  heroImageUrl: _heroImageUrl,
   heroTitle,
   typewriterPauseSeconds,
   typewriterTypingSpeed,
@@ -33,12 +33,13 @@ export function Hero({
   const [isPaused, setIsPaused] = useState(false)
   const [failedImageUrls, setFailedImageUrls] = useState<Record<string, boolean>>({})
 
-  // Two-layer cross-fade state for smooth transitions
-  const [displayedImageUrl, setDisplayedImageUrl] = useState<string | null>(null)
-  const [displayedAlt, setDisplayedAlt] = useState<string>('Gestão empresarial com ERP ibisoft')
-  const [incomingImageUrl, setIncomingImageUrl] = useState<string | null>(null)
-  const [incomingAlt, setIncomingAlt] = useState<string>('Gestão empresarial com ERP ibisoft')
-  const [isCrossFading, setIsCrossFading] = useState(false)
+  // Two-tempo transition state for message content and image:
+  // Phase 'visible': current message and image are 100% visible
+  // Phase 'fading-out': current message and image fade out to 0% opacity
+  // Phase 'empty': gap interval (~200ms) where nothing is visible
+  const [transitionPhase, setTransitionPhase] = useState<'visible' | 'fading-out' | 'empty'>(
+    'visible',
+  )
 
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -80,8 +81,10 @@ export function Hero({
     return ['Gestão completa da sua empresa com um ERP simples, integrado e escalável']
   }, [messages, heroTitle])
 
-  // Determine current target image URL for the active message: only use image attached in the database, without default/fallback image
-  const currentTargetImageUrl = useMemo(() => {
+  // Determine image for the currently active message:
+  // Only use image attached in the database, without default/fallback image.
+  // Message without image = only gradient background.
+  const activeImageUrl = useMemo(() => {
     if (messages.length > 0 && activePhrase < messages.length) {
       const activeMsg = messages[activePhrase]
       if (activeMsg?.image) {
@@ -94,7 +97,7 @@ export function Hero({
     return null
   }, [messages, activePhrase, failedImageUrls])
 
-  const currentTargetAlt = useMemo(() => {
+  const activeAlt = useMemo(() => {
     if (messages.length > 0 && activePhrase < messages.length) {
       const activeMsg = messages[activePhrase]
       if (activeMsg?.text) {
@@ -104,63 +107,19 @@ export function Hero({
     return heroTitle || 'Gestão empresarial com ERP ibisoft'
   }, [messages, activePhrase, heroTitle])
 
-  // Handle smooth image cross-fade when target image changes
+  // Preload next image if available
   useEffect(() => {
-    if (!currentTargetImageUrl) {
-      // No valid image available
-      setDisplayedImageUrl(null)
-      setIncomingImageUrl(null)
-      setIsCrossFading(false)
-      return
+    if (messages.length <= 1) return
+    const nextIndex = (activePhrase + 1) % messages.length
+    const nextMsg = messages[nextIndex]
+    if (nextMsg?.image) {
+      const nextUrl = getHeroMessageImageUrl(nextMsg)
+      if (nextUrl && !failedImageUrls[nextUrl]) {
+        const preloadImg = new Image()
+        preloadImg.src = nextUrl
+      }
     }
-
-    // Initial mount or transition from empty
-    if (!displayedImageUrl) {
-      setDisplayedImageUrl(currentTargetImageUrl)
-      setDisplayedAlt(currentTargetAlt)
-      setIncomingImageUrl(null)
-      setIsCrossFading(false)
-      return
-    }
-
-    // Already displaying this exact image URL
-    if (displayedImageUrl === currentTargetImageUrl) {
-      setDisplayedAlt(currentTargetAlt)
-      return
-    }
-
-    // Preload incoming image then trigger smooth cross-fade
-    let isCancelled = false
-    const img = new Image()
-    img.src = currentTargetImageUrl
-    img.onload = () => {
-      if (isCancelled) return
-      setIncomingImageUrl(currentTargetImageUrl)
-      setIncomingAlt(currentTargetAlt)
-      setIsCrossFading(true)
-    }
-    img.onerror = () => {
-      if (isCancelled) return
-      setFailedImageUrls((prev) => ({ ...prev, [currentTargetImageUrl]: true }))
-    }
-
-    return () => {
-      isCancelled = true
-    }
-  }, [currentTargetImageUrl, currentTargetAlt, displayedImageUrl])
-
-  // Complete cross-fade after CSS transition duration (700ms)
-  useEffect(() => {
-    if (isCrossFading && incomingImageUrl) {
-      const timer = setTimeout(() => {
-        setDisplayedImageUrl(incomingImageUrl)
-        setDisplayedAlt(incomingAlt)
-        setIncomingImageUrl(null)
-        setIsCrossFading(false)
-      }, 700)
-      return () => clearTimeout(timer)
-    }
-  }, [isCrossFading, incomingImageUrl, incomingAlt])
+  }, [activePhrase, messages, failedImageUrls])
 
   const handleAdvance = useCallback(() => {
     setActivePhrase((prev) => (prev + 1) % phraseList.length)
@@ -186,6 +145,12 @@ export function Hero({
       ? typewriterTypingSpeed
       : 35
 
+  // Image visibility controlled strictly by transition phase:
+  // Visible only when phase is 'visible' and there is an active image URL.
+  // During 'fading-out', it animates to opacity-0.
+  // During 'empty', it has opacity-0.
+  const isImageVisible = transitionPhase === 'visible' && Boolean(activeImageUrl)
+
   return (
     <section
       className="relative w-full overflow-hidden min-h-[320px] md:min-h-[480px] lg:min-h-[600px]"
@@ -198,45 +163,29 @@ export function Hero({
         resumeTimerRef.current = setTimeout(() => setIsPaused(false), RESUME_DELAY)
       }}
     >
+      {/* Background Gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/80" />
 
-      {/* Base/Current Image Layer */}
-      {displayedImageUrl && (
+      {/* Hero Image Layer: Single image element, NEVER overlapped with another */}
+      {activeImageUrl && (
         <img
-          key={displayedImageUrl}
-          src={displayedImageUrl}
-          alt={displayedAlt}
+          key={activeImageUrl}
+          src={activeImageUrl}
+          alt={activeAlt}
           className={cn(
-            'absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-700 ease-in-out',
-            isCrossFading ? 'opacity-0' : 'opacity-100',
+            'absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-300 ease-in-out pointer-events-none',
+            isImageVisible ? 'opacity-100' : 'opacity-0',
           )}
           onError={() => {
-            setFailedImageUrls((prev) => ({ ...prev, [displayedImageUrl]: true }))
+            setFailedImageUrls((prev) => ({ ...prev, [activeImageUrl]: true }))
           }}
         />
       )}
 
-      {/* Incoming Image Layer for smooth cross-fade */}
-      {incomingImageUrl && (
-        <img
-          key={incomingImageUrl}
-          src={incomingImageUrl}
-          alt={incomingAlt}
-          className={cn(
-            'absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-700 ease-in-out',
-            isCrossFading ? 'opacity-100' : 'opacity-0',
-          )}
-          onError={() => {
-            setFailedImageUrls((prev) => ({ ...prev, [incomingImageUrl]: true }))
-            setIsCrossFading(false)
-            setIncomingImageUrl(null)
-          }}
-        />
-      )}
-
-      <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30" />
-      <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent" />
-      <div className="absolute inset-0 hero-grid-pattern opacity-10" />
+      {/* Decorative overlays */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 hero-grid-pattern opacity-10 pointer-events-none" />
 
       <div className="relative z-10 container mx-auto flex h-full min-h-[320px] md:min-h-[480px] lg:min-h-[600px] items-end pb-10 md:pb-16 px-4 md:px-6">
         <div className="max-w-2xl w-full animate-fade-in-up">
@@ -248,6 +197,9 @@ export function Hero({
               onAdvance={handleAdvance}
               charactersPerSecond={resolvedTypingSpeed}
               pauseAfterComplete={pauseAfterCompleteMs}
+              fadeOutDuration={300}
+              emptyDuration={200}
+              onTransitionPhaseChange={setTransitionPhase}
               className={MESSAGE_CLASS}
             />
           </div>
@@ -257,7 +209,11 @@ export function Hero({
               {phraseList.map((_, index) => (
                 <button
                   key={index}
-                  onClick={() => setActivePhrase(index)}
+                  onClick={() => {
+                    if (index !== activePhrase) {
+                      setActivePhrase(index)
+                    }
+                  }}
                   aria-label={`Mensagem ${index + 1}`}
                   className={cn(
                     'h-2 rounded-full transition-all duration-300',
