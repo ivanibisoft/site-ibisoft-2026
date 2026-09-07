@@ -30,7 +30,7 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;')
 }
 
-function applySmtpSettings(app, config) {
+function syncSmtpSettings(app, config) {
   try {
     const host = (config.getString('smtp_host') || '').trim()
     const port = config.getInt('smtp_port') || 587
@@ -43,7 +43,7 @@ function applySmtpSettings(app, config) {
 
     const settings = app.settings()
     console.log(
-      '[email-hooks] applySmtpSettings iniciando. host:',
+      '[email-hooks] syncSmtpSettings iniciando. host:',
       host,
       'port:',
       port,
@@ -116,7 +116,7 @@ function applySmtpSettings(app, config) {
 onRecordAfterCreateSuccess((e) => {
   e.next()
   try {
-    applySmtpSettings(e.app, e.record)
+    syncSmtpSettings(e.app, e.record)
   } catch (err) {
     console.error(
       '[email-hooks] Falha ignorada ao sincronizar SMTP após create de email_config:',
@@ -128,7 +128,7 @@ onRecordAfterCreateSuccess((e) => {
 onRecordAfterUpdateSuccess((e) => {
   e.next()
   try {
-    applySmtpSettings(e.app, e.record)
+    syncSmtpSettings(e.app, e.record)
   } catch (err) {
     console.error(
       '[email-hooks] Falha ignorada ao sincronizar SMTP após update de email_config:',
@@ -214,7 +214,7 @@ onRecordAfterCreateSuccess((e) => {
 
   // Garantir que as configurações de SMTP do PocketBase estejam atualizadas antes de criar o cliente
   if (config) {
-    applySmtpSettings(e.app, config)
+    syncSmtpSettings(e.app, config)
   }
 
   const templateData = {
@@ -347,7 +347,7 @@ routerAdd(
       }
 
       // Sincronizar configurações SMTP para o app.settings()
-      applySmtpSettings(e.app, config)
+      syncSmtpSettings(e.app, config)
 
       // Instanciar cliente de e-mail
       const mailClient = e.app.newMailClient()

@@ -45,7 +45,7 @@ export function FormField({
             <Input
               type={showPassword ? 'text' : 'password'}
               placeholder={field.placeholder}
-              value={value || ''}
+              value={value ?? ''}
               onChange={(e) => onChange(e.target.value)}
               autoComplete="new-password"
               className="pr-10"

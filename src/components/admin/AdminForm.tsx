@@ -37,7 +37,8 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
     getOne(collectionName, recordId)
       .then((r) => {
         const initialData = { ...r }
-        // Para campos de senha, não preenchemos com a hash/senha por segurança
+        // Para campos de senha, o formulário inicializa vazio
+        // Se o usuário digitar, o valor é enviado; se deixar em branco na edição, o valor existente é preservado
         config?.fields.forEach((f) => {
           if (f.type === 'password') {
             initialData[f.name] = ''
@@ -173,6 +174,10 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
             // Se for edição e o campo de senha estiver vazio, não envia para manter a senha existente
             if (recordId && (val === undefined || val === null || String(val).trim() === '')) {
               continue
+            }
+            // Se preenchido, assegura que é string sem espaços acidentais nas pontas
+            if (val !== undefined && val !== null) {
+              val = String(val).trim()
             }
           }
 
