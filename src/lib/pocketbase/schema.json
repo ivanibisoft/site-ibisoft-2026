@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-07T04:05:31.170Z",
+  "generatedAt": "2026-09-07T04:21:09.953Z",
   "collections": [
     {
       "name": "users",
@@ -901,6 +901,106 @@
         "CREATE INDEX idx_post_categories_order ON post_categories (order)",
         "CREATE INDEX idx_post_categories_is_active ON post_categories (is_active)"
       ]
+    },
+    {
+      "name": "email_config",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "smtp_host",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "smtp_port",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "smtp_user",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "smtp_pass",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "sender_address",
+          "type": "email",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "sender_name",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "smtp_tls",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "admin_email",
+          "type": "email",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "lead_confirmation_subject",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "lead_confirmation_body",
+          "type": "editor",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "admin_alert_subject",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "admin_alert_body",
+          "type": "editor",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
     }
   ]
 }

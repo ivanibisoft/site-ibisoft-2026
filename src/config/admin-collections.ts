@@ -15,10 +15,12 @@ import {
   MessageSquare,
   Newspaper,
   Tags,
+  SlidersHorizontal,
 } from 'lucide-react'
 
 export type FieldType =
   | 'text'
+  | 'password'
   | 'textarea'
   | 'number'
   | 'bool'
@@ -55,6 +57,7 @@ export interface CollectionConfig {
   defaultSort?: string
   reorderable?: boolean
   orderField?: string
+  isSingleton?: boolean
 }
 
 export const COLLECTIONS: CollectionConfig[] = [
@@ -194,6 +197,7 @@ export const COLLECTIONS: CollectionConfig[] = [
     label: 'Config. Home',
     singularLabel: 'Configuração',
     icon: Home,
+    isSingleton: true,
     fields: [
       {
         name: 'typewriter_pause_seconds',
@@ -217,6 +221,111 @@ export const COLLECTIONS: CollectionConfig[] = [
         placeholder: '35',
         helpText: 'Velocidade com que o texto é digitado (entre 10 e 120 cps). Padrão: 35',
         listDisplay: true,
+      },
+    ],
+  },
+  {
+    name: 'email_config',
+    label: 'Configurações de E-mail',
+    singularLabel: 'Configuração de E-mail',
+    icon: SlidersHorizontal,
+    isSingleton: true,
+    fields: [
+      {
+        name: 'smtp_host',
+        label: 'Servidor SMTP (Host)',
+        type: 'text',
+        placeholder: 'ex: smtp.exemplo.com.br ou smtp.gmail.com',
+        helpText: 'Endereço do host do servidor SMTP para envio dos e-mails transacionais.',
+        listDisplay: true,
+      },
+      {
+        name: 'smtp_port',
+        label: 'Porta SMTP',
+        type: 'number',
+        min: 1,
+        max: 65535,
+        placeholder: '587',
+        helpText: 'Porta do servidor (ex: 587 para STARTTLS ou 465 para SSL/TLS). Padrão: 587.',
+        listDisplay: true,
+      },
+      {
+        name: 'smtp_user',
+        label: 'Usuário SMTP',
+        type: 'text',
+        placeholder: 'ex: usuario@dominio.com.br',
+        helpText: 'Usuário ou e-mail autenticado no servidor SMTP.',
+        listDisplay: true,
+      },
+      {
+        name: 'smtp_pass',
+        label: 'Senha SMTP',
+        type: 'password',
+        placeholder: '••••••••',
+        helpText: 'Senha da conta SMTP. Por segurança, deixe em branco para manter a senha atual.',
+      },
+      {
+        name: 'smtp_tls',
+        label: 'Habilitar TLS / SSL',
+        type: 'bool',
+        helpText: 'Exige criptografia TLS na conexão com o servidor de e-mail.',
+        listDisplay: true,
+      },
+      {
+        name: 'sender_address',
+        label: 'E-mail do Remetente (From)',
+        type: 'email',
+        placeholder: 'contato@ibisoft.com.br',
+        helpText: 'Endereço de e-mail exibido como remetente nas mensagens enviadas.',
+        listDisplay: true,
+      },
+      {
+        name: 'sender_name',
+        label: 'Nome do Remetente',
+        type: 'text',
+        placeholder: 'ibisoft Tecnologia',
+        helpText: 'Nome exibido como remetente nas caixas postais dos destinatários.',
+        listDisplay: true,
+      },
+      {
+        name: 'admin_email',
+        label: 'E-mail do Administrador (Alerta de Novos Leads)',
+        type: 'email',
+        required: true,
+        placeholder: 'admin@ibisoft.com.br',
+        helpText: 'E-mail que receberá a notificação completa a cada novo lead cadastrado no site.',
+        listDisplay: true,
+      },
+      {
+        name: 'lead_confirmation_subject',
+        label: 'Assunto do E-mail ao Lead',
+        type: 'text',
+        placeholder: 'Recebemos seu contato - ibisoft Tecnologia',
+        helpText: 'Assunto da confirmação enviada ao lead. Suporta variáveis: {name}, {email}.',
+      },
+      {
+        name: 'lead_confirmation_body',
+        label: 'Mensagem do E-mail ao Lead (HTML)',
+        type: 'textarea',
+        placeholder: '<p>Olá <strong>{name}</strong>, agradecemos seu contato...</p>',
+        helpText:
+          'Corpo em HTML enviado ao lead. Variáveis disponíveis: {name}, {email}, {phone}, {message}, {source_page}.',
+      },
+      {
+        name: 'admin_alert_subject',
+        label: 'Assunto do Alerta ao Administrador',
+        type: 'text',
+        placeholder: 'Novo lead recebido pelo site: {name}',
+        helpText:
+          'Assunto da notificação enviada ao admin. Suporta variáveis: {name}, {source_page}.',
+      },
+      {
+        name: 'admin_alert_body',
+        label: 'Mensagem do Alerta ao Administrador (HTML)',
+        type: 'textarea',
+        placeholder: '<h3>Novo contato</h3><p><strong>Nome:</strong> {name}...</p>',
+        helpText:
+          'Corpo em HTML enviado ao administrador. Variáveis disponíveis: {name}, {email}, {phone}, {message}, {source_page}.',
       },
     ],
   },

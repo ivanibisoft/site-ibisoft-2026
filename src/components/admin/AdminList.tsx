@@ -71,13 +71,19 @@ export function AdminList({ collectionName }: { collectionName: string }) {
   const loadData = useCallback(async () => {
     try {
       const data = await getList(collectionName, sortBy, expandFields)
+      // Se a coleção for do tipo singleton (ex: home_config, email_config) e já possuir registro,
+      // redireciona diretamente para a tela de edição do registro existente
+      if (config?.isSingleton && data.length > 0) {
+        navigate(`/admin/${collectionName}/${data[0].id}/edit`, { replace: true })
+        return
+      }
       setRecords(data)
     } catch {
       toast.error('Erro ao carregar registros')
     } finally {
       setLoading(false)
     }
-  }, [collectionName, expandFields, sortBy])
+  }, [collectionName, expandFields, sortBy, config?.isSingleton, navigate])
 
   useEffect(() => {
     loadData()

@@ -28,7 +28,14 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
     if (!recordId) return
     getOne(collectionName, recordId)
       .then((r) => {
-        setFormData(r)
+        const initialData = { ...r }
+        // Para campos de senha, não preenchemos com a hash/senha por segurança
+        config?.fields.forEach((f) => {
+          if (f.type === 'password') {
+            initialData[f.name] = ''
+          }
+        })
+        setFormData(initialData)
         setLoading(false)
       })
       .catch(() => {
@@ -107,6 +114,15 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
     try {
       const hasFiles = Object.values(files).some((f) => f !== null)
       let data: any = { ...formData }
+
+      // Se for edição e campo de senha estiver vazio, removemos para não sobrescrever com string vazia
+      if (recordId) {
+        config.fields.forEach((f) => {
+          if (f.type === 'password' && (!data[f.name] || String(data[f.name]).trim() === '')) {
+            delete data[f.name]
+          }
+        })
+      }
 
       // Se for criação em coleção reordenável e não há ordem definida, definir como última
       if (

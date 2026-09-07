@@ -34,8 +34,25 @@ export function FormField({
 }: FormFieldProps) {
   const renderInput = () => {
     switch (field.type) {
+      case 'password':
+        return (
+          <Input
+            type="password"
+            placeholder={field.placeholder}
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            autoComplete="new-password"
+          />
+        )
       case 'textarea':
-        return <Textarea value={value || ''} onChange={(e) => onChange(e.target.value)} rows={4} />
+        return (
+          <Textarea
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={field.placeholder}
+            rows={5}
+          />
+        )
       case 'number':
         return (
           <Input
