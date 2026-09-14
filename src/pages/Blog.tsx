@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog'
 import { getActiveBlogPosts, getBlogPostImageUrl, type BlogPost } from '@/services/blog'
 import { BlogPostShareButtons } from '@/components/blog/BlogPostShareButtons'
+import { BlogPostContent } from '@/components/blog/BlogPostContent'
 import useRealtime from '@/hooks/use-realtime'
 
 export default function Blog() {
@@ -270,8 +271,8 @@ export default function Blog() {
                                 )}
                               </div>
                             )}
-                            <div className="text-base pt-6 space-y-4 text-foreground/90 text-left whitespace-pre-line leading-relaxed">
-                              {post.content || post.summary}
+                            <div className="text-base pt-6 text-foreground/90 text-left">
+                              <BlogPostContent content={post.content || post.summary || ''} />
                             </div>
                           </DialogHeader>
                         </DialogContent>
