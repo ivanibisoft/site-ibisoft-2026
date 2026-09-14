@@ -1,20 +1,28 @@
 import pb from '@/lib/pocketbase/client'
 
-export const getList = (collection: string, sort = '-created', expand?: string) =>
-  pb.collection(collection).getFullList({ sort, expand })
+export const getList = (collection: string, sort?: any, expand?: any) =>
+  pb
+    .collection(collection)
+    .getFullList(typeof sort === 'object' ? sort : { sort: sort || '-created', expand })
 
-export const getOne = (collection: string, id: string) => pb.collection(collection).getOne(id)
+export const getOne = (collection: string, id: string, options?: any) =>
+  pb.collection(collection).getOne(id, options)
 
-export const createRecord = (collection: string, data: Record<string, any> | FormData) =>
-  pb.collection(collection).create(data)
+export const createRecord = (
+  collection: string,
+  data: Record<string, any> | FormData,
+  options?: any,
+) => pb.collection(collection).create(data, options)
 
 export const updateRecord = (
   collection: string,
   id: string,
   data: Record<string, any> | FormData,
-) => pb.collection(collection).update(id, data)
+  options?: any,
+) => pb.collection(collection).update(id, data, options)
 
-export const deleteRecord = (collection: string, id: string) => pb.collection(collection).delete(id)
+export const deleteRecord = (collection: string, id: string, options?: any) =>
+  pb.collection(collection).delete(id, options)
 
 export const getFileUrl = (collection: string, recordId: string, filename: string) =>
   `${pb.baseURL}/api/files/${collection}/${recordId}/${filename}`
@@ -25,12 +33,11 @@ export interface TestEmailResponse {
   recipient?: string
 }
 
-export const sendTestEmail = async (): Promise<TestEmailResponse> => {
+export async function sendTestEmail(...args: unknown[]): Promise<TestEmailResponse> {
   return pb.send<TestEmailResponse>('/backend/v1/ibisoft/test-email', {
     method: 'POST',
   })
 }
-
 export interface ChangePasswordParams {
   oldPassword: string
   password: string
