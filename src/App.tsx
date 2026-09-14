@@ -27,6 +27,7 @@ import AdminLogin from '@/pages/admin/Login'
 import AdminDashboard from '@/pages/admin/Dashboard'
 import CollectionListPage from '@/pages/admin/CollectionListPage'
 import CollectionFormPage from '@/pages/admin/CollectionFormPage'
+import ChangePassword from '@/pages/admin/ChangePassword'
 
 const App = () => (
   <ErrorBoundary>
@@ -59,6 +60,7 @@ const App = () => (
                 <Route path="/admin" element={<ProtectedRoute />}>
                   <Route element={<AdminLayout />}>
                     <Route index element={<AdminDashboard />} />
+                    <Route path="alterar-senha" element={<ChangePassword />} />
                     <Route path=":collection" element={<CollectionListPage />} />
                     <Route path=":collection/new" element={<CollectionFormPage />} />
                     <Route path=":collection/:id/edit" element={<CollectionFormPage />} />

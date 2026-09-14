@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { COLLECTIONS } from '@/config/admin-collections'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Menu, ExternalLink, LogOut } from 'lucide-react'
+import { Menu, ExternalLink, LogOut, KeyRound } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/use-auth'
 
@@ -40,6 +40,23 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           </Link>
         )
       })}
+
+      <div className="pt-2 mt-2 border-t">
+        <div className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          Conta
+        </div>
+        <Link
+          to="/admin/alterar-senha"
+          onClick={onNavigate}
+          className={cn(
+            'flex items-center gap-2 px-3 py-2 rounded-md text-sm hover:bg-accent transition-colors',
+            location.pathname === '/admin/alterar-senha' && 'bg-accent text-accent-foreground',
+          )}
+        >
+          <KeyRound className="w-4 h-4 shrink-0" />
+          Alterar Senha
+        </Link>
+      </div>
     </nav>
   )
 }
@@ -90,14 +107,20 @@ export function AdminLayout() {
           <h1 className="font-semibold hidden md:block">Painel Administrativo</h1>
           <div className="ml-auto flex items-center gap-2">
             <Button variant="ghost" size="sm" asChild>
+              <Link to="/admin/alterar-senha">
+                <KeyRound className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Alterar Senha</span>
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
               <a href="/">
                 <ExternalLink className="w-4 h-4 mr-2" />
-                Ver site
+                <span className="hidden sm:inline">Ver site</span>
               </a>
             </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
-              Sair
+              <span className="hidden sm:inline">Sair</span>
             </Button>
           </div>
         </header>

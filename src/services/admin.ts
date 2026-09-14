@@ -26,7 +26,43 @@ export interface TestEmailResponse {
 }
 
 export const sendTestEmail = async (): Promise<TestEmailResponse> => {
-  return pb.send<TestEmailResponse>('/api/ibisoft/test-email', {
+  return pb.send<TestEmailResponse>('/backend/v1/ibisoft/test-email', {
     method: 'POST',
   })
+}
+
+export interface ChangePasswordParams {
+  oldPassword: string
+  password: string
+  passwordConfirm: string
+}
+
+export const changeAdminPassword = async ({
+  oldPassword,
+  password,
+  passwordConfirm,
+}: ChangePasswordParams) => {
+  const currentRecord = pb.authStore.record
+  if (!currentRecord || !currentRecord.id) {
+    throw new Error('Sessão expirada. Faça login novamente.')
+  }
+
+  // Update password in users collection using oldPassword, password and passwordConfirm
+  const updatedUser = await pb.collection('users').update(currentRecord.id, {
+    oldPassword,
+    password,
+    passwordConfirm,
+  })
+
+  // Ensure current authStore state is updated and session remains active
+  try {
+    await pb.collection('users').authRefresh()
+  } catch {
+    // If authRefresh fails, we still preserve the updated user in authStore
+    if (pb.authStore.isValid && updatedUser) {
+      pb.authStore.save(pb.authStore.token, updatedUser)
+    }
+  }
+
+  return updatedUser
 }

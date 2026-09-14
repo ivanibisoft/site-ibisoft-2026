@@ -298,10 +298,10 @@ onRecordAfterCreateSuccess((e) => {
 }, 'leads')
 
 // Endpoint para testar o envio de e-mail SMTP diretamente pelo painel Admin
-console.log('[email-hooks] Registrando endpoint POST /api/ibisoft/test-email...')
+console.log('[email-hooks] Registrando endpoint POST /backend/v1/ibisoft/test-email...')
 routerAdd(
   'POST',
-  '/api/ibisoft/test-email',
+  '/backend/v1/ibisoft/test-email',
   (e) => {
     try {
       // 1. Buscar a configuração de e-mail salva
