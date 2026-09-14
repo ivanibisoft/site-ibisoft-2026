@@ -23,35 +23,88 @@ interface AdminFormProps {
 export function AdminForm({ collectionName, recordId }: AdminFormProps) {
   const config = COLLECTIONS.find((c) => c.name === collectionName)
   const navigate = useNavigate()
+  const [activeRecordId, setActiveRecordId] = useState<string | undefined>(recordId)
   const [formData, setFormData] = useState<Record<string, any>>({})
   const [files, setFiles] = useState<Record<string, File | null>>({})
   const [relationData, setRelationData] = useState<Record<string, any[]>>({})
   const [dynamicOptionsData, setDynamicOptionsData] = useState<Record<string, string[]>>({})
   const [errors, setErrors] = useState<FieldErrors>({})
-  const [loading, setLoading] = useState(!!recordId)
+  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [testingEmail, setTestingEmail] = useState(false)
 
+  // Map of field names to human-readable Portuguese labels for error messages
+  const fieldLabelMap: Record<string, string> = (config?.fields || []).reduce(
+    (acc, f) => {
+      acc[f.name] = f.label
+      return acc
+    },
+    {} as Record<string, string>,
+  )
+
   useEffect(() => {
-    if (!recordId) return
-    getOne(collectionName, recordId)
-      .then((r) => {
-        const initialData = { ...r }
-        // Para campos de senha, o formulário inicializa vazio
-        // Se o usuário digitar, o valor é enviado; se deixar em branco na edição, o valor existente é preservado
-        config?.fields.forEach((f) => {
-          if (f.type === 'password') {
-            initialData[f.name] = ''
+    let isMounted = true
+
+    const loadRecord = async () => {
+      setLoading(true)
+      try {
+        let targetId = recordId
+
+        // Para coleções singleton (ex: email_config, home_config), se não houver recordId na rota
+        // ou se acessado diretamente por /new, busca o registro único existente
+        if (config?.isSingleton) {
+          if (!targetId) {
+            const list = await getList(collectionName, '-created')
+            if (list.length > 0) {
+              targetId = list[0].id
+            }
           }
-        })
-        setFormData(initialData)
-        setLoading(false)
-      })
-      .catch(() => {
-        toast.error('Registro não encontrado')
-        navigate(`/admin/${collectionName}`)
-      })
-  }, [recordId, collectionName, navigate])
+        }
+
+        if (targetId) {
+          const r = await getOne(collectionName, targetId)
+          if (!isMounted) return
+          setActiveRecordId(targetId)
+          const initialData = { ...r }
+          // Para campos de senha, o formulário inicializa vazio
+          // Se o usuário digitar, o valor é enviado; se deixar em branco na edição, o valor existente é preservado
+          config?.fields.forEach((f) => {
+            if (f.type === 'password') {
+              initialData[f.name] = ''
+            }
+          })
+          setFormData(initialData)
+        } else {
+          // Novo registro comum
+          if (!isMounted) return
+          setActiveRecordId(undefined)
+          const defaultData: Record<string, any> = {}
+          config?.fields.forEach((f) => {
+            if (f.type === 'bool') defaultData[f.name] = false
+            else if (f.type === 'number') defaultData[f.name] = null
+            else defaultData[f.name] = ''
+          })
+          setFormData(defaultData)
+        }
+      } catch (err) {
+        console.error(`Erro ao carregar registro da coleção ${collectionName}:`, err)
+        if (isMounted) {
+          toast.error('Erro ao carregar dados do formulário')
+          navigate(`/admin/${collectionName}`)
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadRecord()
+
+    return () => {
+      isMounted = false
+    }
+  }, [recordId, collectionName, config?.isSingleton, navigate])
 
   useEffect(() => {
     const relFields = config?.fields.filter((f) => f.type === 'relation') || []
@@ -151,6 +204,22 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
 
     try {
       const hasFiles = Object.values(files).some((f) => f !== null)
+
+      // Se for coleção singleton (ex: email_config, home_config) e ainda não tiver activeRecordId,
+      // faz uma verificação defensiva para recuperar o registro único existente
+      let effectiveRecordId = activeRecordId
+      if (config.isSingleton && !effectiveRecordId) {
+        try {
+          const singletons = await getList(collectionName, '-created')
+          if (singletons.length > 0) {
+            effectiveRecordId = singletons[0].id
+            setActiveRecordId(effectiveRecordId)
+          }
+        } catch (fetchErr) {
+          console.warn(`Aviso ao verificar registro singleton para ${collectionName}:`, fetchErr)
+        }
+      }
+
       // Construir payload limpo contendo apenas os campos configurados na coleção
       // evitando enviar campos de sistema (ex: id, created, updated, expand, etc.)
       const allowedFieldMap = new Map(config.fields.map((f) => [f.name, f]))
@@ -172,7 +241,10 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
             val = Boolean(val)
           } else if (fieldDef.type === 'password') {
             // Se for edição e o campo de senha estiver vazio, não envia para manter a senha existente
-            if (recordId && (val === undefined || val === null || String(val).trim() === '')) {
+            if (
+              effectiveRecordId &&
+              (val === undefined || val === null || String(val).trim() === '')
+            ) {
               continue
             }
             // Se preenchido, assegura que é string sem espaços acidentais nas pontas
@@ -187,7 +259,7 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
 
       // Se for criação em coleção reordenável e não há ordem definida, definir como última
       if (
-        !recordId &&
+        !effectiveRecordId &&
         config.reorderable &&
         config.orderField &&
         data[config.orderField] === undefined
@@ -214,18 +286,21 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
         }
         data = formDataPayload
       }
-      if (recordId) {
-        await updateRecord(collectionName, recordId, data)
+      if (effectiveRecordId) {
+        await updateRecord(collectionName, effectiveRecordId, data)
       } else {
-        await createRecord(collectionName, data)
+        const created = await createRecord(collectionName, data)
+        if (config.isSingleton && created?.id) {
+          setActiveRecordId(created.id)
+        }
       }
       toast.success('Registro salvo com sucesso')
       navigate(`/admin/${collectionName}`)
     } catch (err) {
       console.error(`Erro ao salvar na coleção ${collectionName}:`, err)
-      const fieldErrors = extractFieldErrors(err)
+      const fieldErrors = extractFieldErrors(err, fieldLabelMap)
       setErrors(fieldErrors)
-      const detail = getErrorMessage(err)
+      const detail = getErrorMessage(err, fieldLabelMap)
       toast.error(`Erro ao salvar: ${detail}`)
     } finally {
       setSaving(false)
@@ -244,7 +319,7 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
           </Link>
         </Button>
         <h1 className="text-2xl font-bold">
-          {recordId ? 'Editar' : 'Criar'} {config.singularLabel}
+          {activeRecordId ? 'Editar' : 'Criar'} {config.singularLabel}
         </h1>
       </div>
 
@@ -260,8 +335,8 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
             dynamicOptions={dynamicOptionsData[field.name]}
             error={errors[field.name]}
             fileUrl={
-              recordId && formData[field.name]
-                ? getFileUrl(collectionName, recordId, formData[field.name])
+              activeRecordId && formData[field.name]
+                ? getFileUrl(collectionName, activeRecordId, formData[field.name])
                 : null
             }
           />
@@ -277,7 +352,7 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
             </Button>
           </div>
 
-          {collectionName === 'email_config' && recordId && (
+          {collectionName === 'email_config' && (
             <Button
               type="button"
               variant="secondary"

@@ -71,10 +71,15 @@ export function AdminList({ collectionName }: { collectionName: string }) {
   const loadData = useCallback(async () => {
     try {
       const data = await getList(collectionName, sortBy, expandFields)
-      // Se a coleção for do tipo singleton (ex: home_config, email_config) e já possuir registro,
-      // redireciona diretamente para a tela de edição do registro existente
-      if (config?.isSingleton && data.length > 0) {
-        navigate(`/admin/${collectionName}/${data[0].id}/edit`, { replace: true })
+      // Se a coleção for do tipo singleton (ex: home_config, email_config):
+      // se já possuir registro, redireciona diretamente para a tela de edição do registro existente;
+      // se ainda não possuir, direciona para a tela de novo registro
+      if (config?.isSingleton) {
+        if (data.length > 0) {
+          navigate(`/admin/${collectionName}/${data[0].id}/edit`, { replace: true })
+        } else {
+          navigate(`/admin/${collectionName}/new`, { replace: true })
+        }
         return
       }
       setRecords(data)
