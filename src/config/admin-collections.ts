@@ -416,13 +416,20 @@ export const COLLECTIONS: CollectionConfig[] = [
     fields: [
       { name: 'title', label: 'Título', type: 'text', required: true, listDisplay: true },
       { name: 'slug', label: 'Slug', type: 'text', required: true },
-      { name: 'summary', label: 'Resumo', type: 'textarea' },
+      {
+        name: 'summary',
+        label: 'Resumo',
+        type: 'textarea',
+        max: 500,
+        helpText: 'Breve introdução ou síntese do artigo (máx. 500 caracteres).',
+      },
       {
         name: 'content',
         label: 'Conteúdo Completo',
         type: 'richtext',
+        max: 200000,
         helpText:
-          'Editor rico completo: use a barra para negrito, itálico, títulos H2/H3, listas, tabelas, links e upload de imagens inline.',
+          'Editor rico completo: use a barra para negrito, itálico, títulos H2/H3, listas, tabelas, links e upload de imagens inline (limite expandido para até 200.000 caracteres de HTML rico).',
       },
       {
         name: 'category',

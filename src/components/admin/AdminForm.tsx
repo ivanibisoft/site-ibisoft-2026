@@ -192,6 +192,18 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
             newErrors[field.name] = `O valor máximo permitido é ${field.max}.`
           }
         }
+      } else if (
+        (field.type === 'text' || field.type === 'textarea' || field.type === 'richtext') &&
+        typeof val === 'string' &&
+        val.length > 0
+      ) {
+        if (field.max !== undefined && val.length > field.max) {
+          newErrors[field.name] =
+            `O texto não pode exceder ${field.max.toLocaleString('pt-BR')} caracteres (atual: ${val.length.toLocaleString('pt-BR')}).`
+        }
+        if (field.min !== undefined && val.length < field.min) {
+          newErrors[field.name] = `O texto deve ter pelo menos ${field.min} caracteres.`
+        }
       }
     })
 
