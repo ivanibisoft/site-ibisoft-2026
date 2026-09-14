@@ -77,11 +77,11 @@ export default function About() {
               demanda por processamento de dados e desenvolvimento de softwares de alta performance.
             </p>
             <p className="text-muted-foreground text-lg leading-relaxed mb-6">
-              Desde então, nossa evolução tem sido constante. O que começou como um suporte técnico
-              especializado transformou-se em um ecossistema completo de soluções de gestão. Hoje,
-              desenvolvemos softwares que vão desde Sistemas de Gestão de Negócios (ERP) robustos
-              até ferramentas específicas, desenhadas para atender às particularidades de cada
-              modelo de negócio.
+              Desde então, nossa evolução tem sido constante. O que começou como Outsourcing de
+              Processamento de Dados transformou-se em um ecossistema completo de soluções de
+              gestão. Hoje, desenvolvemos softwares que vão desde Sistemas de Gestão de Negócios
+              (ERP) robustos até ferramentas específicas, desenhadas para atender às
+              particularidades de cada modelo de negócio.
             </p>
             <p className="text-muted-foreground text-lg leading-relaxed">
               Nossa missão é clara: democratizar o acesso à tecnologia de ponta. Acreditamos que
