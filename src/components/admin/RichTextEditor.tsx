@@ -1,6 +1,9 @@
 import { useState, useRef } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import { TextStyle } from '@tiptap/extension-text-style'
+import { Color } from '@tiptap/extension-color'
+import Highlight from '@tiptap/extension-highlight'
 import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
@@ -31,6 +34,10 @@ import {
   Redo2,
   Quote,
   Minus,
+  Baseline,
+  Highlighter,
+  RemoveFormatting,
+  Check,
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -57,6 +64,34 @@ interface RichTextEditorProps {
   placeholder?: string
 }
 
+// Brand & standard colors for font text
+const FONT_COLORS = [
+  { name: 'Padrão / Escuro', color: '#091e3a' },
+  { name: 'Azul Navy ibisoft', color: '#002855' },
+  { name: 'Azul Elétrico ibisoft', color: '#0056b3' },
+  { name: 'Laranja ibisoft', color: '#f37021' },
+  { name: 'Cinza Escuro', color: '#4b5563' },
+  { name: 'Cinza Claro', color: '#9ca3af' },
+  { name: 'Vermelho', color: '#dc2626' },
+  { name: 'Verde', color: '#16a34a' },
+  { name: 'Amarelo / Âmbar', color: '#d97706' },
+  { name: 'Roxo', color: '#7c3aed' },
+  { name: 'Branco', color: '#ffffff', border: true },
+]
+
+// Highlight (background) colors
+const HIGHLIGHT_COLORS = [
+  { name: 'Amarelo Marca-texto', color: '#fef08a' },
+  { name: 'Azul Suave ibisoft', color: '#dbeafe' },
+  { name: 'Laranja Suave', color: '#ffedd5' },
+  { name: 'Verde Suave', color: '#dcfce7' },
+  { name: 'Roxo Suave', color: '#f3e8ff' },
+  { name: 'Rosa Suave', color: '#fce7f3' },
+  { name: 'Cinza Suave', color: '#f1f5f9' },
+  { name: 'Azul Corporativo', color: '#002855', dark: true },
+  { name: 'Azul Elétrico', color: '#0056b3', dark: true },
+]
+
 export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [linkDialogOpen, setLinkDialogOpen] = useState(false)
@@ -75,6 +110,11 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
         heading: {
           levels: [2, 3],
         },
+      }),
+      TextStyle,
+      Color,
+      Highlight.configure({
+        multicolor: true,
       }),
       Table.configure({
         resizable: true,
@@ -348,6 +388,146 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
           title="Justificar"
         >
           <AlignJustify className="h-4 w-4" />
+        </Button>
+
+        <div className="h-5 w-px bg-border mx-1" />
+
+        {/* Font Color Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type="button"
+              variant={editor.getAttributes('textStyle').color ? 'secondary' : 'ghost'}
+              size="sm"
+              className={`h-8 px-1.5 flex items-center gap-1 ${
+                editor.getAttributes('textStyle').color ? 'bg-primary/10 text-primary' : ''
+              }`}
+              title="Cor da fonte"
+            >
+              <div className="flex flex-col items-center justify-center">
+                <Baseline className="h-4 w-4" />
+                <span
+                  className="h-1 w-3.5 rounded-full mt-0.5 border border-black/10"
+                  style={{
+                    backgroundColor: editor.getAttributes('textStyle').color || '#002855',
+                  }}
+                />
+              </div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-52 p-2">
+            <div className="text-xs font-semibold text-muted-foreground px-1 pb-1.5">
+              Cor da Fonte
+            </div>
+            <div className="grid grid-cols-5 gap-1.5 py-1">
+              {FONT_COLORS.map((c) => {
+                const isSelected =
+                  editor.getAttributes('textStyle').color?.toLowerCase() === c.color.toLowerCase()
+                return (
+                  <button
+                    key={c.color}
+                    type="button"
+                    onClick={() => editor.chain().focus().setColor(c.color).run()}
+                    className={`h-7 w-7 rounded-md flex items-center justify-center transition-transform hover:scale-110 relative ${
+                      c.border ? 'border border-gray-300' : ''
+                    }`}
+                    style={{ backgroundColor: c.color }}
+                    title={c.name}
+                  >
+                    {isSelected && (
+                      <Check
+                        className={`h-3.5 w-3.5 ${
+                          c.color === '#ffffff' || c.color === '#fef08a'
+                            ? 'text-black'
+                            : 'text-white'
+                        }`}
+                      />
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+            <DropdownMenuSeparator className="my-1.5" />
+            <DropdownMenuItem
+              onClick={() => editor.chain().focus().unsetColor().run()}
+              className="text-xs text-muted-foreground cursor-pointer flex items-center justify-between"
+            >
+              <span>Restaurar cor padrão</span>
+              <Trash2 className="h-3.5 w-3.5 ml-2" />
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Highlight / Background Color Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type="button"
+              variant={editor.isActive('highlight') ? 'secondary' : 'ghost'}
+              size="sm"
+              className={`h-8 px-1.5 flex items-center gap-1 ${
+                editor.isActive('highlight') ? 'bg-primary/10 text-primary' : ''
+              }`}
+              title="Cor de fundo (marca-texto)"
+            >
+              <div className="flex flex-col items-center justify-center">
+                <Highlighter className="h-4 w-4" />
+                <span
+                  className="h-1 w-3.5 rounded-full mt-0.5 border border-black/10"
+                  style={{
+                    backgroundColor: editor.getAttributes('highlight').color || '#fef08a',
+                  }}
+                />
+              </div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-52 p-2">
+            <div className="text-xs font-semibold text-muted-foreground px-1 pb-1.5">
+              Cor de Fundo (Marca-texto)
+            </div>
+            <div className="grid grid-cols-5 gap-1.5 py-1">
+              {HIGHLIGHT_COLORS.map((c) => {
+                const isSelected =
+                  editor.getAttributes('highlight').color?.toLowerCase() === c.color.toLowerCase()
+                return (
+                  <button
+                    key={c.color}
+                    type="button"
+                    onClick={() => editor.chain().focus().toggleHighlight({ color: c.color }).run()}
+                    className="h-7 w-7 rounded-md flex items-center justify-center border border-black/10 transition-transform hover:scale-110 relative"
+                    style={{ backgroundColor: c.color }}
+                    title={c.name}
+                  >
+                    {isSelected && (
+                      <Check
+                        className={`h-3.5 w-3.5 ${c.dark ? 'text-white' : 'text-slate-800'}`}
+                      />
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+            <DropdownMenuSeparator className="my-1.5" />
+            <DropdownMenuItem
+              onClick={() => editor.chain().focus().unsetHighlight().run()}
+              className="text-xs text-muted-foreground cursor-pointer flex items-center justify-between"
+            >
+              <span>Remover fundo</span>
+              <Trash2 className="h-3.5 w-3.5 ml-2" />
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Clear formatting (unsetAllMarks) */}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+          onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
+          title="Limpar formatação (remover estilos e marcas)"
+        >
+          <RemoveFormatting className="h-4 w-4 text-muted-foreground" />
         </Button>
 
         <div className="h-5 w-px bg-border mx-1" />

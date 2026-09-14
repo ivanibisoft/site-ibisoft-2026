@@ -61,12 +61,14 @@ export function BlogPostContent({ content }: BlogPostContentProps) {
         'target',
         'rel',
         'style',
+        'data-color',
         'width',
         'height',
         'colspan',
         'rowspan',
       ],
-      ADD_ATTR: ['target', 'rel'],
+      ADD_ATTR: ['target', 'rel', 'data-color'],
+      ADD_TAGS: ['mark'],
       FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
     })
   }, [content, isHtml])

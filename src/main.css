@@ -207,6 +207,13 @@
   font-style: italic;
 }
 
+.ibisoft-blog-content mark {
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
 .ibisoft-blog-content blockquote {
   border-left: 4px solid hsl(var(--accent));
   background-color: hsl(var(--muted) / 0.6);
@@ -310,6 +317,13 @@
 /* TipTap Editor Inner Styles */
 .tiptap-content-container .tiptap {
   outline: none !important;
+}
+
+.tiptap-content-container .tiptap mark {
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 .tiptap-content-container .tiptap p.is-editor-empty:first-child::before {
