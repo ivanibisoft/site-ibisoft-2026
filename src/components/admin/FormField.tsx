@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { RichTextEditor } from '@/components/admin/RichTextEditor'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
@@ -70,6 +71,14 @@ export function FormField({
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder}
             rows={5}
+          />
+        )
+      case 'richtext':
+        return (
+          <RichTextEditor
+            value={value || ''}
+            onChange={onChange}
+            placeholder={field.placeholder || 'Comece a escrever o conteúdo aqui...'}
           />
         )
       case 'number':

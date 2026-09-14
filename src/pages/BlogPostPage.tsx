@@ -13,6 +13,7 @@ import {
   type BlogPost,
 } from '@/services/blog'
 import { BlogPostShareButtons } from '@/components/blog/BlogPostShareButtons'
+import { BlogPostContent } from '@/components/blog/BlogPostContent'
 import useRealtime from '@/hooks/use-realtime'
 
 export default function BlogPostPage() {
@@ -243,9 +244,7 @@ export default function BlogPostPage() {
       {/* Article Body Content */}
       <section className="py-12 md:py-16">
         <div className="container max-w-3xl mx-auto px-4">
-          <div className="prose prose-slate max-w-none text-foreground/90 text-base md:text-lg leading-relaxed whitespace-pre-line space-y-6">
-            {post.content || post.summary}
-          </div>
+          <BlogPostContent content={post.content || post.summary || ''} />
 
           {/* Bottom Back Button & Share */}
           <div className="mt-12 pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4">

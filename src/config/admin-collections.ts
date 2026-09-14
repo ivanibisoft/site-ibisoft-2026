@@ -22,6 +22,7 @@ export type FieldType =
   | 'text'
   | 'password'
   | 'textarea'
+  | 'richtext'
   | 'number'
   | 'bool'
   | 'email'
@@ -416,7 +417,13 @@ export const COLLECTIONS: CollectionConfig[] = [
       { name: 'title', label: 'Título', type: 'text', required: true, listDisplay: true },
       { name: 'slug', label: 'Slug', type: 'text', required: true },
       { name: 'summary', label: 'Resumo', type: 'textarea' },
-      { name: 'content', label: 'Conteúdo', type: 'textarea' },
+      {
+        name: 'content',
+        label: 'Conteúdo Completo',
+        type: 'richtext',
+        helpText:
+          'Editor rico completo: use a barra para negrito, itálico, títulos H2/H3, listas, tabelas, links e upload de imagens inline.',
+      },
       {
         name: 'category',
         label: 'Categoria',

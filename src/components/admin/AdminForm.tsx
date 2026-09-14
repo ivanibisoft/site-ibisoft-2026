@@ -310,8 +310,10 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
   if (!config) return <div className="text-muted-foreground">Coleção não encontrada</div>
   if (loading) return <div className="animate-pulse text-muted-foreground">Carregando...</div>
 
+  const isWideForm = config.fields.some((f) => f.type === 'richtext')
+
   return (
-    <div className="max-w-2xl">
+    <div className={isWideForm ? 'max-w-4xl' : 'max-w-2xl'}>
       <div className="flex items-center gap-4 mb-6">
         <Button variant="ghost" size="icon" asChild>
           <Link to={`/admin/${collectionName}`}>
