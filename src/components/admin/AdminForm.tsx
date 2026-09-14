@@ -298,9 +298,9 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
       navigate(`/admin/${collectionName}`)
     } catch (err) {
       console.error(`Erro ao salvar na coleção ${collectionName}:`, err)
-      const fieldErrors = extractFieldErrors(err, fieldLabelMap)
+      const fieldErrors = extractFieldErrors(err)
       setErrors(fieldErrors)
-      const detail = getErrorMessage(err, fieldLabelMap)
+      const detail = getErrorMessage(err)
       toast.error(`Erro ao salvar: ${detail}`)
     } finally {
       setSaving(false)

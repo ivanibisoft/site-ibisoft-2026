@@ -120,7 +120,7 @@ try {
   }
 } catch (_) {}
 
-console.log('[email-hooks] Hook leads_email_notification.js v3.3 inicializado!')
+console.log('[email-hooks] Hook leads_email_notification.js v3.4 inicializado!')
 
 // Helper defensivo para invocar syncSmtpSettings sem ReferenceError
 function safeSyncSmtp(app, config) {
