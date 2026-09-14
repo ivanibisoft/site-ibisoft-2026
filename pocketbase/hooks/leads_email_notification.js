@@ -10,9 +10,17 @@
  * nos logs do backend sem lançar erro nem interromper o cadastro do lead.
  */
 
-console.log('[email-hooks] Hook leads_email_notification.js v3.1 inicializado!')
+console.log('[email-hooks] Hook leads_email_notification.js v3.2 inicializado!')
 
-var syncSmtpSettings = function (app, config) {
+try {
+  if (typeof globalThis !== 'undefined') {
+    globalThis.syncSmtpSettings = syncSmtpSettings
+    globalThis.replacePlaceholders = replacePlaceholders
+    globalThis.escapeHtml = escapeHtml
+  }
+} catch (_) {}
+
+function syncSmtpSettings(app, config) {
   try {
     const host = (config.getString('smtp_host') || '').trim()
     const port = config.getInt('smtp_port') || 587
@@ -91,7 +99,7 @@ var syncSmtpSettings = function (app, config) {
   }
 }
 
-var replacePlaceholders = function (template, data) {
+function replacePlaceholders(template, data) {
   if (!template) return ''
   return template
     .replace(/\{name\}/g, data.name || '')
@@ -101,7 +109,7 @@ var replacePlaceholders = function (template, data) {
     .replace(/\{source_page\}/g, data.source_page || '')
 }
 
-var escapeHtml = function (str) {
+function escapeHtml(str) {
   if (!str) return ''
   return String(str)
     .replace(/&/g, '&amp;')
@@ -118,7 +126,15 @@ var escapeHtml = function (str) {
 onRecordAfterCreateSuccess((e) => {
   e.next()
   try {
-    syncSmtpSettings(e.app, e.record)
+    const fn =
+      typeof syncSmtpSettings === 'function'
+        ? syncSmtpSettings
+        : typeof globalThis !== 'undefined'
+          ? globalThis.syncSmtpSettings
+          : null
+    if (fn) {
+      fn(e.app, e.record)
+    }
   } catch (err) {
     console.error(
       '[email-hooks] Falha ignorada ao sincronizar SMTP após create de email_config:',
@@ -130,7 +146,15 @@ onRecordAfterCreateSuccess((e) => {
 onRecordAfterUpdateSuccess((e) => {
   e.next()
   try {
-    syncSmtpSettings(e.app, e.record)
+    const fn =
+      typeof syncSmtpSettings === 'function'
+        ? syncSmtpSettings
+        : typeof globalThis !== 'undefined'
+          ? globalThis.syncSmtpSettings
+          : null
+    if (fn) {
+      fn(e.app, e.record)
+    }
   } catch (err) {
     console.error(
       '[email-hooks] Falha ignorada ao sincronizar SMTP após update de email_config:',
@@ -216,7 +240,15 @@ onRecordAfterCreateSuccess((e) => {
 
   // Garantir que as configurações de SMTP do PocketBase estejam atualizadas antes de criar o cliente
   if (config) {
-    syncSmtpSettings(e.app, config)
+    const fn =
+      typeof syncSmtpSettings === 'function'
+        ? syncSmtpSettings
+        : typeof globalThis !== 'undefined'
+          ? globalThis.syncSmtpSettings
+          : null
+    if (fn) {
+      fn(e.app, config)
+    }
   }
 
   const templateData = {
@@ -350,7 +382,14 @@ routerAdd(
       }
 
       // Sincronizar configurações SMTP para o app.settings()
-      syncSmtpSettings(e.app, config)
+      if (typeof syncSmtpSettings === 'function') {
+        syncSmtpSettings(e.app, config)
+      } else if (
+        typeof globalThis !== 'undefined' &&
+        typeof globalThis.syncSmtpSettings === 'function'
+      ) {
+        globalThis.syncSmtpSettings(e.app, config)
+      }
 
       // Instanciar cliente de e-mail
       const mailClient = e.app.newMailClient()
