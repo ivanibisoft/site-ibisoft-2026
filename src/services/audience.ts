@@ -256,6 +256,7 @@ export interface HookVersionResponse {
   service: string
   version: string
   status: string
+  features?: string[]
   timestamp: string
 }
 
@@ -270,6 +271,26 @@ export async function getAudienceHookVersion(): Promise<HookVersionResponse | nu
   } catch (err) {
     console.warn('[Audience] Falha ao consultar versão do hook:', err)
     return null
+  }
+}
+
+/**
+ * Consulta a versão ativa do hook consolidado de e-mail e jornada de leads
+ */
+export async function getLeadHookVersion(): Promise<HookVersionResponse | null> {
+  try {
+    return await pb.send<HookVersionResponse>('/backend/v1/ibisoft/hook-version', {
+      method: 'GET',
+    })
+  } catch (err) {
+    try {
+      return await pb.send<HookVersionResponse>('/backend/v1/ibisoft/email/hook-version', {
+        method: 'GET',
+      })
+    } catch (innerErr) {
+      console.warn('[LeadHook] Falha ao consultar versão do hook:', innerErr)
+      return null
+    }
   }
 }
 

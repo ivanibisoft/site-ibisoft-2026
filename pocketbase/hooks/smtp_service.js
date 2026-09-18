@@ -1,14 +1,14 @@
 /**
- * smtp_service.js - Serviço Consolidado de E-mail e Alertas de Leads por Seção
- * ibisoft Tecnologia - Versão 1.1.0
+ * smtp_service.js - Serviço Consolidado de E-mail e Alertas de Leads por Página Real
+ * ibisoft Tecnologia - Versão 1.3.0
  *
  * RESPONSABILIDADES:
- * 1. Endpoint GET /backend/v1/ibisoft/email/hook-version: diagnóstico de versão
+ * 1. Endpoint GET /backend/v1/ibisoft/email/hook-version e GET /backend/v1/ibisoft/hook-version: diagnóstico de versão
  * 2. Endpoint POST /backend/v1/ibisoft/test-email: teste operacional de envio SMTP
  * 3. Gatilho onRecordCreateRequest('leads'): enriquece o lead com a jornada navegada na sessão
- *    (seções visitadas, seção de maior interesse, resumo formatado)
+ *    (títulos reais das páginas visitadas em ordem cronológica com agrupamento consecutivo, página real de maior interesse, resumo formatado)
  * 4. Gatilho onRecordAfterCreateSuccess('leads'): envia confirmação ao visitante e
- *    alerta detalhado ao administrador contendo a jornada e seção de maior interesse do lead.
+ *    alerta detalhado ao administrador contendo a jornada e página real de maior interesse do lead.
  * 5. Gatilhos onRecordAfterCreateSuccess('email_config') / onRecordAfterUpdateSuccess('email_config'):
  *    sincroniza configurações SMTP imediatamente.
  *
@@ -18,16 +18,38 @@
  * Falha de SMTP ou de rede NUNCA interrompe o fluxo principal da aplicação.
  */
 
-console.log('[smtp_service v1.1.0] Carregando serviço consolidado de e-mail e alerta de leads...')
+console.log('[smtp_service v1.3.0] Carregando serviço consolidado de e-mail e alerta de leads...')
 
 // ============================================================================
-// 1. ROTA DE DIAGNÓSTICO DE VERSÃO
+// 1. ROTAS DE DIAGNÓSTICO DE VERSÃO
 // ============================================================================
 routerAdd('GET', '/backend/v1/ibisoft/email/hook-version', (e) => {
   return e.json(200, {
     service: 'ibisoft-smtp-service',
-    version: '1.2.0',
-    features: ['smtp-sync', 'lead-journey-alerts', 'exact-page-resolution', 'safe-test-email'],
+    version: '1.3.0',
+    features: [
+      'smtp-sync',
+      'lead-journey-alerts',
+      'exact-page-resolution',
+      'page-titles-journey-summary',
+      'safe-test-email',
+    ],
+    status: 'online',
+    timestamp: new Date().toISOString(),
+  })
+})
+
+routerAdd('GET', '/backend/v1/ibisoft/hook-version', (e) => {
+  return e.json(200, {
+    service: 'ibisoft-smtp-service',
+    version: '1.3.0',
+    features: [
+      'smtp-sync',
+      'lead-journey-alerts',
+      'exact-page-resolution',
+      'page-titles-journey-summary',
+      'safe-test-email',
+    ],
     status: 'online',
     timestamp: new Date().toISOString(),
   })
@@ -91,7 +113,7 @@ routerAdd('POST', '/backend/v1/ibisoft/test-email', (e) => {
       console.warn('[smtp_service v1.1.0] Aviso ao atualizar settings do PocketBase:', syncErr)
     }
 
-    const testSubject = '[Teste ibisoft] Diagnóstico de Envio SMTP v1.1'
+    const testSubject = '[Teste ibisoft] Diagnóstico de Envio SMTP v1.3'
     const testBody = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
         <h2 style="color: #0284c7; margin-top: 0;">Diagnóstico de Envio SMTP ibisoft</h2>
@@ -102,7 +124,7 @@ routerAdd('POST', '/backend/v1/ibisoft/test-email', (e) => {
           <p style="margin: 4px 0;"><strong>TLS Habilitado:</strong> ${tls ? 'Sim' : 'Não'}</p>
           <p style="margin: 4px 0;"><strong>Remetente:</strong> ${senderName} &lt;${senderAddress}&gt;</p>
           <p style="margin: 4px 0;"><strong>Destinatário de Teste:</strong> ${adminEmail}</p>
-          <p style="margin: 4px 0;"><strong>Versão do Hook:</strong> v1.1.0 (Alertas de Leads por Seção)</p>
+          <p style="margin: 4px 0;"><strong>Versão do Hook:</strong> v1.3.0 (Alertas de Leads por Página Real)</p>
           <p style="margin: 4px 0;"><strong>Data / Hora:</strong> ${new Date().toLocaleString('pt-BR')}</p>
         </div>
         <p style="color: #15803d; font-weight: bold;">✓ Comunicação SMTP operacional com sucesso!</p>
@@ -247,6 +269,7 @@ onRecordCreateRequest((e) => {
 
         if (events && events.length > 0) {
           const sectionCounts = {}
+          const pageTitleCounts = {}
           const pathSteps = []
 
           for (let i = 0; i < events.length; i++) {
@@ -260,6 +283,8 @@ onRecordCreateRequest((e) => {
             title = resolveExactPageName(e.app, path, title)
 
             sectionCounts[sec] = (sectionCounts[sec] || 0) + 1
+            pageTitleCounts[title] = (pageTitleCounts[title] || 0) + 1
+
             pathSteps.push({
               path,
               section: sec,
@@ -268,32 +293,58 @@ onRecordCreateRequest((e) => {
             })
           }
 
-          // Identificar as seções de maior interesse (ordenadas por frequência)
-          const sortedSections = Object.keys(sectionCounts).sort(
-            (a, b) => sectionCounts[b] - sectionCounts[a],
+          // 1. Identificar a PÁGINA REAL de maior interesse (mais visitada na sessão)
+          const sortedPages = Object.keys(pageTitleCounts).sort(
+            (a, b) => pageTitleCounts[b] - pageTitleCounts[a],
           )
 
-          // Seção mais visitada
-          if (!currentInterest && sortedSections.length > 0) {
-            currentInterest = sortedSections[0]
+          // Se primary_interest não foi definido ou é genérico (ex: apenas a seção genérica),
+          // define para o título real da página mais visitada
+          if (sortedPages.length > 0) {
+            const topPageTitle = sortedPages[0]
+            currentInterest = topPageTitle
             record.set('primary_interest', currentInterest)
           }
 
-          // Montar resumo textual legível da jornada
-          if (!currentSummary) {
-            const stepsSummary = sortedSections
-              .slice(0, 3)
-              .map((s) => `${s} (${sectionCounts[s]}x)`)
-              .join(' → ')
-            currentSummary = stepsSummary || 'Navegação direta'
-            record.set('journey_summary', currentSummary)
+          // 2. Montar journey_summary a partir dos TÍTULOS REAIS das páginas em ordem cronológica
+          // com agrupamento de repetições consecutivas: ex "Contato (2x) → Segmento — Indústria → Segmento — Serviços"
+          const groupedConsecutiveSteps = []
+          for (let i = 0; i < pathSteps.length; i++) {
+            const stepTitle = pathSteps[i].title || 'Página'
+            if (
+              groupedConsecutiveSteps.length > 0 &&
+              groupedConsecutiveSteps[groupedConsecutiveSteps.length - 1].title === stepTitle
+            ) {
+              groupedConsecutiveSteps[groupedConsecutiveSteps.length - 1].count++
+            } else {
+              groupedConsecutiveSteps.push({
+                title: stepTitle,
+                count: 1,
+              })
+            }
           }
+
+          const stepsSummary = groupedConsecutiveSteps
+            .map((item) => (item.count > 1 ? `${item.title} (${item.count}x)` : item.title))
+            .join(' → ')
+
+          currentSummary = stepsSummary || 'Navegação direta'
+          record.set('journey_summary', currentSummary)
+
+          // Seções ordenadas por frequência para manter compatibilidade com analytics
+          const sortedSections = Object.keys(sectionCounts).sort(
+            (a, b) => sectionCounts[b] - sectionCounts[a],
+          )
 
           // Guardar detalhes da jornada em JSON com os nomes exatos das páginas
           try {
             record.set('journey_details', {
               session_id: sessionId,
               total_pages_viewed: events.length,
+              top_pages: sortedPages.map((p) => ({
+                title: p,
+                views: pageTitleCounts[p],
+              })),
               top_sections: sortedSections.map((s) => ({
                 section: s,
                 views: sectionCounts[s],
@@ -304,7 +355,7 @@ onRecordCreateRequest((e) => {
         }
       } catch (searchErr) {
         console.warn(
-          '[smtp_service v1.2.0] Aviso ao cruzar eventos de audiência do lead:',
+          '[smtp_service v1.3.0] Aviso ao cruzar eventos de audiência do lead:',
           searchErr,
         )
       }
@@ -327,7 +378,7 @@ onRecordCreateRequest((e) => {
     }
   } catch (err) {
     // RESILIENTE: NUNCA interrompe a criação do lead
-    console.warn('[smtp_service v1.1.0] Erro não fatal no pré-cadastro do lead:', err)
+    console.warn('[smtp_service v1.3.0] Erro não fatal no pré-cadastro do lead:', err)
   }
 
   e.next()
@@ -574,9 +625,8 @@ onRecordAfterCreateSuccess((e) => {
               </span>
             </div>
             <p style="margin: 6px 0; font-size: 14px; color: #166534;">
-              <strong>Seção de Maior Interesse:</strong> <span style="font-size: 15px; font-weight: bold; color: #14532d;">${primaryInterest}</span>
-            </p>
-            <p style="margin: 6px 0; font-size: 13px; color: #374151;">
+              <strong>Página de Maior Interesse:</strong> <span style="font-size: 15px; font-weight: bold; color: #14532d;">${primaryInterest}</span>
+            </p>            <p style="margin: 6px 0; font-size: 13px; color: #374151;">
               <strong>Jornada Navegada na Sessão:</strong> ${journeySummary}
             </p>
             ${stepsHtml}
@@ -604,9 +654,9 @@ onRecordAfterCreateSuccess((e) => {
         })
 
         mailClient.send(adminMailer)
-        console.log('[smtp_service v1.1.0] Alerta de novo lead enviado ao admin:', adminEmail)
+        console.log('[smtp_service v1.3.0] Alerta de novo lead enviado ao admin:', adminEmail)
       } catch (adminErr) {
-        console.error('[smtp_service v1.1.0] Falha ao enviar alerta ao administrador:', adminErr)
+        console.error('[smtp_service v1.3.0] Falha ao enviar alerta ao administrador:', adminErr)
       }
     }
 
@@ -645,14 +695,14 @@ onRecordAfterCreateSuccess((e) => {
         })
 
         mailClient.send(userMailer)
-        console.log('[smtp_service v1.1.0] E-mail de confirmação enviado ao lead:', leadEmail)
+        console.log('[smtp_service v1.3.0] E-mail de confirmação enviado ao lead:', leadEmail)
       } catch (userErr) {
-        console.error('[smtp_service v1.1.0] Falha ao enviar confirmação ao lead:', userErr)
+        console.error('[smtp_service v1.3.0] Falha ao enviar confirmação ao lead:', userErr)
       }
     }
   } catch (outerErr) {
     // RESILIENTE: NUNCA interrompe o fluxo principal
-    console.error('[smtp_service v1.1.0] Erro geral ao processar notificações de lead:', outerErr)
+    console.error('[smtp_service v1.3.0] Erro geral ao processar notificações de lead:', outerErr)
   }
 }, 'leads')
 
@@ -690,10 +740,10 @@ onRecordAfterCreateSuccess((e) => {
     }
     e.app.saveNoValidate(settings)
     console.log(
-      '[smtp_service v1.1.0] Configurações SMTP sincronizadas a partir de email_config (create).',
+      '[smtp_service v1.3.0] Configurações SMTP sincronizadas a partir de email_config (create).',
     )
   } catch (err) {
-    console.warn('[smtp_service v1.1.0] Falha ao sincronizar SMTP a partir de email_config:', err)
+    console.warn('[smtp_service v1.3.0] Falha ao sincronizar SMTP a partir de email_config:', err)
   }
 }, 'email_config')
 
@@ -726,9 +776,9 @@ onRecordAfterUpdateSuccess((e) => {
     }
     e.app.saveNoValidate(settings)
     console.log(
-      '[smtp_service v1.1.0] Configurações SMTP sincronizadas a partir de email_config (update).',
+      '[smtp_service v1.3.0] Configurações SMTP sincronizadas a partir de email_config (update).',
     )
   } catch (err) {
-    console.warn('[smtp_service v1.1.0] Falha ao sincronizar SMTP a partir de email_config:', err)
+    console.warn('[smtp_service v1.3.0] Falha ao sincronizar SMTP a partir de email_config:', err)
   }
 }, 'email_config')

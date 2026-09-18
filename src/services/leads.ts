@@ -65,6 +65,7 @@ export const createLead = async (data: CreateLeadPayload): Promise<LeadRecord> =
 
         if (events && events.items.length > 0) {
           const sectionCounts: Record<string, number> = {}
+          const pageTitleCounts: Record<string, number> = {}
           const steps: LeadJourneyStep[] = []
 
           for (const item of events.items as any[]) {
@@ -91,6 +92,7 @@ export const createLead = async (data: CreateLeadPayload): Promise<LeadRecord> =
             }
 
             sectionCounts[sec] = (sectionCounts[sec] || 0) + 1
+            pageTitleCounts[t] = (pageTitleCounts[t] || 0) + 1
             steps.push({
               path: p,
               section: sec,
@@ -99,25 +101,48 @@ export const createLead = async (data: CreateLeadPayload): Promise<LeadRecord> =
             })
           }
 
+          const sortedPages = Object.keys(pageTitleCounts).sort(
+            (a, b) => pageTitleCounts[b] - pageTitleCounts[a],
+          )
+
+          // 1. Identificar a PÁGINA REAL de maior interesse (mais visitada na sessão)
+          if (!primaryInterest && sortedPages.length > 0) {
+            primaryInterest = sortedPages[0]
+          }
+
+          // 2. Montar journey_summary a partir dos títulos reais em ordem cronológica
+          // agrupando repetições consecutivas com contador entre parênteses: ex "Contato (2x) → Segmento — Indústria → Segmento — Serviços"
+          if (steps.length > 0) {
+            const groupedConsecutiveSteps: Array<{ title: string; count: number }> = []
+            for (let i = 0; i < steps.length; i++) {
+              const stepTitle = steps[i].title || 'Página'
+              if (
+                groupedConsecutiveSteps.length > 0 &&
+                groupedConsecutiveSteps[groupedConsecutiveSteps.length - 1].title === stepTitle
+              ) {
+                groupedConsecutiveSteps[groupedConsecutiveSteps.length - 1].count++
+              } else {
+                groupedConsecutiveSteps.push({
+                  title: stepTitle,
+                  count: 1,
+                })
+              }
+            }
+
+            journeySummary = groupedConsecutiveSteps
+              .map((item) => (item.count > 1 ? `${item.title} (${item.count}x)` : item.title))
+              .join(' → ')
+          }
+
           const sortedSections = Object.keys(sectionCounts).sort(
             (a, b) => sectionCounts[b] - sectionCounts[a],
           )
-
-          if (!primaryInterest && sortedSections.length > 0) {
-            primaryInterest = sortedSections[0]
-          }
-
-          if (sortedSections.length > 0) {
-            journeySummary = sortedSections
-              .slice(0, 3)
-              .map((s) => `${s} (${sectionCounts[s]}x)`)
-              .join(' → ')
-          }
 
           journeyDetails = {
             session_id: sessionId,
             visitor_id: visitorId,
             total_pages_viewed: events.items.length,
+            top_pages: sortedPages.map((p) => ({ title: p, views: pageTitleCounts[p] })),
             top_sections: sortedSections.map((s) => ({ section: s, views: sectionCounts[s] })),
             steps: steps.slice(0, 30),
           }
