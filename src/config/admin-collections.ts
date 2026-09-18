@@ -93,10 +93,25 @@ export const COLLECTIONS: CollectionConfig[] = [
     label: 'Leads',
     singularLabel: 'Lead',
     icon: Mail,
+    defaultSort: '-created',
     fields: [
       { name: 'name', label: 'Nome', type: 'text', required: true, listDisplay: true },
       { name: 'email', label: 'E-mail', type: 'email', required: true, listDisplay: true },
       { name: 'phone', label: 'Telefone', type: 'text', listDisplay: true },
+      {
+        name: 'primary_interest',
+        label: 'Interesse / Seção',
+        type: 'text',
+        helpText: 'Seção de maior navegação do visitante antes de enviar o contato.',
+        listDisplay: true,
+      },
+      {
+        name: 'journey_summary',
+        label: 'Jornada na Sessão',
+        type: 'textarea',
+        helpText: 'Caminho percorrido pelo visitante na sessão de acesso ao site.',
+        listDisplay: true,
+      },
       { name: 'message', label: 'Mensagem', type: 'textarea', required: true },
       { name: 'source_page', label: 'Origem', type: 'text', listDisplay: true },
       {

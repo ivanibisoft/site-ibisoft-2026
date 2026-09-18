@@ -16,8 +16,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import pb from '@/lib/pocketbase/client'
 import { useToast } from '@/hooks/use-toast'
+import { createLead } from '@/services/leads'
 import { WHATSAPP_URL } from '@/lib/constants'
 import { DunsBadge } from '@/components/DunsBadge'
 import { InpiBadge } from '@/components/InpiBadge'
@@ -52,10 +52,12 @@ export default function QueroConhecer() {
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true)
     try {
-      await pb.collection('leads').create({
-        ...data,
+      await createLead({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        message: data.message,
         source_page: 'contato',
-        status: 'new',
       })
       setIsSuccess(true)
       form.reset()

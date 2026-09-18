@@ -13,7 +13,7 @@ import {
   sendTestEmail,
 } from '@/services/admin'
 import { extractFieldErrors, getErrorMessage, type FieldErrors } from '@/lib/pocketbase/errors'
-import { ArrowLeft, Save, Send, Loader2 } from 'lucide-react'
+import { ArrowLeft, Save, Send, Loader2, Sparkles, Compass } from 'lucide-react'
 
 interface AdminFormProps {
   collectionName: string
@@ -336,6 +336,51 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
           {activeRecordId ? 'Editar' : 'Criar'} {config.singularLabel}
         </h1>
       </div>
+
+      {collectionName === 'leads' &&
+        activeRecordId &&
+        (formData.primary_interest || formData.journey_summary) && (
+          <div className="mb-6 p-4 bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl space-y-3">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+              <Sparkles className="w-4 h-4 text-emerald-600" />
+              Alerta de Interesse do Lead por Seção
+            </div>
+            <div className="text-sm">
+              <span className="text-muted-foreground">
+                Seção mais navegada antes da conversão:{' '}
+              </span>
+              <strong className="text-emerald-950 dark:text-emerald-100 font-semibold text-base">
+                {formData.primary_interest || 'Contato Direto'}
+              </strong>
+            </div>
+            {formData.journey_summary && (
+              <div className="text-xs text-muted-foreground">
+                <span>Jornada: </span>
+                <span className="font-medium text-foreground">{formData.journey_summary}</span>
+              </div>
+            )}
+            {formData.journey_details?.steps?.length > 0 && (
+              <div className="pt-2 border-t border-emerald-200/60 dark:border-emerald-800/60">
+                <span className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1.5 mb-2">
+                  <Compass className="w-3.5 h-3.5" />
+                  Passos navegados na sessão:
+                </span>
+                <ul className="text-xs space-y-1 max-h-40 overflow-y-auto pl-2">
+                  {formData.journey_details.steps.map((st: any, i: number) => (
+                    <li key={i} className="flex items-center gap-2 text-muted-foreground">
+                      <span className="w-4 h-4 rounded-full bg-emerald-200/70 text-emerald-800 text-[10px] font-bold flex items-center justify-center shrink-0">
+                        {i + 1}
+                      </span>
+                      <span className="font-medium text-foreground">{st.section || 'Página'}:</span>
+                      <span className="truncate">{st.title || st.path}</span>
+                      <span className="text-[10px] text-slate-400">({st.path})</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {config.fields.map((field) => (

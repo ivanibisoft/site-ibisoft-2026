@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-18T02:11:51.060Z",
+  "generatedAt": "2026-09-18T02:30:31.761Z",
   "collections": [
     {
       "name": "users",
@@ -209,9 +209,33 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "session_id",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "primary_interest",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "journey_summary",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "journey_details",
+          "type": "json",
+          "required": false,
+          "system": false
         }
       ],
-      "indexes": []
+      "indexes": ["CREATE INDEX `idx_leads_session_id` ON `leads` (session_id)"]
     },
     {
       "name": "segments",

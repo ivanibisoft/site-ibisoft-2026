@@ -24,7 +24,26 @@ import {
 import { COLLECTIONS, type FieldConfig } from '@/config/admin-collections'
 import { getList, deleteRecord, updateRecord } from '@/services/admin'
 import { useRealtime } from '@/hooks/use-realtime'
-import { Plus, Pencil, Trash2, GripVertical, ChevronUp, ChevronDown, Loader2 } from 'lucide-react'
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  GripVertical,
+  ChevronUp,
+  ChevronDown,
+  Loader2,
+  Sparkles,
+  Compass,
+  Eye,
+} from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 
 function formatValue(value: any, field: FieldConfig, record?: any): string {
@@ -52,6 +71,7 @@ export function AdminList({ collectionName }: { collectionName: string }) {
   const [deleting, setDeleting] = useState(false)
   const [blockingWarning, setBlockingWarning] = useState<string | null>(null)
   const [isReordering, setIsReordering] = useState(false)
+  const [selectedLeadJourney, setSelectedLeadJourney] = useState<any | null>(null)
 
   // Drag and drop state
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
@@ -358,18 +378,77 @@ export function AdminList({ collectionName }: { collectionName: string }) {
                         </div>
                       </TableCell>
                     )}
-                    {displayFields.map((f) => (
-                      <TableCell key={f.name} className="max-w-[200px] truncate">
-                        {f.type === 'bool' && f.name === 'is_active' ? (
-                          <Switch
-                            checked={!!r[f.name]}
-                            onCheckedChange={() => handleToggle(r.id, f.name, r[f.name])}
-                          />
-                        ) : (
-                          formatValue(r[f.name], f, r)
-                        )}
-                      </TableCell>
-                    ))}
+                    {displayFields.map((f) => {
+                      if (collectionName === 'leads' && f.name === 'primary_interest') {
+                        const interest = r.primary_interest || 'Contato Direto'
+                        const isHighlight =
+                          interest !== 'Contato Direto' &&
+                          interest !== '-' &&
+                          interest !== 'Exit Intent (Retenção)'
+                        return (
+                          <TableCell key={f.name} className="max-w-[220px]">
+                            <div className="flex items-center gap-1.5">
+                              {isHighlight ? (
+                                <Badge
+                                  variant="secondary"
+                                  className="bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 font-medium truncate py-0.5 px-2 text-xs flex items-center gap-1"
+                                >
+                                  <Sparkles className="w-3 h-3 shrink-0 text-emerald-600" />
+                                  <span className="truncate">{interest}</span>
+                                </Badge>
+                              ) : (
+                                <span className="text-muted-foreground text-xs">{interest}</span>
+                              )}
+                            </div>
+                          </TableCell>
+                        )
+                      }
+
+                      if (collectionName === 'leads' && f.name === 'journey_summary') {
+                        const summary = r.journey_summary || '-'
+                        const hasSteps =
+                          r.journey_details?.steps?.length > 0 ||
+                          (summary && summary !== '-' && summary !== 'Contato Direto')
+                        return (
+                          <TableCell key={f.name} className="max-w-[260px]">
+                            <div className="flex items-center justify-between gap-2">
+                              <span
+                                className="text-xs text-muted-foreground truncate"
+                                title={summary}
+                              >
+                                {summary}
+                              </span>
+                              {hasSteps && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 px-1.5 text-xs text-primary hover:text-primary/80 shrink-0"
+                                  onClick={() => setSelectedLeadJourney(r)}
+                                  title="Ver jornada completa percorrida pelo visitante"
+                                >
+                                  <Eye className="w-3 h-3 mr-1" />
+                                  Ver
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        )
+                      }
+
+                      return (
+                        <TableCell key={f.name} className="max-w-[200px] truncate">
+                          {f.type === 'bool' && f.name === 'is_active' ? (
+                            <Switch
+                              checked={!!r[f.name]}
+                              onCheckedChange={() => handleToggle(r.id, f.name, r[f.name])}
+                            />
+                          ) : (
+                            formatValue(r[f.name], f, r)
+                          )}
+                        </TableCell>
+                      )
+                    })}
                     <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
                       {new Date(r.created).toLocaleDateString('pt-BR')}
                     </TableCell>
@@ -392,6 +471,113 @@ export function AdminList({ collectionName }: { collectionName: string }) {
           </TableBody>
         </Table>
       </div>
+
+      {/* Modal de Detalhamento da Jornada do Lead */}
+      {collectionName === 'leads' && (
+        <Dialog
+          open={!!selectedLeadJourney}
+          onOpenChange={(open) => {
+            if (!open) setSelectedLeadJourney(null)
+          }}
+        >
+          <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                  <Compass className="w-4 h-4" />
+                </div>
+                <div>
+                  <DialogTitle className="text-lg">
+                    Jornada de Navegação do Lead: {selectedLeadJourney?.name}
+                  </DialogTitle>
+                  <DialogDescription className="text-xs mt-0.5">
+                    {selectedLeadJourney?.email} • Origem:{' '}
+                    {selectedLeadJourney?.source_page || 'contato'}
+                  </DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+
+            <div className="space-y-4 pt-2">
+              {/* Card de Interesse Principal */}
+              <div className="p-3.5 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-lg">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider mb-1">
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                  Alerta de Interesse do Lead
+                </div>
+                <p className="text-sm font-medium text-emerald-950 dark:text-emerald-100">
+                  {selectedLeadJourney?.primary_interest || 'Contato Geral'}
+                </p>
+                {selectedLeadJourney?.journey_summary && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Resumo: {selectedLeadJourney.journey_summary}
+                  </p>
+                )}
+              </div>
+
+              {/* Lista dos Passos da Jornada */}
+              <div>
+                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                  Páginas Navegadas na Sessão (
+                  {selectedLeadJourney?.journey_details?.steps?.length || 0})
+                </h4>
+                {selectedLeadJourney?.journey_details?.steps?.length ? (
+                  <div className="space-y-2 border rounded-lg p-3 bg-muted/20">
+                    {selectedLeadJourney.journey_details.steps.map((step: any, idx: number) => (
+                      <div
+                        key={idx}
+                        className="flex items-start gap-2.5 pb-2 last:pb-0 border-b last:border-0 border-muted"
+                      >
+                        <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                          {idx + 1}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs font-medium text-foreground truncate">
+                              {step.section || 'Página'}
+                            </span>
+                            {step.created && (
+                              <span className="text-[10px] text-muted-foreground shrink-0">
+                                {new Date(step.created).toLocaleTimeString('pt-BR', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {step.title || step.path}
+                          </p>
+                          <code className="text-[10px] text-slate-500 bg-muted px-1 py-0.5 rounded">
+                            {step.path}
+                          </code>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-xs text-muted-foreground border border-dashed rounded-lg">
+                    {selectedLeadJourney?.journey_summary ||
+                      'Nenhum evento detalhado registrado para esta sessão.'}
+                  </div>
+                )}
+              </div>
+
+              {/* Mensagem enviada pelo lead */}
+              {selectedLeadJourney?.message && (
+                <div className="border-t pt-3">
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                    Mensagem Enviada
+                  </h4>
+                  <div className="text-xs bg-muted/30 p-2.5 rounded border text-foreground whitespace-pre-wrap">
+                    {selectedLeadJourney.message}
+                  </div>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       <AlertDialog
         open={!!deleteId}

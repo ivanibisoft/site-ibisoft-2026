@@ -10,8 +10,8 @@ import { Button } from '@/components/ui/button'
 import { CtaButton } from '@/components/CtaButton'
 import { Input } from '@/components/ui/input'
 import { Gift, CheckCircle2, Loader2 } from 'lucide-react'
-import pb from '@/lib/pocketbase/client'
 import { useToast } from '@/hooks/use-toast'
+import { createLead } from '@/services/leads'
 import { useAutoFocus } from '@/hooks/use-auto-focus'
 
 export function ExitIntentModal() {
@@ -56,12 +56,11 @@ export function ExitIntentModal() {
 
     setIsSubmitting(true)
     try {
-      await pb.collection('leads').create({
+      await createLead({
         name: name.trim(),
         email: email.trim(),
         message: 'Lead capturado via modal de exit intent',
         source_page: 'exit-intent',
-        status: 'new',
       })
       setIsSuccess(true)
       toast({
