@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { COLLECTIONS } from '@/config/admin-collections'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Menu, ExternalLink, LogOut, KeyRound } from 'lucide-react'
+import { Menu, ExternalLink, LogOut, KeyRound, Activity } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/use-auth'
 
@@ -21,6 +21,18 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         )}
       >
         Dashboard
+      </Link>
+
+      <Link
+        to="/admin/audiencia"
+        onClick={onNavigate}
+        className={cn(
+          'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium hover:bg-accent transition-colors text-sky-700 bg-sky-50/50 hover:bg-sky-100/70',
+          location.pathname === '/admin/audiencia' && 'bg-sky-100 text-sky-900 font-semibold',
+        )}
+      >
+        <Activity className="w-4 h-4 shrink-0 text-sky-600" />
+        Audiência
       </Link>
       {COLLECTIONS.map((col) => {
         const Icon = col.icon

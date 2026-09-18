@@ -231,6 +231,15 @@ export function Footer() {
               -
             </span>
             <Link
+              to="/privacidade"
+              className="hover:text-primary transition-colors text-slate-500 hover:text-slate-700 text-xs px-1"
+            >
+              Privacidade &amp; LGPD
+            </Link>
+            <span className="hidden sm:inline text-slate-400" aria-hidden="true">
+              -
+            </span>
+            <Link
               to="/admin"
               className="hover:text-primary transition-colors underline decoration-transparent hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm text-slate-400 hover:text-slate-600 text-xs px-1"
             >

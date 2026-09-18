@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-18T01:29:41.794Z",
+  "generatedAt": "2026-09-18T02:11:51.060Z",
   "collections": [
     {
       "name": "users",
@@ -1001,6 +1001,125 @@
         }
       ],
       "indexes": []
+    },
+    {
+      "name": "audience_events",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "session_id",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "visitor_id",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "path",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "section",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "blog_slug",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "device_type",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "uf",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "city",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "country",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "access_hour",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "access_year_month",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "access_date",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "referrer",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_audience_created ON audience_events (created)",
+        "CREATE INDEX idx_audience_ym ON audience_events (access_year_month)",
+        "CREATE INDEX idx_audience_section ON audience_events (section)",
+        "CREATE INDEX idx_audience_uf ON audience_events (uf)",
+        "CREATE INDEX idx_audience_device ON audience_events (device_type)",
+        "CREATE INDEX idx_audience_visitor ON audience_events (visitor_id)"
+      ]
     }
   ]
 }

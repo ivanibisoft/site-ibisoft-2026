@@ -15,6 +15,7 @@ import BlogPostPage from './pages/BlogPostPage'
 import Duns from './pages/Duns'
 import Inpi from './pages/Inpi'
 import Cnpj from './pages/Cnpj'
+import PoliticaPrivacidade from './pages/PoliticaPrivacidade'
 import NotFound from './pages/NotFound'
 import { ScrollToTop } from './components/ScrollToTop'
 import { SiteAssetsProvider } from '@/hooks/use-site-assets'
@@ -25,9 +26,58 @@ import { ProtectedRoute } from '@/components/admin/ProtectedRoute'
 import { AdminLayout } from '@/components/admin/AdminLayout'
 import AdminLogin from '@/pages/admin/Login'
 import AdminDashboard from '@/pages/admin/Dashboard'
+import AudiencePage from '@/pages/admin/AudiencePage'
 import CollectionListPage from '@/pages/admin/CollectionListPage'
 import CollectionFormPage from '@/pages/admin/CollectionFormPage'
 import ChangePassword from '@/pages/admin/ChangePassword'
+import { useAudienceTracker } from '@/hooks/use-audience-tracker'
+
+function AppRoutes() {
+  useAudienceTracker()
+
+  return (
+    <>
+      <ScrollToTop />
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Index />} />
+            <Route path="/segmentos/:slug" element={<Segment />} />
+            <Route path="/funcionalidades/:slug" element={<Functionality />} />
+            <Route path="/quero-conhecer" element={<QueroConhecer />} />
+            <Route path="/sobre-erp" element={<SobreErp />} />
+            <Route path="/sobre" element={<About />} />
+            <Route path="/cases" element={<Cases />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPostPage />} />
+            <Route path="/contato" element={<QueroConhecer />} />
+            <Route path="/duns" element={<Duns />} />
+            <Route path="/inpi" element={<Inpi />} />
+            <Route path="/cnpj" element={<Cnpj />} />
+            <Route path="/privacidade" element={<PoliticaPrivacidade />} />
+            <Route path="/politica-de-privacidade" element={<PoliticaPrivacidade />} />
+          </Route>
+
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<ProtectedRoute />}>
+            <Route element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="audiencia" element={<AudiencePage />} />
+              <Route path="alterar-senha" element={<ChangePassword />} />
+              <Route path=":collection" element={<CollectionListPage />} />
+              <Route path=":collection/new" element={<CollectionFormPage />} />
+              <Route path=":collection/:id/edit" element={<CollectionFormPage />} />
+            </Route>
+          </Route>
+
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </TooltipProvider>
+    </>
+  )
+}
 
 const App = () => (
   <ErrorBoundary>
@@ -35,41 +85,7 @@ const App = () => (
       <SiteAssetsProvider>
         <EditorMiddleware>
           <BrowserRouter>
-            <ScrollToTop />
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <Routes>
-                <Route element={<Layout />}>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/segmentos/:slug" element={<Segment />} />
-                  <Route path="/funcionalidades/:slug" element={<Functionality />} />
-                  <Route path="/quero-conhecer" element={<QueroConhecer />} />
-                  <Route path="/sobre-erp" element={<SobreErp />} />
-                  <Route path="/sobre" element={<About />} />
-                  <Route path="/cases" element={<Cases />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/blog/:slug" element={<BlogPostPage />} />
-                  <Route path="/contato" element={<QueroConhecer />} />
-                  <Route path="/duns" element={<Duns />} />
-                  <Route path="/inpi" element={<Inpi />} />
-                  <Route path="/cnpj" element={<Cnpj />} />
-                </Route>
-
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin" element={<ProtectedRoute />}>
-                  <Route element={<AdminLayout />}>
-                    <Route index element={<AdminDashboard />} />
-                    <Route path="alterar-senha" element={<ChangePassword />} />
-                    <Route path=":collection" element={<CollectionListPage />} />
-                    <Route path=":collection/new" element={<CollectionFormPage />} />
-                    <Route path=":collection/:id/edit" element={<CollectionFormPage />} />
-                  </Route>
-                </Route>
-
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </TooltipProvider>
+            <AppRoutes />
           </BrowserRouter>
         </EditorMiddleware>
       </SiteAssetsProvider>
