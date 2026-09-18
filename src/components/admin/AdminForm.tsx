@@ -366,16 +366,23 @@ export function AdminForm({ collectionName, recordId }: AdminFormProps) {
                   Passos navegados na sessão:
                 </span>
                 <ul className="text-xs space-y-1 max-h-40 overflow-y-auto pl-2">
-                  {formData.journey_details.steps.map((st: any, i: number) => (
-                    <li key={i} className="flex items-center gap-2 text-muted-foreground">
-                      <span className="w-4 h-4 rounded-full bg-emerald-200/70 text-emerald-800 text-[10px] font-bold flex items-center justify-center shrink-0">
-                        {i + 1}
-                      </span>
-                      <span className="font-medium text-foreground">{st.section || 'Página'}:</span>
-                      <span className="truncate">{st.title || st.path}</span>
-                      <span className="text-[10px] text-slate-400">({st.path})</span>
-                    </li>
-                  ))}
+                  {formData.journey_details.steps.map((st: any, i: number) => {
+                    const displayTitle = st.title || st.path
+                    return (
+                      <li key={i} className="flex items-center gap-2 text-muted-foreground">
+                        <span className="w-4 h-4 rounded-full bg-emerald-200/70 text-emerald-800 text-[10px] font-bold flex items-center justify-center shrink-0">
+                          {i + 1}
+                        </span>
+                        <span className="font-medium text-foreground">
+                          {st.section || 'Página'}:
+                        </span>
+                        <span className="truncate font-semibold text-emerald-950 dark:text-emerald-200">
+                          {displayTitle}
+                        </span>
+                        <span className="text-[10px] text-slate-400">({st.path})</span>
+                      </li>
+                    )
+                  })}
                 </ul>
               </div>
             )}

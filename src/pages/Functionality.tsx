@@ -66,6 +66,16 @@ export default function Functionality() {
     loadData()
   }, [loadData])
 
+  useEffect(() => {
+    const originalTitle = document.title
+    if (data?.moduleData?.name) {
+      document.title = `${data.moduleData.name} | Módulos ERP ibisoft`
+    }
+    return () => {
+      document.title = originalTitle
+    }
+  }, [data?.moduleData?.name])
+
   useRealtime('modules', (e) => {
     if (e.action === 'update') {
       setData((prev) => {

@@ -545,7 +545,7 @@ export function AdminList({ collectionName }: { collectionName: string }) {
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-muted-foreground truncate">
+                          <p className="text-xs font-semibold text-primary truncate">
                             {step.title || step.path}
                           </p>
                           <code className="text-[10px] text-slate-500 bg-muted px-1 py-0.5 rounded">

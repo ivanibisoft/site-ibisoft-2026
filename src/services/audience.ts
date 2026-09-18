@@ -74,6 +74,118 @@ export function detectDeviceType(): 'pc' | 'smartphone' | 'tablet' {
 /**
  * Categoriza o caminho na seção do site
  */
+// Cache local em memória para evitar consultas redundantes no frontend
+const titleResolutionCache = new Map<string, string>()
+
+/**
+ * Resolve o título e a seção legíveis de uma página consultando o banco
+ * de dados quando for rota dinâmica (/funcionalidades/:slug, /segmentos/:slug, /blog/:slug).
+ * Mantém fallback imediato caso a consulta falhe ou demore.
+ */
+export async function resolvePageInfo(pathname: string): Promise<{
+  section: string
+  title: string
+  blogSlug?: string
+}> {
+  const base = classifySection(pathname)
+  const path = pathname.toLowerCase()
+
+  try {
+    // 1. Módulos / Funcionalidades
+    if (path.startsWith('/funcionalidades/')) {
+      const rawSlug = pathname.replace(/^\/funcionalidades\//i, '').split('/')[0]
+      const slug = decodeURIComponent(rawSlug).trim()
+      const cacheKey = `modules:${slug}`
+
+      if (titleResolutionCache.has(cacheKey)) {
+        return {
+          section: 'Funcionalidades',
+          title: `Módulo — ${titleResolutionCache.get(cacheKey)}`,
+        }
+      }
+
+      const rec = await pb
+        .collection('modules')
+        .getFirstListItem(`slug = "${slug.replace(/"/g, '\\"')}"`)
+        .catch(() => null)
+
+      if (rec && rec.name) {
+        const moduleName = String(rec.name).trim()
+        titleResolutionCache.set(cacheKey, moduleName)
+        return {
+          section: 'Funcionalidades',
+          title: `Módulo — ${moduleName}`,
+        }
+      }
+    }
+
+    // 2. Segmentos / Soluções
+    if (path.startsWith('/segmentos/')) {
+      const rawSlug = pathname.replace(/^\/segmentos\//i, '').split('/')[0]
+      const slug = decodeURIComponent(rawSlug).trim()
+      const cacheKey = `segments:${slug}`
+
+      if (titleResolutionCache.has(cacheKey)) {
+        return {
+          section: 'Soluções / Segmentos',
+          title: `Segmento — ${titleResolutionCache.get(cacheKey)}`,
+        }
+      }
+
+      const rec = await pb
+        .collection('segments')
+        .getFirstListItem(`slug = "${slug.replace(/"/g, '\\"')}"`)
+        .catch(() => null)
+
+      if (rec && rec.title) {
+        const segTitle = String(rec.title).trim()
+        titleResolutionCache.set(cacheKey, segTitle)
+        return {
+          section: 'Soluções / Segmentos',
+          title: `Segmento — ${segTitle}`,
+        }
+      }
+    }
+
+    // 3. Blog Post
+    if (path.startsWith('/blog/')) {
+      const rawSlug = pathname.replace(/^\/blog\//i, '').split('/')[0]
+      const slug = decodeURIComponent(rawSlug).trim()
+      const cacheKey = `posts:${slug}`
+
+      if (titleResolutionCache.has(cacheKey)) {
+        return {
+          section: 'Blog Post',
+          title: titleResolutionCache.get(cacheKey)!,
+          blogSlug: slug,
+        }
+      }
+
+      const rec = await pb
+        .collection('posts')
+        .getFirstListItem(`slug = "${slug.replace(/"/g, '\\"')}"`)
+        .catch(() => null)
+
+      if (rec && rec.title) {
+        const postTitle = String(rec.title).trim()
+        titleResolutionCache.set(cacheKey, postTitle)
+        return {
+          section: 'Blog Post',
+          title: postTitle,
+          blogSlug: slug,
+        }
+      }
+    }
+  } catch (err) {
+    console.debug('[Audience] Fallback para classificação padrão de página:', err)
+  }
+
+  return base
+}
+
+/**
+ * Categoriza o caminho na seção do site (síncrono/fallback)
+ */
 export function classifySection(pathname: string): {
   section: string
   title: string
@@ -94,7 +206,8 @@ export function classifySection(pathname: string): {
     return { section: 'Cases', title: 'Cases de Sucesso' }
   }
   if (path.startsWith('/blog/')) {
-    const slug = pathname.replace(/^\/blog\//, '').split('/')[0]
+    const rawSlug = pathname.replace(/^\/blog\//i, '').split('/')[0]
+    const slug = decodeURIComponent(rawSlug)
     return { section: 'Blog Post', title: `Post do Blog (${slug})`, blogSlug: slug }
   }
   if (path.startsWith('/blog')) {
@@ -104,11 +217,13 @@ export function classifySection(pathname: string): {
     return { section: 'Contato', title: 'Quero Conhecer / Contato' }
   }
   if (path.startsWith('/segmentos/')) {
-    const slug = pathname.replace(/^\/segmentos\//, '').split('/')[0]
+    const rawSlug = pathname.replace(/^\/segmentos\//i, '').split('/')[0]
+    const slug = decodeURIComponent(rawSlug)
     return { section: 'Soluções / Segmentos', title: `Segmento (${slug})` }
   }
   if (path.startsWith('/funcionalidades/')) {
-    const slug = pathname.replace(/^\/funcionalidades\//, '').split('/')[0]
+    const rawSlug = pathname.replace(/^\/funcionalidades\//i, '').split('/')[0]
+    const slug = decodeURIComponent(rawSlug)
     return { section: 'Funcionalidades', title: `Módulo ERP (${slug})` }
   }
   if (path.startsWith('/duns')) {
@@ -119,6 +234,9 @@ export function classifySection(pathname: string): {
   }
   if (path.startsWith('/cnpj')) {
     return { section: 'Institucional', title: 'Cartão CNPJ' }
+  }
+  if (path.startsWith('/politica-de-privacidade') || path.startsWith('/privacidade')) {
+    return { section: 'Institucional', title: 'Política de Privacidade' }
   }
   if (path.startsWith('/admin')) {
     return { section: 'Admin', title: 'Painel Administrativo' }
@@ -169,7 +287,19 @@ export async function trackPageView(payload?: TrackPayload): Promise<void> {
       return
     }
 
-    const { section, title, blogSlug } = classifySection(currentPath)
+    // Se o payload já forneceu título customizado, usa-o.
+    // Senão, tenta resolver via banco (modules, segments, posts) com fallback rápido.
+    let section = payload?.section
+    let title = payload?.title
+    let blogSlug = payload?.blog_slug
+
+    if (!title || !section) {
+      const resolved = await resolvePageInfo(currentPath)
+      if (!section) section = resolved.section
+      if (!title) title = resolved.title
+      if (!blogSlug) blogSlug = resolved.blogSlug
+    }
+
     const visitorId = getOrCreateVisitorId()
     const sessionId = getOrCreateSessionId()
     const deviceType = detectDeviceType()
@@ -177,9 +307,9 @@ export async function trackPageView(payload?: TrackPayload): Promise<void> {
 
     const data = {
       path: currentPath,
-      section: payload?.section || section,
-      title: payload?.title || title || document.title,
-      blog_slug: payload?.blog_slug || blogSlug || '',
+      section: section || 'Outros',
+      title: title || document.title || currentPath,
+      blog_slug: blogSlug || '',
       visitor_id: visitorId,
       session_id: sessionId,
       device_type: deviceType,

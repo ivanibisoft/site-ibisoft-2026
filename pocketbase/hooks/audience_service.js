@@ -12,8 +12,9 @@
 routerAdd('GET', '/backend/v1/ibisoft/audience/hook-version', (e) => {
   return e.json(200, {
     service: 'ibisoft-audience-service',
-    version: '1.0.0',
+    version: '1.1.0',
     status: 'online',
+    features: ['real-page-name-resolution', 'lgpd-compliant'],
     timestamp: new Date().toISOString(),
   })
 })
@@ -34,12 +35,75 @@ routerAdd('POST', '/backend/v1/ibisoft/audience/track', (e) => {
     }
 
     const path = String(body.path || '').slice(0, 500)
-    const section = String(body.section || 'Outros').slice(0, 100)
-    const title = String(body.title || '').slice(0, 300)
-    const blogSlug = String(body.blog_slug || '').slice(0, 200)
+    let section = String(body.section || 'Outros').slice(0, 100)
+    let title = String(body.title || '').slice(0, 300)
+    let blogSlug = String(body.blog_slug || '').slice(0, 200)
     const visitorId = String(body.visitor_id || '').slice(0, 120)
     const sessionId = String(body.session_id || '').slice(0, 120)
     const referrer = String(body.referrer || '').slice(0, 500)
+
+    // Resolução robusta de nome da página no backend caso o título seja genérico ou vazio
+    const lowerPath = path.toLowerCase()
+    const isGenericTitle =
+      !title ||
+      title === path ||
+      title.startsWith('Módulo ERP (') ||
+      title.startsWith('Segmento (') ||
+      title.startsWith('Post do Blog (')
+
+    if (isGenericTitle) {
+      try {
+        if (lowerPath.startsWith('/funcionalidades/')) {
+          const rawSlug = path
+            .replace(/^\/funcionalidades\//i, '')
+            .split('/')[0]
+            .split('?')[0]
+          const slug = decodeURIComponent(rawSlug).trim()
+          if (slug) {
+            try {
+              const rec = e.app.findFirstRecordByData('modules', 'slug', slug)
+              if (rec && rec.getString('name')) {
+                title = 'Módulo — ' + rec.getString('name').trim()
+                section = 'Funcionalidades'
+              }
+            } catch (_) {}
+          }
+        } else if (lowerPath.startsWith('/segmentos/')) {
+          const rawSlug = path
+            .replace(/^\/segmentos\//i, '')
+            .split('/')[0]
+            .split('?')[0]
+          const slug = decodeURIComponent(rawSlug).trim()
+          if (slug) {
+            try {
+              const rec = e.app.findFirstRecordByData('segments', 'slug', slug)
+              if (rec && rec.getString('title')) {
+                title = 'Segmento — ' + rec.getString('title').trim()
+                section = 'Soluções / Segmentos'
+              }
+            } catch (_) {}
+          }
+        } else if (lowerPath.startsWith('/blog/')) {
+          const rawSlug = path
+            .replace(/^\/blog\//i, '')
+            .split('/')[0]
+            .split('?')[0]
+          const slug = decodeURIComponent(rawSlug).trim()
+          if (slug) {
+            blogSlug = slug
+            try {
+              const rec = e.app.findFirstRecordByData('posts', 'slug', slug)
+              if (rec && rec.getString('title')) {
+                title = rec.getString('title').trim()
+                section = 'Blog Post'
+              }
+            } catch (_) {}
+          }
+        }
+      } catch (resErr) {
+        // Falha tolerante — mantém o título fornecido
+      }
+    }
 
     // Captura e enriquecimento por IP
     // O IP NUNCA é gravado na coleção audience_events por conformidade com a LGPD

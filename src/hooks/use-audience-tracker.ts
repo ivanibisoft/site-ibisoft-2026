@@ -22,7 +22,7 @@ export function useAudienceTracker() {
     // Pequeno debounce para permitir que títulos da página sejam atualizados
     const timer = setTimeout(() => {
       trackPageView({ path: location.pathname })
-    }, 120)
+    }, 200)
 
     return () => clearTimeout(timer)
   }, [location.pathname, location.search])

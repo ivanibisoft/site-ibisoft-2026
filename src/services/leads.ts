@@ -1,5 +1,5 @@
 import pb from '@/lib/pocketbase/client'
-import { getOrCreateSessionId, getOrCreateVisitorId } from './audience'
+import { getOrCreateSessionId, getOrCreateVisitorId, resolvePageInfo } from './audience'
 
 export interface CreateLeadPayload {
   name: string
@@ -67,10 +67,29 @@ export const createLead = async (data: CreateLeadPayload): Promise<LeadRecord> =
           const sectionCounts: Record<string, number> = {}
           const steps: LeadJourneyStep[] = []
 
-          events.items.forEach((item: any) => {
+          for (const item of events.items as any[]) {
             const sec = (item.section || 'Outros').trim()
             const p = (item.path || '/').trim()
-            const t = (item.title || p).trim()
+            let t = (item.title || p).trim()
+
+            // Se o evento antigo tiver apenas slug genérico no título, enriquece
+            if (
+              !t ||
+              t === p ||
+              t.startsWith('Módulo ERP (') ||
+              t.startsWith('Segmento (') ||
+              t.startsWith('Post do Blog (')
+            ) {
+              try {
+                const resolved = await resolvePageInfo(p)
+                if (resolved.title) {
+                  t = resolved.title
+                }
+              } catch {
+                /* intentionally ignored */
+              }
+            }
+
             sectionCounts[sec] = (sectionCounts[sec] || 0) + 1
             steps.push({
               path: p,
@@ -78,7 +97,7 @@ export const createLead = async (data: CreateLeadPayload): Promise<LeadRecord> =
               title: t,
               created: item.created,
             })
-          })
+          }
 
           const sortedSections = Object.keys(sectionCounts).sort(
             (a, b) => sectionCounts[b] - sectionCounts[a],

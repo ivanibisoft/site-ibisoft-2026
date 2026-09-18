@@ -40,6 +40,16 @@ export default function Segment() {
     loadData()
   }, [slug])
 
+  useEffect(() => {
+    const originalTitle = document.title
+    if (segment?.title) {
+      document.title = `${segment.title} | Segmentos ibisoft ERP`
+    }
+    return () => {
+      document.title = originalTitle
+    }
+  }, [segment?.title])
+
   useRealtime(
     'segment_challenges',
     () => {

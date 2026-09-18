@@ -26,8 +26,8 @@ console.log('[smtp_service v1.1.0] Carregando serviço consolidado de e-mail e a
 routerAdd('GET', '/backend/v1/ibisoft/email/hook-version', (e) => {
   return e.json(200, {
     service: 'ibisoft-smtp-service',
-    version: '1.1.0',
-    features: ['smtp-sync', 'lead-journey-alerts', 'safe-test-email'],
+    version: '1.2.0',
+    features: ['smtp-sync', 'lead-journey-alerts', 'exact-page-resolution', 'safe-test-email'],
     status: 'online',
     timestamp: new Date().toISOString(),
   })
@@ -139,11 +139,98 @@ routerAdd('POST', '/backend/v1/ibisoft/test-email', (e) => {
 //    primary_interest, journey_summary e journey_details antes de persistir o lead.
 // ============================================================================
 onRecordCreateRequest((e) => {
+  // Helper inline no callback para resolver título exato e legível
+  const resolveExactPageName = (app, path, fallbackTitle) => {
+    if (!path) return fallbackTitle || 'Página Inicial'
+    const cleanPath = String(path).trim()
+    const lower = cleanPath.toLowerCase()
+
+    let title = (fallbackTitle || '').trim()
+    const hasGenericPattern =
+      !title ||
+      title === cleanPath ||
+      title.indexOf('(') !== -1 ||
+      title.indexOf('Módulo ERP') === 0 ||
+      title.indexOf('Segmento (') === 0 ||
+      title.indexOf('Post do Blog (') === 0
+
+    if (!hasGenericPattern) {
+      return title
+    }
+
+    try {
+      if (lower.indexOf('/funcionalidades/') === 0) {
+        const rawSlug = cleanPath
+          .replace(/^\/funcionalidades\//i, '')
+          .split('/')[0]
+          .split('?')[0]
+        const slug = decodeURIComponent(rawSlug).trim()
+        if (slug) {
+          try {
+            const rec = app.findFirstRecordByData('modules', 'slug', slug)
+            if (rec && rec.getString('name')) {
+              return 'Módulo — ' + rec.getString('name').trim()
+            }
+          } catch (_) {}
+        }
+        return 'Módulo — ' + (slug || 'ERP')
+      }
+
+      if (lower.indexOf('/segmentos/') === 0) {
+        const rawSlug = cleanPath
+          .replace(/^\/segmentos\//i, '')
+          .split('/')[0]
+          .split('?')[0]
+        const slug = decodeURIComponent(rawSlug).trim()
+        if (slug) {
+          try {
+            const rec = app.findFirstRecordByData('segments', 'slug', slug)
+            if (rec && rec.getString('title')) {
+              return 'Segmento — ' + rec.getString('title').trim()
+            }
+          } catch (_) {}
+        }
+        return 'Segmento — ' + (slug || 'Soluções')
+      }
+
+      if (lower.indexOf('/blog/') === 0) {
+        const rawSlug = cleanPath
+          .replace(/^\/blog\//i, '')
+          .split('/')[0]
+          .split('?')[0]
+        const slug = decodeURIComponent(rawSlug).trim()
+        if (slug) {
+          try {
+            const rec = app.findFirstRecordByData('posts', 'slug', slug)
+            if (rec && rec.getString('title')) {
+              return rec.getString('title').trim()
+            }
+          } catch (_) {}
+        }
+        return 'Artigo: ' + slug
+      }
+
+      if (lower === '/' || lower === '') return 'Página Inicial'
+      if (lower.indexOf('/sobre-erp') === 0) return 'Sobre o ERP ibisoft'
+      if (lower.indexOf('/sobre') === 0) return 'Quem Somos'
+      if (lower.indexOf('/cases') === 0) return 'Cases de Sucesso'
+      if (lower.indexOf('/blog') === 0) return 'Blog e Artigos'
+      if (lower.indexOf('/quero-conhecer') === 0 || lower.indexOf('/contato') === 0)
+        return 'Quero Conhecer / Contato'
+      if (lower.indexOf('/duns') === 0) return 'Certificado D-U-N-S'
+      if (lower.indexOf('/inpi') === 0) return 'Certificado INPI'
+      if (lower.indexOf('/cnpj') === 0) return 'Cartão CNPJ'
+      if (lower.indexOf('/politica-de-privacidade') === 0 || lower.indexOf('/privacidade') === 0)
+        return 'Política de Privacidade'
+    } catch (_) {}
+
+    return title || cleanPath
+  }
+
   try {
     const record = e.record
     const sessionId = (record.getString('session_id') || '').trim()
 
-    // Se já vier informado journey_summary e primary_interest do payload frontend, preserva
     let currentSummary = (record.getString('journey_summary') || '').trim()
     let currentInterest = (record.getString('primary_interest') || '').trim()
 
@@ -166,8 +253,11 @@ onRecordCreateRequest((e) => {
             const ev = events[i]
             const sec = (ev.getString('section') || 'Outros').trim()
             const path = (ev.getString('path') || '/').trim()
-            const title = (ev.getString('title') || '').trim()
+            let title = (ev.getString('title') || '').trim()
             const created = ev.getString('created') || ''
+
+            // Resolver nome real e legível caso seja título antigo/genérico
+            title = resolveExactPageName(e.app, path, title)
 
             sectionCounts[sec] = (sectionCounts[sec] || 0) + 1
             pathSteps.push({
@@ -199,7 +289,7 @@ onRecordCreateRequest((e) => {
             record.set('journey_summary', currentSummary)
           }
 
-          // Guardar detalhes da jornada em JSON
+          // Guardar detalhes da jornada em JSON com os nomes exatos das páginas
           try {
             record.set('journey_details', {
               session_id: sessionId,
@@ -214,7 +304,7 @@ onRecordCreateRequest((e) => {
         }
       } catch (searchErr) {
         console.warn(
-          '[smtp_service v1.1.0] Aviso ao cruzar eventos de audiência do lead:',
+          '[smtp_service v1.2.0] Aviso ao cruzar eventos de audiência do lead:',
           searchErr,
         )
       }
@@ -250,6 +340,94 @@ onRecordCreateRequest((e) => {
 // ============================================================================
 onRecordAfterCreateSuccess((e) => {
   e.next()
+
+  // Helper inline no callback para resolver título exato e legível
+  const resolveExactPageName = (app, path, fallbackTitle) => {
+    if (!path) return fallbackTitle || 'Página Inicial'
+    const cleanPath = String(path).trim()
+    const lower = cleanPath.toLowerCase()
+
+    let title = (fallbackTitle || '').trim()
+    const hasGenericPattern =
+      !title ||
+      title === cleanPath ||
+      title.indexOf('(') !== -1 ||
+      title.indexOf('Módulo ERP') === 0 ||
+      title.indexOf('Segmento (') === 0 ||
+      title.indexOf('Post do Blog (') === 0
+
+    if (!hasGenericPattern) {
+      return title
+    }
+
+    try {
+      if (lower.indexOf('/funcionalidades/') === 0) {
+        const rawSlug = cleanPath
+          .replace(/^\/funcionalidades\//i, '')
+          .split('/')[0]
+          .split('?')[0]
+        const slug = decodeURIComponent(rawSlug).trim()
+        if (slug) {
+          try {
+            const rec = app.findFirstRecordByData('modules', 'slug', slug)
+            if (rec && rec.getString('name')) {
+              return 'Módulo — ' + rec.getString('name').trim()
+            }
+          } catch (_) {}
+        }
+        return 'Módulo — ' + (slug || 'ERP')
+      }
+
+      if (lower.indexOf('/segmentos/') === 0) {
+        const rawSlug = cleanPath
+          .replace(/^\/segmentos\//i, '')
+          .split('/')[0]
+          .split('?')[0]
+        const slug = decodeURIComponent(rawSlug).trim()
+        if (slug) {
+          try {
+            const rec = app.findFirstRecordByData('segments', 'slug', slug)
+            if (rec && rec.getString('title')) {
+              return 'Segmento — ' + rec.getString('title').trim()
+            }
+          } catch (_) {}
+        }
+        return 'Segmento — ' + (slug || 'Soluções')
+      }
+
+      if (lower.indexOf('/blog/') === 0) {
+        const rawSlug = cleanPath
+          .replace(/^\/blog\//i, '')
+          .split('/')[0]
+          .split('?')[0]
+        const slug = decodeURIComponent(rawSlug).trim()
+        if (slug) {
+          try {
+            const rec = app.findFirstRecordByData('posts', 'slug', slug)
+            if (rec && rec.getString('title')) {
+              return rec.getString('title').trim()
+            }
+          } catch (_) {}
+        }
+        return 'Artigo: ' + slug
+      }
+
+      if (lower === '/' || lower === '') return 'Página Inicial'
+      if (lower.indexOf('/sobre-erp') === 0) return 'Sobre o ERP ibisoft'
+      if (lower.indexOf('/sobre') === 0) return 'Quem Somos'
+      if (lower.indexOf('/cases') === 0) return 'Cases de Sucesso'
+      if (lower.indexOf('/blog') === 0) return 'Blog e Artigos'
+      if (lower.indexOf('/quero-conhecer') === 0 || lower.indexOf('/contato') === 0)
+        return 'Quero Conhecer / Contato'
+      if (lower.indexOf('/duns') === 0) return 'Certificado D-U-N-S'
+      if (lower.indexOf('/inpi') === 0) return 'Certificado INPI'
+      if (lower.indexOf('/cnpj') === 0) return 'Cartão CNPJ'
+      if (lower.indexOf('/politica-de-privacidade') === 0 || lower.indexOf('/privacidade') === 0)
+        return 'Política de Privacidade'
+    } catch (_) {}
+
+    return title || cleanPath
+  }
 
   try {
     const lead = e.record
@@ -369,13 +547,14 @@ onRecordAfterCreateSuccess((e) => {
         ) {
           const rows = journeyDetails.steps
             .slice(0, 10)
-            .map(
-              (step) =>
-                `<li style="margin-bottom: 4px; color: #475569;">
-                  <strong>${step.section || 'Página'}:</strong> ${step.title || step.path} 
-                  <span style="color: #94a3b8; font-size: 11px;">(${step.path})</span>
-                </li>`,
-            )
+            .map((step) => {
+              const displayTitle = resolveExactPageName(e.app, step.path, step.title)
+              return `<li style="margin-bottom: 6px; color: #334155; line-height: 1.4;">
+                <strong style="color: #0f172a;">${step.section || 'Página'}:</strong> 
+                <span style="color: #0284c7; font-weight: 600;">${displayTitle}</span> 
+                <span style="color: #94a3b8; font-size: 11px;">(${step.path})</span>
+              </li>`
+            })
             .join('')
           stepsHtml = `
             <div style="margin-top: 10px;">
