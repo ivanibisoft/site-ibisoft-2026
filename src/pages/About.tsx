@@ -1,37 +1,26 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { Building2, Lightbulb, UserCircle2, ShieldCheck, ArrowRight, Award } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { CnpjLink } from '@/components/CnpjLink'
-import { getTeamMembers } from '@/services/team_members'
-import pb from '@/lib/pocketbase/client'
 import ivanPhoto from '@/assets/ivan-2-7b6a6.jpg'
 import ibisoftLogo from '@/assets/logo-ibisoft-r-4b810.jpg'
 import { useSiteAssets } from '@/hooks/use-site-assets'
 
+const CEO_NAME = 'Ivan Christófolli'
+const CEO_ROLE = 'Fundador e CEO'
+const CEO_QUOTE =
+  'Acreditamos que a tecnologia não deve ser um obstáculo, mas sim a ponte para o crescimento contínuo. Nosso compromisso diário é entregar não apenas um software, mas uma verdadeira vantagem competitiva estruturada para nossos parceiros.'
+const CEO_BIO =
+  'À frente da ibisoft desde 1985, Ivan une sólida formação técnica à visão empreendedora. É tecnólogo em Processamento de Dados pela UFPR (1989), com pós-graduação em Administração de Empresas pela FAE (2000), e concluiu o programa Empretec da ONU / SEBRAE (2005). Essa combinação de tecnologia e gestão orienta a forma como a ibisoft desenvolve soluções: engenharia rigorosa com foco no resultado do negócio do cliente.'
+
 export default function About() {
   const location = useLocation()
-  const DEFAULT_CEO_BIO =
-    'À frente da ibisoft desde 1985, Ivan une sólida formação técnica à visão empreendedora. É tecnólogo em Processamento de Dados pela UFPR (1989), com pós-graduação em Administração de Empresas pela FAE (2000), e concluiu o programa Empretec da ONU / SEBRAE (2005). Essa combinação de tecnologia e gestão orienta a forma como a ibisoft desenvolve soluções: engenharia rigorosa com foco no resultado do negócio do cliente.'
-
-  const [ceo, setCeo] = useState<any>(null)
   const { getAssetUrl } = useSiteAssets()
-  const ceoPhotoUrl = getAssetUrl('foto-ceo')
   const logoIbisoftRUrl = getAssetUrl('logo-ibisoft-r') || ibisoftLogo
   const historyImageUrl =
     getAssetUrl('imagem-sobre-1') ||
     'https://img.usecurling.com/p/800/600?q=office%20team&color=blue'
-
-  useEffect(() => {
-    getTeamMembers()
-      .then((members) => {
-        const ceoMember = members.find(
-          (m) => m.role === 'CEO' || m.role === 'Fundador e CEO' || m.order === 1,
-        )
-        if (ceoMember) setCeo(ceoMember)
-      })
-      .catch(console.error)
-  }, [])
 
   useEffect(() => {
     if (location.hash) {
@@ -201,35 +190,29 @@ export default function About() {
           </div>
           <h2 className="text-3xl font-bold mb-12">Nosso CEO</h2>
 
-          {ceo ? (
-            <div className="grid md:grid-cols-5 gap-8 items-center bg-card rounded-3xl p-8 md:p-12 shadow-elevation border border-border">
-              <div className="md:col-span-2">
-                <img
-                  src={ceoPhotoUrl || (ceo.photo ? pb.files.getUrl(ceo, ceo.photo) : ivanPhoto)}
-                  alt={`Foto de ${ceo.name}`}
-                  className="w-full rounded-2xl shadow-lg border-4 border-background"
-                />
+          <div className="grid md:grid-cols-5 gap-8 items-center bg-card rounded-3xl p-8 md:p-12 shadow-elevation border border-border">
+            <div className="md:col-span-2">
+              <img
+                src={ivanPhoto}
+                alt={`Foto de ${CEO_NAME}`}
+                className="w-full rounded-2xl shadow-lg border-4 border-background object-cover"
+                loading="eager"
+                decoding="sync"
+              />
+            </div>
+            <div className="md:col-span-3 space-y-6">
+              <div>
+                <h3 className="text-2xl font-bold font-display">{CEO_NAME}</h3>
+                <p className="text-accent font-medium">{CEO_ROLE}</p>
               </div>
-              <div className="md:col-span-3 space-y-6">
-                <div>
-                  <h3 className="text-2xl font-bold font-display">{ceo.name}</h3>
-                  <p className="text-accent font-medium">Fundador e CEO</p>
-                </div>
-                {ceo.quote && ceo.quote.trim() && (
-                  <p className="text-lg text-muted-foreground leading-relaxed italic border-l-4 border-accent pl-4">
-                    "{ceo.quote.trim().replace(/^["“]|["”]$/g, '')}"
-                  </p>
-                )}
-                <div className={ceo.quote && ceo.quote.trim() ? 'pt-4' : ''}>
-                  <p className="text-muted-foreground whitespace-pre-line">
-                    {ceo.bio || DEFAULT_CEO_BIO}
-                  </p>
-                </div>
+              <p className="text-lg text-muted-foreground leading-relaxed italic border-l-4 border-accent pl-4">
+                "{CEO_QUOTE}"
+              </p>
+              <div className="pt-4">
+                <p className="text-muted-foreground whitespace-pre-line">{CEO_BIO}</p>
               </div>
             </div>
-          ) : (
-            <div className="animate-pulse bg-muted rounded-3xl h-[400px]"></div>
-          )}
+          </div>
         </div>
       </section>
     </div>
