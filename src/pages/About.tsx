@@ -12,7 +12,7 @@ import { useSiteAssets } from '@/hooks/use-site-assets'
 export default function About() {
   const location = useLocation()
   const DEFAULT_CEO_BIO =
-    'À frente da ibisoft desde 1985, Ivan une sólida formação técnica à visão empreendedora. É tecnólogo em Processamento de Dados pela UFPR (1989), com pós-graduação em Administração de Empresas pela FAE (2000), e concluiu o programa Empretec do SEBRAE/ONU (2005). Essa combinação de tecnologia e gestão orienta a forma como a ibisoft desenvolve soluções: engenharia rigorosa com foco no resultado do negócio do cliente.'
+    'À frente da ibisoft desde 1985, Ivan une sólida formação técnica à visão empreendedora. É tecnólogo em Processamento de Dados pela UFPR (1989), com pós-graduação em Administração de Empresas pela FAE (2000), e concluiu o programa Empretec da ONU / SEBRAE (2005). Essa combinação de tecnologia e gestão orienta a forma como a ibisoft desenvolve soluções: engenharia rigorosa com foco no resultado do negócio do cliente.'
 
   const [ceo, setCeo] = useState<any>(null)
   const { getAssetUrl } = useSiteAssets()
@@ -215,12 +215,12 @@ export default function About() {
                   <h3 className="text-2xl font-bold font-display">{ceo.name}</h3>
                   <p className="text-accent font-medium">Fundador e CEO</p>
                 </div>
-                <p className="text-lg text-muted-foreground leading-relaxed italic border-l-4 border-accent pl-4">
-                  "Acreditamos que a tecnologia não deve ser um obstáculo, mas sim a ponte para o
-                  crescimento contínuo. Nosso compromisso diário é entregar não apenas um software,
-                  mas uma verdadeira vantagem competitiva estruturada para nossos parceiros."
-                </p>
-                <div className="pt-4">
+                {ceo.quote && ceo.quote.trim() && (
+                  <p className="text-lg text-muted-foreground leading-relaxed italic border-l-4 border-accent pl-4">
+                    "{ceo.quote.trim().replace(/^["“]|["”]$/g, '')}"
+                  </p>
+                )}
+                <div className={ceo.quote && ceo.quote.trim() ? 'pt-4' : ''}>
                   <p className="text-muted-foreground whitespace-pre-line">
                     {ceo.bio || DEFAULT_CEO_BIO}
                   </p>

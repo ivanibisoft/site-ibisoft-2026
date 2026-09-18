@@ -1,8 +1,20 @@
 import pb from '@/lib/pocketbase/client'
 
-export const getTeamMembers = async () => {
+export interface TeamMember {
+  id: string
+  name: string
+  role: string
+  quote?: string
+  bio?: string
+  photo?: string
+  order?: number
+  created?: string
+  updated?: string
+}
+
+export const getTeamMembers = async (): Promise<TeamMember[]> => {
   try {
-    return await pb.collection('team_members').getFullList({
+    return await pb.collection('team_members').getFullList<TeamMember>({
       sort: 'order',
     })
   } catch (error) {

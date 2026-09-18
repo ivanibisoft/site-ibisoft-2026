@@ -83,6 +83,12 @@ export const COLLECTIONS: CollectionConfig[] = [
     fields: [
       { name: 'name', label: 'Nome', type: 'text', required: true, listDisplay: true },
       { name: 'role', label: 'Cargo', type: 'text', required: true, listDisplay: true },
+      {
+        name: 'quote',
+        label: 'Frase de Destaque',
+        type: 'textarea',
+        helpText: 'Frase de citação em destaque exibida no bloco de liderança / citação.',
+      },
       { name: 'bio', label: 'Bio', type: 'textarea' },
       { name: 'photo', label: 'Foto', type: 'file' },
       { name: 'order', label: 'Ordem', type: 'number', listDisplay: true },
