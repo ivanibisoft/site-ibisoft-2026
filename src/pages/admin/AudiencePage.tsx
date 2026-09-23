@@ -89,6 +89,7 @@ export default function AudiencePage() {
   const [periodFilter, setPeriodFilter] = useState<'this-month' | '30-days' | '90-days' | 'all'>(
     '30-days',
   )
+  const [granularity, setGranularity] = useState<'daily' | 'weekly' | 'monthly'>('monthly')
   const [ufFilter, setUfFilter] = useState<string>('all')
   const [deviceFilter, setDeviceFilter] = useState<string>('all')
   const [sectionFilter, setSectionFilter] = useState<string>('all')
@@ -234,49 +235,128 @@ export default function AudiencePage() {
     }
   }, [filteredEvents])
 
-  // 1. Gráfico de Evolução Mês a Mês (com opção de comparar seções)
-  const monthlyData = useMemo(() => {
-    const map: Record<string, Record<string, number>> = {}
-    const sectionsSet = new Set<string>()
+  // 1. Gráfico de Evolução Temporal: Diária / Semanal / Mensal (comparando seções)
+  const timeSeriesData = useMemo(() => {
+    const map: Record<
+      string,
+      { label: string; fullLabel: string; sortKey: string; [key: string]: any }
+    > = {}
+    const monthNames = [
+      'Jan',
+      'Fev',
+      'Mar',
+      'Abr',
+      'Mai',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Set',
+      'Out',
+      'Nov',
+      'Dez',
+    ]
+    const fullMonthNames = [
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro',
+    ]
 
     filteredEvents.forEach((e) => {
-      const ym = e.access_year_month || (e.created ? e.created.slice(0, 7) : '2026-09')
       const sec = e.section || 'Outros'
-      sectionsSet.add(sec)
+      let dateObj: Date | null = null
 
-      if (!map[ym]) {
-        map[ym] = { total: 0 }
+      if (e.access_date && /^\d{4}-\d{2}-\d{2}$/.test(e.access_date)) {
+        const [y, m, d] = e.access_date.split('-').map(Number)
+        dateObj = new Date(y, m - 1, d)
+      } else if (e.created) {
+        dateObj = new Date(e.created)
+      } else {
+        dateObj = new Date()
       }
-      map[ym].total = (map[ym].total || 0) + 1
-      map[ym][sec] = (map[ym][sec] || 0) + 1
+
+      if (isNaN(dateObj.getTime())) {
+        dateObj = new Date()
+      }
+
+      let key = ''
+      let label = ''
+      let fullLabel = ''
+      let sortKey = ''
+
+      if (granularity === 'daily') {
+        const y = dateObj.getFullYear()
+        const m = dateObj.getMonth() + 1
+        const d = dateObj.getDate()
+        const mStr = String(m).padStart(2, '0')
+        const dStr = String(d).padStart(2, '0')
+
+        key = `${y}-${mStr}-${dStr}`
+        sortKey = key
+        label = `${dStr}/${mStr}`
+        fullLabel = `${dStr}/${mStr}/${y}`
+      } else if (granularity === 'weekly') {
+        // Semana com início na Segunda-feira (ISO 8601)
+        const dayOfWeek = dateObj.getDay() // 0 = Dom, 1 = Seg, ..., 6 = Sab
+        const distToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+        const monday = new Date(
+          dateObj.getFullYear(),
+          dateObj.getMonth(),
+          dateObj.getDate() + distToMonday,
+        )
+        const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6)
+
+        const y = monday.getFullYear()
+        const m = String(monday.getMonth() + 1).padStart(2, '0')
+        const d = String(monday.getDate()).padStart(2, '0')
+        const endD = String(sunday.getDate()).padStart(2, '0')
+        const endM = String(sunday.getMonth() + 1).padStart(2, '0')
+
+        key = `${y}-${m}-${d}`
+        sortKey = key
+        label = `${d}/${m} a ${endD}/${endM}`
+        fullLabel = `Semana de ${d}/${m} a ${endD}/${endM}/${sunday.getFullYear()}`
+      } else {
+        // Mensal (padrão)
+        let ym = e.access_year_month
+        if (!ym || !/^\d{4}-\d{2}$/.test(ym)) {
+          const y = dateObj.getFullYear()
+          const m = String(dateObj.getMonth() + 1).padStart(2, '0')
+          ym = `${y}-${m}`
+        }
+
+        const [yearStr, monthStr] = ym.split('-')
+        const mIdx = parseInt(monthStr, 10) - 1
+        key = ym
+        sortKey = ym
+        label = `${monthNames[mIdx] || monthStr}/${yearStr.slice(2)}`
+        fullLabel = `${fullMonthNames[mIdx] || monthStr} de ${yearStr}`
+      }
+
+      if (!map[key]) {
+        map[key] = {
+          label,
+          fullLabel,
+          sortKey,
+          total: 0,
+        }
+      }
+
+      map[key].total = (map[key].total || 0) + 1
+      map[key][sec] = (map[key][sec] || 0) + 1
     })
 
-    const sortedMonths = Object.keys(map).sort()
-    return sortedMonths.map((ym) => {
-      const [year, month] = ym.split('-')
-      const monthNames = [
-        'Jan',
-        'Fev',
-        'Mar',
-        'Abr',
-        'Mai',
-        'Jun',
-        'Jul',
-        'Ago',
-        'Set',
-        'Out',
-        'Nov',
-        'Dez',
-      ]
-      const label = `${monthNames[parseInt(month, 10) - 1] || month}/${year.slice(2)}`
-
-      return {
-        monthKey: ym,
-        label,
-        ...map[ym],
-      }
-    })
-  }, [filteredEvents])
+    const sortedKeys = Object.keys(map).sort((a, b) => map[a].sortKey.localeCompare(map[b].sortKey))
+    return sortedKeys.map((k) => map[k])
+  }, [filteredEvents, granularity])
 
   // Seções mais frequentes para plotar linhas no gráfico mês a mês
   const topSectionsForLines = useMemo(() => {
@@ -712,27 +792,76 @@ export default function AudiencePage() {
 
       {/* Bloco 1: Evolução Mês a Mês (Linhas) & Gráfico de Pizza (Aparelhos) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Gráfico de Evolução Mês a Mês */}
+        {/* Gráfico de Evolução de Acessos: Diária / Semanal / Mensal */}
         <Card className="lg:col-span-8 border-slate-200">
           <CardHeader className="pb-2">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <CardTitle className="text-base font-semibold text-slate-900 font-lexend flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-primary" />
-                  Evolução de Acessos Mês a Mês
+                  Evolução de Acessos{' '}
+                  {granularity === 'daily'
+                    ? 'Dia a Dia'
+                    : granularity === 'weekly'
+                      ? 'Semana a Semana'
+                      : 'Mês a Mês'}
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Comparação de volume total e interesse por principais seções
+                  Comparação temporal de volume total e interesse por principais seções
                 </CardDescription>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="inline-block w-2.5 h-2.5 rounded-full bg-sky-600"></span>
-                <span className="text-xs text-slate-600 font-medium">Total de Visitas</span>
+
+              <div className="flex flex-wrap items-center gap-2.5">
+                {/* Alternador de visualização: Diária / Semanal / Mensal */}
+                <div
+                  role="group"
+                  aria-label="Granularidade temporal do gráfico"
+                  className="inline-flex items-center rounded-lg bg-slate-100 p-0.5 border border-slate-200"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setGranularity('daily')}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all ${
+                      granularity === 'daily'
+                        ? 'bg-white text-primary shadow-xs font-semibold'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Diária
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGranularity('weekly')}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all ${
+                      granularity === 'weekly'
+                        ? 'bg-white text-primary shadow-xs font-semibold'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Semanal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGranularity('monthly')}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all ${
+                      granularity === 'monthly'
+                        ? 'bg-white text-primary shadow-xs font-semibold'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Mensal
+                  </button>
+                </div>
+
+                <div className="hidden sm:flex items-center gap-1.5 pl-1">
+                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-sky-600"></span>
+                  <span className="text-xs text-slate-600 font-medium">Total Geral</span>
+                </div>
               </div>
             </div>
           </CardHeader>
           <CardContent className="pt-4">
-            {monthlyData.length === 0 ? (
+            {timeSeriesData.length === 0 ? (
               <div className="h-64 flex flex-col items-center justify-center text-slate-400 text-sm">
                 <Info className="w-8 h-8 mb-2 opacity-50" />
                 Nenhum acesso registrado no período selecionado.
@@ -741,12 +870,30 @@ export default function AudiencePage() {
               <div className="h-72 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
-                    data={monthlyData}
+                    data={timeSeriesData}
                     margin={{ top: 10, right: 20, left: -10, bottom: 0 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                    <XAxis dataKey="label" stroke="#64748b" fontSize={12} tickLine={false} />
-                    <YAxis stroke="#64748b" fontSize={12} tickLine={false} allowDecimals={false} />
+                    <XAxis
+                      dataKey="label"
+                      stroke="#64748b"
+                      fontSize={11}
+                      tickLine={false}
+                      interval={
+                        granularity === 'daily'
+                          ? timeSeriesData.length > 30
+                            ? Math.ceil(timeSeriesData.length / 15)
+                            : timeSeriesData.length > 14
+                              ? 1
+                              : 0
+                          : granularity === 'weekly'
+                            ? timeSeriesData.length > 12
+                              ? 1
+                              : 0
+                            : 0
+                      }
+                    />
+                    <YAxis stroke="#64748b" fontSize={11} tickLine={false} allowDecimals={false} />
                     <RechartsTooltip
                       contentStyle={{
                         backgroundColor: '#ffffff',
@@ -754,6 +901,10 @@ export default function AudiencePage() {
                         borderRadius: '8px',
                         boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                         fontSize: '12px',
+                      }}
+                      labelFormatter={(_label, payload) => {
+                        const item = payload && payload[0]?.payload
+                        return item?.fullLabel || item?.label || _label
                       }}
                     />
                     <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
