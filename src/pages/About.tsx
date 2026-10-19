@@ -12,7 +12,7 @@ const CEO_ROLE = 'Fundador e CEO'
 const CEO_QUOTE =
   'Acreditamos que a tecnologia não deve ser um obstáculo, mas sim a ponte para o crescimento contínuo. Nosso compromisso diário é entregar não apenas um software, mas uma verdadeira vantagem competitiva estruturada para nossos parceiros.'
 const CEO_BIO =
-  'À frente da ibisoft desde 1985, Ivan une sólida formação técnica à visão empreendedora. É tecnólogo em Processamento de Dados pela UFPR (1989), com pós-graduação em Administração de Empresas pela FAE (2000), e concluiu o programa Empretec da ONU / SEBRAE (2005). Essa combinação de tecnologia e gestão orienta a forma como a ibisoft desenvolve soluções: engenharia rigorosa com foco no resultado do negócio do cliente.'
+  'À frente da ibisoft desde 1985, Ivan une sólida formação técnica à visão empreendedora. É tecnólogo em Processamento de Dados pela Universidade Federal do Paraná (1989), com pós-graduação em Administração de Empresas pela FAE Centro Universitário (2000), e concluiu o programa Empretec da ONU / SEBRAE/PR (2005). Essa combinação de tecnologia e gestão orienta a forma como a ibisoft desenvolve soluções: engenharia rigorosa com foco no resultado do negócio do cliente.'
 
 export default function About() {
   const location = useLocation()
